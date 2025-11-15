@@ -1,0 +1,91 @@
+/* Scoped theme helpers for the dashboard. Uses shadcn-style CSS vars declared in app/globals.css */
+
+.theme-dashboard {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  /* Default dashboard fonts */
+  --dashboard-heading-font: var(--font-poppins);
+  --dashboard-heading-alt-1: var(--font-montserrat);
+  --dashboard-heading-alt-2: var(--font-source-sans);
+  --dashboard-body-font: var(--font-inter);
+  --dashboard-body-alt-1: var(--font-roboto);
+  --dashboard-body-alt-2: var(--font-open-sans);
+}
+
+/* Card and surface alignment to theme tokens */
+.theme-dashboard .professional-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.theme-dashboard .professional-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Subtle surface blocks (e.g., neutral sections) */
+.theme-dashboard .surface-subtle {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Muted text helper */
+.theme-dashboard .text-muted-theme {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Primary accents (links, emphasis) */
+.theme-dashboard .accent-primary {
+  color: hsl(var(--primary));
+}
+
+.theme-dashboard .accent-primary-bg {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Accent/ghost backgrounds (used by chip nav too) */
+.theme-dashboard .accent-surface {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Borders */
+.theme-dashboard .border-theme {
+  border-color: hsl(var(--border));
+}
+
+/* Inputs */
+.theme-dashboard .input-theme {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  color: hsl(var(--foreground));
+}
+
+.theme-dashboard .ring-theme:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* No separate .dark block required; the tokens swap under .dark in globals.css. */
+
+/* Typography helpers */
+.theme-dashboard h1,
+.theme-dashboard h2,
+.theme-dashboard h3,
+.theme-dashboard h4,
+.theme-dashboard h5,
+.theme-dashboard h6,
+.theme-dashboard .heading-font {
+  font-family: var(--dashboard-heading-font), system-ui, -apple-system, Segoe UI,
+    Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+.theme-dashboard,
+.theme-dashboard .body-font {
+  font-family: var(--dashboard-body-font), system-ui, -apple-system, Segoe UI,
+    Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
