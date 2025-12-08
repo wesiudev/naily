@@ -1,6 +1,6 @@
 "use server";
 export async function getUsers() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/users`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/users`, {
     method: "POST",
     body: JSON.stringify({ secret: process.env.SECRET }),
   });

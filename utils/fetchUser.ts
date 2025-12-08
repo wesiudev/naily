@@ -5,8 +5,9 @@ type UnknownRecord = any;
 export async function fetchUser(
   uid: string
 ): Promise<UnknownRecord | FetchUserError> {
-  // Always use a relative URL to ensure we hit the same environment (dev/prod)
-  const url = `/api/users/${uid}`;
+  // Construct full URL for server-side usage
+  const baseUrl = process.env.NEXT_PUBLIC_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+  const url = `${baseUrl}/api/users/${uid}`;
 
   // Small retry to avoid race immediately after registration
   const maxAttempts = 3;
@@ -24,10 +25,12 @@ export async function fetchUser(
         const message = err?.error || `HTTP ${response.status}`;
 
         // Retry on 404 as the user document may not have propagated yet
+        // Only retry if this is not the first attempt (to avoid unnecessary retries for new users)
         if (response.status === 404 && attempt < maxAttempts) {
           await new Promise((r) => setTimeout(r, baseDelayMs * attempt));
           continue;
         }
+        // Return error without logging for 404s (expected for new users)
         return { error: message } as FetchUserError;
       }
       const user: UnknownRecord = await response.json();

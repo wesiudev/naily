@@ -23,7 +23,7 @@ function Success() {
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL}/stripe/success`,
+          `${process.env.NEXT_PUBLIC_URL}/api/stripe/success`,
           {
             method: "POST",
             body: JSON.stringify({ session_id }),

@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/redux/slices/user";
-import { updateUser } from "@/firebase";
+import { updateUser, getDocument } from "@/firebase";
 import { deleteField } from "firebase/firestore";
-import { FaCog, FaTimes, FaCrown, FaBan } from "react-icons/fa";
+import { FaCog, FaTimes, FaCrown, FaBan, FaMagic } from "react-icons/fa";
 
 export default function PremiumTestPanel() {
   const dispatch = useDispatch();
@@ -121,6 +121,37 @@ export default function PremiumTestPanel() {
     }
   };
 
+  const handleGenerateMetadata = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL || ""}/api/generateMetadata`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate metadata");
+      }
+
+      // Refresh user data from database to get updated metadata
+      const updatedUserData = await getDocument("users", user.uid);
+      dispatch(setUser(updatedUserData));
+
+      alert(`Metadata generated successfully!\nTitle: ${data.seoTitle}\nDescription: ${data.seoDescription}`);
+    } catch (error) {
+      console.error("Error generating metadata:", error);
+      alert(`Error generating metadata: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-[9999]">
       {/* Main Toggle Button */}
@@ -172,6 +203,15 @@ export default function PremiumTestPanel() {
             >
               <FaTimes className="w-4 h-4" />
               <span>Premium Removed</span>
+            </button>
+
+            <button
+              onClick={handleGenerateMetadata}
+              disabled={isLoading}
+              className="w-full flex items-center gap-2 px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+            >
+              <FaMagic className="w-4 h-4" />
+              <span>Generate Metadata</span>
             </button>
           </div>
 

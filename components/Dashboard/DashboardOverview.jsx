@@ -101,7 +101,8 @@ export default function DashboardOverview({
   const getRecentPayments = () => {
     if (!user?.payments) return [];
 
-    return user.payments
+    // Create a copy of the array before sorting to avoid mutating read-only array
+    return [...user.payments]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5)
       .map((payment) => ({

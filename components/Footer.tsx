@@ -6,6 +6,7 @@ import { RootState } from "@/redux/store";
 import Image from "next/image";
 import logoBig from "@/public/naily-logo-big.png";
 import logo from "@/public/naily-logo2.png";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 export default function Footer() {
   const { user } = useSelector((state: RootState) => state.user);
@@ -29,7 +30,7 @@ export default function Footer() {
               className="w-24"
             />
             <p className="text-neutral-300 text-sm leading-relaxed">
-              Profesjonalne usługi, konkurencyjne ceny, <br /> wygodne
+              Profesjonalne usługi, konkurencyjne ceny i wygodne
               rezerwacje online.
             </p>
             <div className="flex space-x-4">
@@ -71,14 +72,16 @@ export default function Footer() {
                   Kariera
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="text-neutral-300 hover:text-white transition-colors text-sm flex items-center gap-2"
-                >
-                  Blog
-                </Link>
-              </li>
+              {isFeatureEnabled("blog") && (
+                <li>
+                  <Link
+                    href="/blog"
+                    className="text-neutral-300 hover:text-white transition-colors text-sm flex items-center gap-2"
+                  >
+                    Blog
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link
                   href="/regulamin"

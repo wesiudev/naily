@@ -27,6 +27,21 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ uid: string }> }
 ) {
-  // Backward compatibility: allow POST without secret
-  return GET(request, { params });
+  try {
+    const body = await request.json().catch(() => ({}));
+    const { secret } = body;
+    
+    // If secret is provided, validate it
+    if (secret !== undefined) {
+      if (secret !== process.env.SECRET) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+    
+    // Backward compatibility: allow POST without secret (public access)
+    return GET(request, { params });
+  } catch (error) {
+    // If JSON parsing fails, still allow public access
+    return GET(request, { params });
+  }
 }

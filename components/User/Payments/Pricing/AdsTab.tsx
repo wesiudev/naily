@@ -36,7 +36,7 @@ export default function AdsTab({ user }: { user: User }) {
       });
       // Create one-time Stripe Checkout session
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_URL}/stripe/one-time`,
+        `${process.env.NEXT_PUBLIC_URL}/api/stripe/one-time`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

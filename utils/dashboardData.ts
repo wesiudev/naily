@@ -33,6 +33,10 @@ export async function fetchDashboardData(user: User): Promise<DashboardData> {
 
     const userReservations = await reservationsResponse.json();
 
+    // For now, we'll use mock prices since the reservation data doesn't include prices
+    // In a real implementation, you'd want to store prices in reservations
+    const mockPrices = [80, 60, 120, 50, 90]; // Mock prices for demo
+
     // Calculate statistics from real data
     const calculateStats = () => {
       const totalReservations = userReservations.length;
@@ -45,10 +49,6 @@ export async function fetchDashboardData(user: User): Promise<DashboardData> {
       const cancelledReservations = userReservations.filter(
         (r: any) => r.status === "cancelled"
       ).length;
-      
-      // For now, we'll use mock prices since the reservation data doesn't include prices
-      // In a real implementation, you'd want to store prices in reservations
-      const mockPrices = [80, 60, 120, 50, 90]; // Mock prices for demo
       const totalSpent = userReservations.reduce((sum: number, r: any, index: number) => {
         return sum + (mockPrices[index % mockPrices.length] || 0);
       }, 0);

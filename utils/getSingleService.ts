@@ -2,7 +2,7 @@
 export async function getSingleService(service: string) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_URL ?? ""}/service/${service}`,
+      `${process.env.NEXT_PUBLIC_URL ?? ""}/api/service/${service}`,
       {
         next: { revalidate: 3600 },
         method: "GET",

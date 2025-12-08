@@ -44,6 +44,8 @@ export default function DashboardNavigation({
       handleLogout();
     } else {
       setActiveTab(id);
+      // Scroll to top without animation when switching tabs
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
@@ -110,7 +112,10 @@ export default function DashboardNavigation({
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               type="button"
-              onClick={() => setActiveTab("notifications")}
+              onClick={() => {
+                setActiveTab("notifications");
+                window.scrollTo({ top: 0, behavior: 'auto' });
+              }}
               className="rounded-full relative focus:outline-none w-9 h-9 inline-flex items-center justify-center text-black transition-colors active:scale-95"
               title="Powiadomienia"
             >

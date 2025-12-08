@@ -5,7 +5,7 @@ import { fetchUser } from "@/utils/fetchUser";
 import { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDispatch } from "react-redux";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
 export default function InitUser() {
@@ -15,27 +15,36 @@ export default function InitUser() {
   useEffect(() => {
     let unsubscribe: undefined | (() => void);
     if (user && !loading) {
-      // Initial fetch for SSR compatibility
-      fetchUser(user?.uid)
-        .then((res) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const maybeError = (res as any)?.error as string | undefined;
-          if (res && !maybeError) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            dispatch(setUser(res as any));
+      // Set UID cookie for server-side authentication
+      document.cookie = `uid=${user.uid}; path=/; max-age=86400; SameSite=Lax`;
+
+      // Check if user document exists before calling fetchUser to avoid 404s
+      const userRef = doc(db, "users", user.uid);
+      getDoc(userRef)
+        .then((snap) => {
+          if (snap.exists()) {
+            // Document exists, fetch via API for SSR compatibility
+            fetchUser(user?.uid)
+              .then((res) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const maybeError = (res as any)?.error as string | undefined;
+                if (res && !maybeError) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  dispatch(setUser(res as any));
+                }
+              })
+              .catch(() => {
+                // Silently ignore; Firestore onSnapshot will populate when ready
+              });
           }
-          // If error, Firestore onSnapshot below will likely deliver the doc soon after creation
+          // If document doesn't exist, onSnapshot below will fire when it's created
         })
         .catch(() => {
           // Silently ignore; Firestore onSnapshot will populate when ready
         });
 
-      // Set UID cookie for server-side authentication
-      document.cookie = `uid=${user.uid}; path=/; max-age=86400; SameSite=Lax`;
-
-      // Live updates from Firestore
-      const ref = doc(db, "users", user.uid);
-      unsubscribe = onSnapshot(ref, (snap) => {
+      // Live updates from Firestore (this will fire when document is created)
+      unsubscribe = onSnapshot(userRef, (snap) => {
         const data = snap.data();
         if (data) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -93,9 +93,18 @@ export default async function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pl"
       className={`${inter.variable} ${playfair.variable} ${poppins.variable} ${roboto.variable} ${cormorant.variable} ${marcellus.variable} ${cinzel.variable} ${nunito.variable} ${lora.variable} ${montserrat.variable} ${openSans.variable} ${sourceSans.variable} ${baloo.variable}`}
     >
+      <head>
+        {/* PWA Meta Tags */}
+        <meta name="theme-color" content="#2563eb" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Naily" />
+        <link rel="apple-touch-icon" href="/naily-logo.png" />
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className={`max-w-screen overflow-x-hidden font-body bg-white`}>
         <Script
           async
@@ -133,6 +142,26 @@ export default async function RootLayout({
           <Footer />
           <ModalManager />
         </Providers>
+        {/* Register Service Worker for PWA */}
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                  .then((reg) => {
+                    console.log('Service Worker registered:', reg);
+                    // Check for updates periodically
+                    setInterval(() => {
+                      reg.update();
+                    }, 60000); // Check every minute
+                  })
+                  .catch((err) => {
+                    console.log('Service Worker registration failed:', err);
+                  });
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { auth } from "@/firebase";
 import { setUser, initialState } from "@/redux/slices/user";
 import DownloadApp from "./Navigation/DownloadApp";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import {
   FaGem,
   FaUser,
@@ -286,7 +287,7 @@ export default function Header({
   return (
     <>
       <header
-        className={`${pathname === "/login" ? "fixed" : "sticky"} ${
+        className={`${pathname.includes("/zarezerwuj") ? "bg-white" : ""} ${pathname === "/login" ? "fixed" : "sticky"} ${
           pathname === "/login" && "bg-transparent"
         } top-0 left-0 right-0 z-[100] ${pathname === "/" && "bg-white"} ${
           (pathname.includes("/manicure/") ||
@@ -306,7 +307,8 @@ export default function Header({
                 <div className="w-max flex items-center">
                   <button
                     onClick={toggleMobileMenu}
-                    className="mr-4 lg:hidden focus:outline-none"
+                    className="mr-4 lg:hidden mobile-menu-button focus:outline-none"
+                    aria-label="Otwórz menu"
                   >
                     <FaBars
                       className={`h-6 w-6 ${
@@ -355,51 +357,53 @@ export default function Header({
                     Kariera
                   </Link>
 
-                  <div className="relative" ref={earnMenuRef}>
-                    <button
-                      type="button"
-                      onClick={() => setIsEarnMenuOpen((prev) => !prev)}
-                      aria-haspopup="menu"
-                      aria-expanded={isEarnMenuOpen}
-                      className={`py-3 px-5 rounded-full border ${
-                        pathname === "/login"
-                          ? "border-white"
-                          : "border-blue-700"
-                      } flex items-center gap-2 text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                        pathname === "/login" ? "text-white" : "text-blue-700"
-                      } focus:outline-none hover:bg-gray-100/80`}
-                    >
-                      Zarabiaj z Naily <FaChevronDown className="h-4 w-4" />
-                    </button>
-                    {isEarnMenuOpen && (
-                      <div className="absolute left-0 mt-2 w-72 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 z-50">
-                        {user?.uid ? (
+                  {isFeatureEnabled("affiliate") && (
+                    <div className="relative" ref={earnMenuRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsEarnMenuOpen((prev) => !prev)}
+                        aria-haspopup="menu"
+                        aria-expanded={isEarnMenuOpen}
+                        className={`py-3 px-5 rounded-full border ${
+                          pathname === "/login"
+                            ? "border-white"
+                            : "border-blue-700"
+                        } flex items-center gap-2 text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
+                          pathname === "/login" ? "text-white" : "text-blue-700"
+                        } focus:outline-none hover:bg-gray-100/80`}
+                      >
+                        Zarabiaj z Naily <FaChevronDown className="h-4 w-4" />
+                      </button>
+                      {isEarnMenuOpen && (
+                        <div className="absolute left-0 mt-2 w-72 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 z-50">
+                          {user?.uid ? (
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setIsEarnMenuOpen(false)}
+                              className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                            >
+                              Zarabiaj jako stylistka
+                            </Link>
+                          ) : (
+                            <Link
+                              href="/kreator-profilu"
+                              onClick={() => setIsEarnMenuOpen(false)}
+                              className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                            >
+                              Zarabiaj jako stylistka
+                            </Link>
+                          )}
                           <Link
-                            href="/dashboard"
+                            href="/influencer-program"
                             onClick={() => setIsEarnMenuOpen(false)}
-                            className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                            className="block px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
                           >
-                            Zarabiaj jako stylistka
+                            Zarabiaj jako influencer
                           </Link>
-                        ) : (
-                          <Link
-                            href="/kreator-profilu"
-                            onClick={() => setIsEarnMenuOpen(false)}
-                            className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
-                          >
-                            Zarabiaj jako stylistka
-                          </Link>
-                        )}
-                        <Link
-                          href="/influencer-program"
-                          onClick={() => setIsEarnMenuOpen(false)}
-                          className="block px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
-                        >
-                          Zarabiaj jako influencer
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {isDashboardRoute && (
                     <button
                       onClick={() => {
@@ -548,21 +552,21 @@ export default function Header({
       {!isDashboardRoute && (
         <div
           onClick={toggleMobileMenu}
-          className={`fixed z-[40] inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-            isMobileMenuOpen ? "block" : "hidden"
+          className={`fixed z-[110] inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         />
       )}
       {!isDashboardRoute && (
         <div
-          className={`mobile-menu fixed left-0 top-0 h-full w-80 bg-white/95 backdrop-blur-md shadow-2xl transform transition-transform duration-300 ease-out z-50 ${
+          className={`mobile-menu fixed left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out z-[120] ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-[-100vw]"
           }`}
           onClick={(e) => e.stopPropagation()} // Prevent clicks inside menu from closing it
         >
           <div className="h-full flex flex-col">
             {/* Enhanced Header */}
-            <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-gradient-to-r from-primary-50 to-accent-50">
+            <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-gradient-to-r from-purple-50 to-blue-50">
               <div className="flex items-center gap-3">
                 <Image
                   src={logo}
@@ -577,7 +581,8 @@ export default function Header({
                   e.stopPropagation();
                   setIsMobileMenuOpen(false);
                 }}
-                className="h-6 w-6 flex items-center justify-center text-neutral-600 hover:text-primary-600 hover:bg-neutral-100 transition-colors rounded-full"
+                className="h-10 w-10 flex items-center justify-center text-neutral-600 hover:text-blue-600 hover:bg-neutral-100 transition-colors rounded-full"
+                aria-label="Zamknij menu"
               >
                 <FaTimes className="text-lg" />
               </button>
@@ -586,7 +591,7 @@ export default function Header({
             {/* Enhanced Navigation Links */}
             <div className="flex-1 overflow-y-auto p-6">
               {/* Header Search (mobile) */}
-              <div className="mb-4">
+              <div className="mb-6">
                 <HeaderSearch />
               </div>
               <nav className="space-y-2">
@@ -596,17 +601,18 @@ export default function Header({
                     e.stopPropagation();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 transition-all duration-200 group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
                 >
-                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                    <FaHome className="text-lg text-primary-600" />
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                    <FaHome className="text-lg text-blue-700" />
                   </div>
-                  <div>
-                    <span className="font-medium text-sm">Strona główna</span>
-                    <p className="text-xs text-neutral-500">
+                  <div className="flex-1">
+                    <span className="font-semibold text-sm block">Strona główna</span>
+                    <p className="text-xs text-neutral-500 mt-0.5">
                       Powrót do strony głównej
                     </p>
                   </div>
+                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
                 </Link>
 
                 <Link
@@ -615,37 +621,41 @@ export default function Header({
                     e.stopPropagation();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 transition-all duration-200 group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
                 >
-                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                    <FaGem className="text-lg text-primary-600" />
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                    <FaGem className="text-lg text-blue-700" />
                   </div>
-                  <div>
-                    <span className="font-medium text-sm">Usługi</span>
-                    <p className="text-xs text-neutral-500">
+                  <div className="flex-1">
+                    <span className="font-semibold text-sm block">Usługi</span>
+                    <p className="text-xs text-neutral-500 mt-0.5">
                       Znajdź usługi manicure
                     </p>
                   </div>
+                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
                 </Link>
 
-                <Link
-                  href="/blog"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 transition-all duration-200 group"
-                >
-                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                    <FaBookOpen className="text-lg text-primary-600" />
-                  </div>
-                  <div>
-                    <span className="font-medium text-sm">Blog</span>
-                    <p className="text-xs text-neutral-500">
-                      Artykuły i porady
-                    </p>
-                  </div>
-                </Link>
+                {isFeatureEnabled("blog") && (
+                  <Link
+                    href="/blog"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                  >
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <FaBookOpen className="text-lg text-blue-700" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="font-semibold text-sm block">Blog</span>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Artykuły i porady
+                      </p>
+                    </div>
+                    <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
+                  </Link>
+                )}
 
                 {user?.uid && (
                   <Link
@@ -654,57 +664,63 @@ export default function Header({
                       e.stopPropagation();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 transition-all duration-200 group"
+                    className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
                   >
-                    <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                      <MdDashboard className="text-lg text-primary-600" />
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <MdDashboard className="text-lg text-blue-700" />
                     </div>
-                    <div>
-                      <span className="font-medium text-sm">Dashboard</span>
-                      <p className="text-xs text-neutral-500">
+                    <div className="flex-1">
+                      <span className="font-semibold text-sm block">Dashboard</span>
+                      <p className="text-xs text-neutral-500 mt-0.5">
                         Panel użytkownika
                       </p>
                     </div>
+                    <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
                   </Link>
                 )}
               </nav>
             </div>
 
             {/* Enhanced User Section */}
-            <div className="p-6 border-t border-neutral-200 bg-neutral-50">
+            <div className="p-6 border-t border-neutral-200 bg-gradient-to-b from-purple-50/50 to-white">
               {user?.uid ? (
-                <div>
-                  <div className="flex flex-col text-center items-center justify-between p-4 bg-white rounded-lg shadow-sm">
-                    <div className="aspect-square min-w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <FaUser className="text-primary-600 text-sm" />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-neutral-100">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <FaUser className="text-blue-700 text-base" />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm text-neutral-900">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-zinc-800 truncate">
                         {user.name || "Użytkownik"}
                       </p>
-                      <p className="text-xs text-neutral-500">{user.email}</p>
+                      <p className="text-xs text-neutral-500 truncate">{user.email}</p>
                     </div>
-
-                    <button
-                      onClick={handleViewPublicProfile}
-                      className="flex text-xs text-white transition-colors duration-200 font-medium whitespace-nowrap flex-col bg-yellow-500 p-2 rounded-lg text-wrap mt-2 mx-auto gap-1 justify-center items-center"
-                    >
-                      Zobacz profil
-                    </button>
                   </div>
+                  
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewPublicProfile();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-full font-semibold text-sm transition-all duration-200 hover:bg-blue-700 shadow-md"
+                  >
+                    Zobacz profil
+                  </button>
+                  
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       logout();
                     }}
-                    className="w-full flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-white hover:text-primary-600 transition-all duration-200 group"
+                    className="w-full flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-white hover:text-blue-700 transition-all duration-200 group border border-neutral-200"
                   >
-                    <div className="w-10 h-10 bg-neutral-200 rounded-lg flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                      <FaSignOutAlt className="text-lg text-neutral-600 group-hover:text-primary-600" />
+                    <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors">
+                      <FaSignOutAlt className="text-lg text-neutral-600 group-hover:text-red-600" />
                     </div>
-                    <div>
-                      <span className="font-medium text-sm">Wyloguj</span>
-                      <p className="text-xs text-neutral-500">Zamknij sesję</p>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-sm block">Wyloguj</span>
+                      <p className="text-xs text-neutral-500 mt-0.5">Zamknij sesję</p>
                     </div>
                   </button>
                 </div>
@@ -714,15 +730,16 @@ export default function Header({
                     e.stopPropagation();
                     openLoginPopup();
                   }}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg text-neutral-700 hover:bg-white hover:text-primary-600 transition-all duration-200 group"
+                  className="w-full flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-white hover:text-blue-700 transition-all duration-200 group border border-neutral-200 bg-white"
                 >
-                  <div className="w-10 h-10 bg-neutral-200 rounded-lg flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                    <FaUser className="text-lg text-neutral-600 group-hover:text-primary-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                    <FaUser className="text-lg text-blue-700" />
                   </div>
-                  <div>
-                    <span className="font-medium text-sm">Zaloguj</span>
-                    <p className="text-xs text-neutral-500">Dostęp do konta</p>
+                  <div className="flex-1 text-left">
+                    <span className="font-semibold text-sm block">Zaloguj</span>
+                    <p className="text-xs text-neutral-500 mt-0.5">Dostęp do konta</p>
                   </div>
+                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
                 </button>
               )}
             </div>

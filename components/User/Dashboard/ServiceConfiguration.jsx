@@ -427,7 +427,7 @@ export default function ServiceConfiguration() {
             >
               {/* Desktop Layout */}
               <div className="hidden md:block p-6 relative">
-                <div className="pr-16">
+                <div className="pr-40">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-bold text-2xl text-gray-900">
                       {service.name}
@@ -445,35 +445,33 @@ export default function ServiceConfiguration() {
                   )}
                 </div>
                 
-                <button
-                  onClick={() => toggleServiceStatus(service.id)}
-                  className={`absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-lg transition-all shadow-sm hover:shadow-md ${
-                    service.active
-                      ? "text-blue-600 hover:bg-blue-50 bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-100 bg-gray-50"
-                  }`}
-                  title={service.active ? "Dezaktywuj" : "Aktywuj"}
-                >
-                  {service.active ? <FaEye className="text-lg flex-shrink-0" /> : <FaEyeSlash className="text-lg flex-shrink-0" />}
-                </button>
-
-                <div className="flex items-center justify-end pt-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(service)}
-                      className="w-10 h-10 flex items-center justify-center text-blue-600 hover:bg-blue-50 bg-blue-50 rounded-lg transition-all shadow-sm hover:shadow-md"
-                      title="Edytuj"
-                    >
-                      <FaEdit className="text-lg" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(service.id)}
-                      className="w-10 h-10 flex items-center justify-center text-red-600 hover:bg-red-50 bg-red-50 rounded-lg transition-all shadow-sm hover:shadow-md"
-                      title="Usuń"
-                    >
-                      <FaTrash className="text-lg" />
-                    </button>
-                  </div>
+                {/* Action Buttons - Top Right */}
+                <div className="absolute top-6 right-6 flex items-center gap-2">
+                  <button
+                    onClick={() => toggleServiceStatus(service.id)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all shadow-sm hover:shadow-md ${
+                      service.active
+                        ? "text-blue-600 hover:bg-blue-50 bg-blue-50"
+                        : "text-gray-600 hover:bg-gray-100 bg-gray-50"
+                    }`}
+                    title={service.active ? "Dezaktywuj" : "Aktywuj"}
+                  >
+                    {service.active ? <FaEye className="text-lg flex-shrink-0" /> : <FaEyeSlash className="text-lg flex-shrink-0" />}
+                  </button>
+                  <button
+                    onClick={() => handleEdit(service)}
+                    className="w-10 h-10 flex items-center justify-center text-blue-600 hover:bg-blue-50 bg-blue-50 rounded-lg transition-all shadow-sm hover:shadow-md"
+                    title="Edytuj"
+                  >
+                    <FaEdit className="text-lg" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(service.id)}
+                    className="w-10 h-10 flex items-center justify-center text-red-600 hover:bg-red-50 bg-red-50 rounded-lg transition-all shadow-sm hover:shadow-md"
+                    title="Usuń"
+                  >
+                    <FaTrash className="text-lg" />
+                  </button>
                 </div>
 
                 {/* Portfolio Images - Desktop */}

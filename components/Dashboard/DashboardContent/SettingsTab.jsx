@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaEdit, FaCheck, FaTimes, FaBell, FaCog, FaCrown, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaEdit, FaCheck, FaTimes, FaBell, FaCog, FaCrown, FaCheckCircle, FaSpinner, FaExclamationCircle } from "react-icons/fa";
 import Image from "next/image";
 import { requestNotificationPermission, hasNotificationPermission, showNotification } from "@/utils/pushNotifications";
 import { toast } from "react-toastify";
@@ -38,10 +38,14 @@ export default function SettingsTab({
     user?.active
   );
 
+  // Check if user is on paid premium (has customerId) vs freemium (no customerId)
+  const isPaidPremium = Boolean(user?.customerId);
+  const isFreemium = isSubscribed && !isPaidPremium;
+
   const handleSubscribe = async () => {
     setIsSubscribing(true);
     try {
-      const response = await fetch("/stripe/subscription", {
+      const response = await fetch("/api/stripe/subscription", {
         method: "POST",
         body: JSON.stringify({
           uid: user?.uid,
@@ -65,17 +69,22 @@ export default function SettingsTab({
 
   const handleManageSubscription = async () => {
     try {
-      const response = await fetch("/stripe/customer-portal", {
+      const response = await fetch("/api/stripe/customer-portal", {
         method: "POST",
         body: JSON.stringify({ uid: user?.uid }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      if (data.success) {
+      console.log("Customer portal response:", data);
+      if (data.success && data.url) {
         window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Nie udało się otworzyć portalu klienta");
+        console.error("Customer portal error:", data.error);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error opening customer portal:", error);
+      toast.error("Wystąpił błąd podczas otwierania portalu klienta");
     }
   };
 
@@ -115,7 +124,84 @@ export default function SettingsTab({
     return null;
   };
 
+  // Calculate progress bar percentage for freemium
+  const getProgressPercentage = () => {
+    if (!user?.subscription?.currentPeriodEnd) return null;
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    const periodEnd = user.subscription.currentPeriodEnd;
+    const totalDays = 30; // 30-day freemium period
+    const periodStart = periodEnd - (totalDays * 24 * 60 * 60);
+    const totalPeriod = periodEnd - periodStart;
+    const timeRemaining = Math.max(0, periodEnd - currentTime);
+    const percentage = Math.max(0, Math.min(100, (timeRemaining / totalPeriod) * 100));
+    
+    return percentage;
+  };
+
   const daysRemaining = getDaysRemaining();
+  const progressPercentage = getProgressPercentage();
+
+  // Determine subscription status and get next payment info
+  const getSubscriptionStatus = () => {
+    if (!isSubscribed || !user?.subscription) {
+      return null;
+    }
+
+    const subscriptionStatus = user.subscription.status;
+    const cancelAtPeriodEnd = user.subscription.cancelAtPeriodEnd;
+    const currentPeriodEnd = user.subscription.currentPeriodEnd;
+    
+    // Check if period has expired
+    const currentTime = Math.floor(Date.now() / 1000);
+    const isPeriodExpired = currentPeriodEnd && currentPeriodEnd < currentTime;
+
+    // Check if cancellation is scheduled (check for truthy value)
+    const isCancelling = cancelAtPeriodEnd === true || cancelAtPeriodEnd === "true";
+
+    // Determine status - check cancellation first
+    if (subscriptionStatus === "canceled" || isPeriodExpired) {
+      return {
+        status: "cancelled",
+        text: "Anulowana",
+        iconColor: "text-red-600",
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200",
+      };
+    } else if (isCancelling && (subscriptionStatus === "active" || subscriptionStatus === "trialing")) {
+      // Subscription is scheduled to cancel but still active
+      return {
+        status: "cancelling",
+        text: "W trakcie anulowania",
+        iconColor: "text-yellow-600",
+        bgColor: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+      };
+    } else if (subscriptionStatus === "active" || subscriptionStatus === "trialing") {
+      return {
+        status: "active",
+        text: "Subskrypcja aktywna",
+        iconColor: "text-green-600",
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
+      };
+    }
+
+    return null;
+  };
+
+  const getNextPaymentDate = () => {
+    if (!user?.subscription?.currentPeriodEnd) return null;
+    const date = new Date(user.subscription.currentPeriodEnd * 1000);
+    return date.toLocaleDateString("pl-PL", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const subscriptionStatusInfo = getSubscriptionStatus();
+  const nextPaymentDate = getNextPaymentDate();
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -144,22 +230,80 @@ export default function SettingsTab({
               </div>
               
               {isSubscribed ? (
-                <div className="mt-4 p-4 bg-blue-100/50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-2 text-blue-700 font-semibold mb-2">
-                    <FaCheckCircle className="text-blue-600" />
-                    <span>Subskrypcja aktywna</span>
-                  </div>
-                  {daysRemaining !== null && (
-                    <p className="text-sm text-gray-700">
-                      Pozostało dni: <span className="font-bold text-blue-600">{daysRemaining}</span>
-                    </p>
+                <div className={`mt-4 p-4 rounded-lg border ${subscriptionStatusInfo?.bgColor || "bg-gray-50"} ${subscriptionStatusInfo?.borderColor || "border-gray-200"}`}>
+                  {/* Status with colored icon */}
+                  {subscriptionStatusInfo && (
+                    <div className="flex items-center gap-2 font-semibold mb-3">
+                      {subscriptionStatusInfo.status === "cancelled" ? (
+                        <FaExclamationCircle className={subscriptionStatusInfo.iconColor} />
+                      ) : subscriptionStatusInfo.status === "cancelling" ? (
+                        <FaExclamationCircle className={subscriptionStatusInfo.iconColor} />
+                      ) : (
+                        <FaCheckCircle className={subscriptionStatusInfo.iconColor} />
+                      )}
+                      <span className={`${subscriptionStatusInfo.status === "cancelled" ? "text-red-800" : subscriptionStatusInfo.status === "cancelling" ? "text-yellow-800" : "text-green-800"}`}>
+                        {isFreemium ? "Okres próbny aktywny" : subscriptionStatusInfo.text}
+                      </span>
+                    </div>
                   )}
-                  <button
-                    onClick={handleManageSubscription}
-                    className="mt-3 text-sm text-blue-600 hover:text-blue-700 underline"
-                  >
-                    Zarządzaj subskrypcją
-                  </button>
+                  
+                  {/* Freemium progress bar */}
+                  {isFreemium && progressPercentage !== null ? (
+                    <div className="space-y-2 mb-3">
+                      {daysRemaining !== null && (
+                        <p className="text-sm text-gray-700">
+                          Pozostało dni: <span className="font-bold text-gray-900">{daysRemaining}</span>
+                        </p>
+                      )}
+                      <div className="relative w-full h-2.5 rounded-full overflow-hidden bg-gray-200">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            daysRemaining !== null && daysRemaining <= 3
+                              ? "bg-gradient-to-r from-red-500 to-red-600"
+                              : daysRemaining !== null && daysRemaining <= 7
+                              ? "bg-gradient-to-r from-orange-500 to-orange-600"
+                              : daysRemaining !== null && daysRemaining <= 14
+                              ? "bg-gradient-to-r from-yellow-500 to-yellow-600"
+                              : "bg-gradient-to-r from-green-500 to-green-600"
+                          }`}
+                          style={{ width: `${progressPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Days remaining for paid subscriptions */}
+                      {daysRemaining !== null && !isFreemium && (
+                        <p className="text-sm text-gray-700 mb-2">
+                          Pozostało dni: <span className="font-bold text-gray-900">{daysRemaining}</span>
+                        </p>
+                      )}
+                      
+                      {/* Next payment info for paid premium */}
+                      {isPaidPremium && subscriptionStatusInfo?.status !== "cancelled" && (
+                        <div className="space-y-1 mb-3">
+                          {nextPaymentDate && (
+                            <p className="text-sm text-gray-700">
+                              Następna płatność: <span className="font-semibold text-gray-900">{nextPaymentDate}</span>
+                            </p>
+                          )}
+                          <p className="text-sm text-gray-700">
+                            Kwota: <span className="font-bold text-gray-900">49,99 zł</span>
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Manage subscription button */}
+                  {isPaidPremium && subscriptionStatusInfo?.status !== "cancelled" && (
+                    <button
+                      onClick={handleManageSubscription}
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 underline"
+                    >
+                      Zarządzaj subskrypcją
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="mt-4 space-y-2">

@@ -1,70 +1,19 @@
-import { Metadata, Viewport } from "next";
-import BlogLayout, { BlogSidebar } from "@/components/Blog/BlogLayout";
-import EnhancedPostSamples from "@/components/Blog/EnhancedPostSamples";
-import ShareButtons from "@/components/ShareButtons";
+import { redirect } from "next/navigation";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
-export default async function Page() {
+export default function BlogPage() {
+  // Redirect to home if blog feature is disabled
+  if (!isFeatureEnabled("blog")) {
+    redirect("/");
+  }
+
+  // Original blog page content (kept for when feature is enabled)
   return (
-    <BlogLayout>
-      <div className="space-y-10">
-        {/* Featured + grid from current API */}
-        <EnhancedPostSamples variant="featured" columns={3} showHeader />
-
-        {/* Sidebar and additional sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3" />
-          <div className="lg:col-span-1 space-y-6">
-            <BlogSidebar>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Popularne kategorie
-              </h3>
-              <p className="text-sm text-gray-600">
-                Przeglądaj wpisy według kategorii i tematów.
-              </p>
-            </BlogSidebar>
-            <BlogSidebar>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Udostępnij blog
-              </h3>
-              <ShareButtons url={`${process.env.NEXT_PUBLIC_URL ?? ""}/blog`} />
-            </BlogSidebar>
-          </div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Blog</h1>
+        <p className="text-gray-600">Blog feature is currently disabled for MVP.</p>
       </div>
-    </BlogLayout>
+    </div>
   );
 }
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: "#d8b4fe",
-};
-
-export const metadata: Metadata = {
-  publisher: "naily.pl",
-  manifest: "/manifest.json",
-  icons: [
-    {
-      url: "/fav/favicon.ico",
-      sizes: "192x192",
-      type: "image/png",
-    },
-  ],
-  title: "Blog o manicure i pedicure – poradniki, inspiracje i nowości",
-  description:
-    "Profesjonalne porady, inspiracje i nowości ze świata paznokci. Odkryj techniki stylizacji, pielęgnację i rekomendacje produktów.",
-  openGraph: {
-    type: "website",
-    url: "/blog",
-    title: "Blog o manicure i pedicure – poradniki, inspiracje i nowości",
-    description:
-      "Profesjonalne porady, inspiracje i nowości ze świata paznokci. Odkryj techniki stylizacji, pielęgnację i rekomendacje produktów.",
-    siteName: "naily.pl",
-  },
-  alternates: {
-    canonical: "/blog",
-  },
-};

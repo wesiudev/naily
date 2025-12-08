@@ -1,8 +1,8 @@
 "use server";
-export async function getCityServiceUsers(city: string, service: string) {
+export async function getServiceUsers(service: string) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_URL ?? ""}/results/${service}/${city}`,
+      `${process.env.NEXT_PUBLIC_URL ?? ""}/api/results/${service}`,
       {
         method: "POST",
       }

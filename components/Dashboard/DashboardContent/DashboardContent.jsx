@@ -23,7 +23,6 @@ import {
   FaPalette,
 } from "react-icons/fa";
 import ReservationManager from "@/components/User/Dashboard/ReservationManager";
-import PremiumTab from "@/components/User/Payments/PremiumTab";
 import AdsTab from "@/components/User/Payments/Pricing/AdsTab";
 import ServiceConfiguration from "@/components/User/Dashboard/ServiceConfiguration";
 import FavoritesManager from "@/components/User/Dashboard/FavoritesManager";
@@ -35,6 +34,7 @@ import ShareProfilePopup from "./ShareProfilePopup";
 import OpeningHoursPopup from "./OpeningHoursPopup";
 import SettingsTab from "./SettingsTab";
 import CalendarTab from "./CalendarTab";
+import PremiumExpiredPopup from "./PremiumExpiredPopup";
 import { uploadBanner as uploadBannerUtil, uploadProfilePhoto as uploadProfilePhotoUtil } from "./bannerUtils";
 import { FaTrophy } from "react-icons/fa6";
 
@@ -83,6 +83,9 @@ export default function DashboardContent({
   // Opening hours popup state
   const [showOpeningHoursPopup, setShowOpeningHoursPopup] = useState(false);
   const [openingHoursData, setOpeningHoursData] = useState({});
+
+  // Premium expired popup state
+  const [showPremiumExpiredPopup, setShowPremiumExpiredPopup] = useState(false);
 
   // Banner upload state
   const [bannerUploading, setBannerUploading] = useState(false);
@@ -289,6 +292,52 @@ export default function DashboardContent({
     }`;
   }
 
+  // Check if user has active premium access
+  function hasPremiumAccess() {
+    if (!user) return false;
+    
+    // Check if premium is active (including trialing status for sandbox/test mode)
+    const subscriptionStatus = user?.subscription?.status;
+    const isPremiumActive = 
+      user?.premiumActive || 
+      user?.active || 
+      subscriptionStatus === "active" ||
+      subscriptionStatus === "trialing";
+    
+    if (!isPremiumActive) return false;
+    
+    // Check if subscription period has expired
+    if (user?.subscription?.currentPeriodEnd) {
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      const periodEnd = user.subscription.currentPeriodEnd;
+      if (periodEnd < currentTime) {
+        return false; // Subscription expired
+      }
+    }
+    
+    return true;
+  }
+
+  // Determine if freemium expired or premium expired
+  function isFreemiumExpired() {
+    if (!user?.subscription?.id) return true; // No subscription = freemium expired
+    return user.subscription.id.startsWith("free_trial_");
+  }
+
+  // Check premium access when accessing premium tabs
+  useEffect(() => {
+    const premiumTabs = ["calendar", "services", "portfolio"];
+    if (premiumTabs.includes(activeTab)) {
+      if (!hasPremiumAccess()) {
+        setShowPremiumExpiredPopup(true);
+      } else {
+        setShowPremiumExpiredPopup(false);
+      }
+    } else {
+      setShowPremiumExpiredPopup(false);
+    }
+  }, [activeTab, user]);
+
   return (
     <div className="w-full">
       {activeTab === "overview" && (
@@ -325,45 +374,51 @@ export default function DashboardContent({
       <div className="px-4 pb-6">
         {/* Tab Content */}
       {activeTab === "notifications" && (
-        <Card className="shadow-sm rounded-xl">
-          <CardHeader className="p-6 pb-0">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <FaBell className="text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-xl">Powiadomienia</CardTitle>
-                <CardDescription>
-                  Bądź na bieżąco — tutaj znajdziesz aktualizacje dotyczące
-                  Twojego konta i rezerwacji.
-                </CardDescription>
+        <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
+          {/* Desktop Header */}
+          <CardHeader className="hidden md:block pt-8 pb-6 px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start gap-5">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
+                  <div className="relative p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:scale-105 transition-transform">
+                    <FaBell className="text-white text-2xl" />
+                  </div>
+                </div>
+                <div className="flex-1 pt-1">
+                  <CardTitle className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+                    Powiadomienia
+                  </CardTitle>
+                  <CardDescription className="text-base text-gray-600 leading-relaxed">
+                    Bądź na bieżąco — tutaj znajdziesz aktualizacje dotyczące Twojego konta i rezerwacji.
+                  </CardDescription>
+                </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <NotificationManager />
-          </CardContent>
-        </Card>
-      )}
 
-      {activeTab === "pricing" && (
-        <Card className="shadow-sm rounded-xl">
-          <CardHeader className="p-6 pb-0">
+          {/* Mobile Header */}
+          <CardHeader className="md:hidden pt-6 pb-4 px-4 bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <FaCrown className="text-primary" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-20"></div>
+                <div className="relative p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+                  <FaBell className="text-white text-xl" />
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl">Plan i płatności</CardTitle>
-                <CardDescription>
-                  Wybierz plan, który najlepiej pasuje do Twoich potrzeb i opłać
-                  subskrypcję.
+              <div className="flex-1">
+                <CardTitle className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                  Powiadomienia
+                </CardTitle>
+                <CardDescription className="text-sm text-gray-600 mt-1">
+                  Bądź na bieżąco — tutaj znajdziesz aktualizacje dotyczące Twojego konta i rezerwacji.
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <PremiumTab user={user} />
+
+          <CardContent className="pt-2 pb-8 px-4 md:px-8">
+            <NotificationManager />
           </CardContent>
         </Card>
       )}
@@ -390,7 +445,9 @@ export default function DashboardContent({
       )}
 
       {activeTab === "services" && (
-        <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
+        <>
+          {hasPremiumAccess() ? (
+            <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
           {/* Desktop Header */}
           <CardHeader className="hidden md:block pt-8 pb-6 px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
             <div className="flex items-start justify-between gap-6">
@@ -466,10 +523,14 @@ export default function DashboardContent({
             <ServiceConfiguration />
           </CardContent>
         </Card>
+          ) : null}
+        </>
       )}
 
       {activeTab === "portfolio" && (
-        <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
+        <>
+          {hasPremiumAccess() ? (
+            <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
           {/* Desktop Header */}
           <CardHeader className="hidden md:block pt-8 pb-6 px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
             <div className="flex items-start justify-between gap-6">
@@ -545,6 +606,8 @@ export default function DashboardContent({
             <PortfolioManager uid={user?.uid} />
           </CardContent>
         </Card>
+          ) : null}
+        </>
       )}
 
       {activeTab === "favorites" && (
@@ -569,7 +632,11 @@ export default function DashboardContent({
       )}
 
       {activeTab === "calendar" && (
-        <CalendarTab user={user} />
+        <>
+          {hasPremiumAccess() ? (
+            <CalendarTab user={user} />
+          ) : null}
+        </>
       )}
 
       {activeTab === "settings" && (
@@ -650,6 +717,19 @@ export default function DashboardContent({
         onClose={() => setShowOpeningHoursPopup(false)}
         openingHours={user?.openingHours}
         onSave={saveOpeningHours}
+      />
+
+      <PremiumExpiredPopup
+        isOpen={showPremiumExpiredPopup}
+        onClose={() => {
+          setShowPremiumExpiredPopup(false);
+          setActiveTab("overview");
+        }}
+        isFreemiumExpired={isFreemiumExpired()}
+        onUpgrade={() => {
+          setShowPremiumExpiredPopup(false);
+          setActiveTab("settings");
+        }}
       />
     </div>
   );

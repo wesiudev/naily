@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/card";
 
 export default function QuickActions({ user, setActiveTab, onShare }) {
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  };
+
   return (
     <>
      
@@ -25,7 +30,7 @@ export default function QuickActions({ user, setActiveTab, onShare }) {
           <CardContent className="pb-3 pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
           <button
-            onClick={() => setActiveTab("services")}
+            onClick={() => handleTabChange("services")}
             className="px-3 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center gap-2 justify-center shadow-sm touch-manipulation"
           >
             <FaPlusCircle className="w-4 h-4 flex-shrink-0" />
@@ -52,11 +57,11 @@ export default function QuickActions({ user, setActiveTab, onShare }) {
           <CardContent className="pt-3">
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               <button
-                onClick={() => setActiveTab("calendar")}
+                onClick={() => handleTabChange("calendar")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActiveTab("calendar");
+                    handleTabChange("calendar");
                   }
                 }}
                 aria-label="Przejdź do kalendarza"
@@ -71,11 +76,11 @@ export default function QuickActions({ user, setActiveTab, onShare }) {
                 </span>
               </button>
               <button
-                onClick={() => setActiveTab("services")}
+                onClick={() => handleTabChange("services")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActiveTab("services");
+                    handleTabChange("services");
                   }
                 }}
                 aria-label="Przejdź do usług"
@@ -90,11 +95,11 @@ export default function QuickActions({ user, setActiveTab, onShare }) {
                 </span>
               </button>
               <button
-                onClick={() => setActiveTab("portfolio")}
+                onClick={() => handleTabChange("portfolio")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActiveTab("portfolio");
+                    handleTabChange("portfolio");
                   }
                 }}
                 aria-label="Przejdź do galerii"
@@ -110,11 +115,11 @@ export default function QuickActions({ user, setActiveTab, onShare }) {
               </button>
               
               <button
-                onClick={() => setActiveTab("settings")}
+                onClick={() => handleTabChange("settings")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActiveTab("settings");
+                    handleTabChange("settings");
                   }
                 }}
                 aria-label="Przejdź do ustawień"

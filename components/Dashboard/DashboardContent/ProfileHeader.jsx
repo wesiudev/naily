@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import OpeningHoursDisplay from "./OpeningHoursDisplay";
 import DescriptionEditor from "./DescriptionEditor";
 import ContactInfo from "./ContactInfo";
+import PremiumStatusTracker from "./PremiumStatusTracker";
 import { Card, CardContent } from "@/components/ui/card";
 import DashboardOverview from "../DashboardOverview";
 import { toast } from "react-toastify";
@@ -172,8 +173,11 @@ export default function ProfileHeader({
           <div className="flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-12 lg:mt-6">
             <div className="w-full lg:w-1/3">
               {/* User Details */}
-              <div className="flex-1 min-w-0">
-
+              <div className="flex-1 min-w-0 space-y-4">
+                      <PremiumStatusTracker
+                        user={user}
+                        onRenew={() => setActiveTab("settings")}
+                      />
                       <OpeningHoursDisplay
                         openingHours={openingHours}
                         onEdit={onOpeningHoursEdit}
@@ -202,6 +206,11 @@ export default function ProfileHeader({
               </div>
             </div>
             <div className="w-full lg:w-2/3 flex flex-col gap-6">
+                  <QuickActions
+                    user={user}
+                    setActiveTab={setActiveTab}
+                    onShare={shareProfile}
+                  />
               <Card className="shadow-sm rounded-xl">
                 <CardContent className="w-full">
                   <DashboardOverview
@@ -212,11 +221,6 @@ export default function ProfileHeader({
                   />
                 </CardContent>
               </Card>
-              <QuickActions
-                user={user}
-                setActiveTab={setActiveTab}
-                onShare={shareProfile}
-              />
             </div>
           </div>
           </div>

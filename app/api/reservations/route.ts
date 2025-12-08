@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         
         await addUserNotification(body.specialistUid, {
           type: "reservation_request",
-          title: "Nowa prośba o rezerwację",
+          title: "Zatwierdź rezerwację",
           message: `${serviceDisplayName}${dateTimeInfo} - ${body.customerPhone}`,
           reservationId: id,
           isRead: false,

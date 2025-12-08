@@ -2,7 +2,7 @@
 export async function getServices() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/services/`, {
+    const res = await fetch(`${baseUrl}/api/services/`, {
       next: { revalidate: 3600 },
       method: "GET",
     });

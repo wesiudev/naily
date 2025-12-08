@@ -231,6 +231,25 @@ export default function MultiStepCreator() {
         // Continue even if premium grant fails
       }
 
+      // Generate metadata if description is provided
+      if (userData.description && userData.description.trim()) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_URL || ""}/api/generateMetadata`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid: userCredential.user?.uid,
+              description: userData.description,
+              name: userData.name,
+              city: userData.location?.address || "",
+            }),
+          });
+        } catch (metadataError) {
+          console.error("Error generating metadata:", metadataError);
+          // Continue even if metadata generation fails
+        }
+      }
+
       // Update user data with premium info for Redux
       const userDataWithPremium = {
         ...userDataForDB,

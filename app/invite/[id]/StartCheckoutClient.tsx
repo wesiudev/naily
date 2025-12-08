@@ -15,7 +15,7 @@ export default function StartCheckoutClient({
       window.location.href = "/admin";
       return;
     }
-    const res = await fetch("/stripe/subscription", {
+    const res = await fetch("/api/stripe/subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

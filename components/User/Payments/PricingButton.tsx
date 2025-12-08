@@ -15,7 +15,7 @@ export default function PricingButton({
 }) {
   const dispatch = useDispatch();
   const handleSubscribe = async () => {
-    const response = await fetch("/stripe/subscription", {
+    const response = await fetch("/api/stripe/subscription", {
       method: "POST",
       body: JSON.stringify({
         uid: user?.uid,
@@ -68,16 +68,23 @@ export default function PricingButton({
       ) && (
         <button
           onClick={async () => {
-            const response = await fetch(`/stripe/customer-portal`, {
-              method: "POST",
-              body: JSON.stringify({ uid: user?.uid }),
-              headers: { "Content-Type": "application/json" },
-            });
-            const data = await response.json();
-            if (data.success) {
-              window.location.href = data.url; // Redirect to Stripe Customer Portal
-            } else {
-              console.error(data.error);
+            try {
+              const response = await fetch(`/api/stripe/customer-portal`, {
+                method: "POST",
+                body: JSON.stringify({ uid: user?.uid }),
+                headers: { "Content-Type": "application/json" },
+              });
+              const data = await response.json();
+              console.log("Customer portal response:", data);
+              if (data.success && data.url) {
+                window.location.href = data.url; // Redirect to Stripe Customer Portal
+              } else {
+                console.error("Customer portal error:", data.error);
+                alert(data.error || "Nie udało się otworzyć portalu klienta");
+              }
+            } catch (error) {
+              console.error("Error opening customer portal:", error);
+              alert("Wystąpił błąd podczas otwierania portalu klienta");
             }
           }}
           className="w-max mx-auto text-sm text-gray-500 mt-2 block text-center"

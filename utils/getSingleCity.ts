@@ -2,7 +2,7 @@
 export async function getSingleCity(city: string) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_URL ?? ""}/city/${city}`,
+      `${process.env.NEXT_PUBLIC_URL ?? ""}/api/city/${city}`,
       {
         next: { revalidate: 3600 },
         method: "GET",

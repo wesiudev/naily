@@ -4,8 +4,8 @@ import Hero from "@/components/Landing/Hero";
 import ComparisonSection from "@/components/Landing/ComparisonSection";
 import TestimonialsCarousel from "@/components/Testimonials/Carousel";
 import FinalCta from "@/components/Landing/FinalCta";
-import RecentPosts from "@/components/Blog/RecentPosts";
 import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
+import RecentPostsWrapper from "@/components/Blog/RecentPostsWrapper";
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
       <Hero />
       <ComparisonSection />
 
-      <RecentPosts limit={6} columns={3} />
+      <RecentPostsWrapper limit={6} columns={3} />
 
       <FinalCta />
       <div className="py-20">
