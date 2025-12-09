@@ -12,7 +12,7 @@ export default function RecentPostsWrapper({
   columns,
 }: {
   limit?: number;
-  columns?: number;
+  columns?: 1 | 2 | 3 | 4;
 }) {
   if (!isFeatureEnabled("blog")) {
     return null;

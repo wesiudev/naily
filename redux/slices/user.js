@@ -24,6 +24,10 @@ export const initialState = {
 
     phoneNumber: "",
     active: false,
+    premiumActive: false,
+    subscription: undefined,
+    subscriptionId: undefined,
+    customerId: undefined,
     userSlugUrl: "",
     metadata: {
       seoTitle: "",

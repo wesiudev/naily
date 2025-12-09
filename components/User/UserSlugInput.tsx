@@ -24,7 +24,7 @@ export default function UserSlugInput({
   onChange: (val: string) => void;
   currentUid: string;
   baseUrlPrefix?: string;
-  onContinue: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onContinue?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   const [raw, setRaw] = useState<string>(value || "");
   const normalized = useMemo(() => normalizeSlug(raw), [raw]);
@@ -109,12 +109,14 @@ export default function UserSlugInput({
           )}
         </span>
       </div>
-      <button
-        onClick={onContinue}
-        className="mt-6 h-max bg-black text-white px-4 py-2 rounded-lg"
-      >
-        Kontynuuj
-      </button>
+      {onContinue && (
+        <button
+          onClick={onContinue}
+          className="mt-6 h-max bg-black text-white px-4 py-2 rounded-lg"
+        >
+          Kontynuuj
+        </button>
+      )}
     </div>
   );
 }

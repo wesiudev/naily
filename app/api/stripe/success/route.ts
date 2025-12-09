@@ -30,10 +30,16 @@ export async function POST(req: Request) {
     }
 
     // Fetch the subscription to get its status and period end
-    let subscription = null;
+    let subscription: Stripe.Subscription | null = null;
     if (subscriptionId) {
       try {
-        subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        // session.subscription can be a string (ID) or Subscription object (if expanded)
+        if (typeof subscriptionId === "string") {
+          subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        } else {
+          // Already a Subscription object (expanded)
+          subscription = subscriptionId;
+        }
       } catch (subError) {
         console.error("Error retrieving subscription:", subError);
         // Continue anyway, webhook will handle it
@@ -47,9 +53,12 @@ export async function POST(req: Request) {
     };
 
     // Update subscription data (basic info)
+    // Ensure subscriptionId is a string for the update function
+    // Prefer subscription.id if we have the full object, otherwise use the original subscriptionId
+    const subscriptionIdString = subscription?.id || (typeof subscriptionId === "string" ? subscriptionId : subscriptionId?.id || null);
     await updateUserSubscriptionData(
       uid,
-      subscriptionId,
+      subscriptionIdString,
       customerId,
       paymentData
     );
@@ -81,7 +90,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Subscription successful",
-      subscriptionId,
+      subscriptionId: subscriptionIdString,
       customerId,
       session,
       subscriptionStatus: subscription?.status,

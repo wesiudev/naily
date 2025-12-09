@@ -15,6 +15,13 @@ export async function POST(req: Request) {
   const stripeSignature = req.headers.get("stripe-signature");
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  if (!stripeSignature) {
+    return NextResponse.json({
+      success: false,
+      error: "Missing stripe-signature header",
+    });
+  }
+
   let event;
 
   try {
@@ -22,7 +29,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(
       rawBody,
       stripeSignature,
-      endpointSecret
+      endpointSecret!
     );
   } catch (err: any) {
     console.error("Webhook Error:", err.message);

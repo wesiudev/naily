@@ -151,9 +151,11 @@ export default function FastConfigurationPopup({
 
       onClose();
 
-      // Show premium gift popup after configuration is complete
+      // Show premium gift popup after configuration is complete        
       // Check if user has free trial premium (new user)
-      if (user?.premiumActive && user?.subscription?.id?.startsWith("free_trial_")) {
+      const subscription = user?.subscription as { id?: string } | null | undefined;
+      const subscriptionId = subscription?.id;
+      if (user?.premiumActive && subscriptionId?.startsWith("free_trial_")) {
         // Small delay to ensure FastConfigurationPopup closes first
         setTimeout(() => {
           dispatch(setPremiumGiftPopupOpen(true));
