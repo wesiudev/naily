@@ -233,7 +233,7 @@ export async function updateUser(userId, data) {
  * @param {string} userId - The user's UID
  * @returns {Promise<void>}
  */
-export async function grantFreePremium(userId) {
+async function grantFreePremium(userId) {
   const userRef = doc(db, "users", userId);
   const userDoc = await getDoc(userRef);
   const thirtyDaysFromNow = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
