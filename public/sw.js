@@ -83,3 +83,4 @@ self.addEventListener('activate', (event) => {
   // Take control of all pages immediately
   return self.clients.claim();
 });
+

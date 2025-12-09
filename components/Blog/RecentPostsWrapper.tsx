@@ -20,3 +20,4 @@ export default function RecentPostsWrapper({
 
   return <RecentPosts limit={limit} columns={columns} />;
 }
+

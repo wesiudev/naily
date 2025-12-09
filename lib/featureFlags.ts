@@ -15,3 +15,4 @@ export function isFeatureEnabled(feature: keyof typeof featureFlags): boolean {
 
 // Type-safe feature names
 export type FeatureName = keyof typeof featureFlags;
+
