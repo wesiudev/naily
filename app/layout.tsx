@@ -25,60 +25,86 @@ import ModalManager from "@/components/ModalManager";
 import InitUser from "@/components/User/Init";
 import localFont from "next/font/local";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: "--font-inter",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
+});
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
+  display: "swap",
+  fallback: ["serif"],
 });
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
   variable: "--font-roboto",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-cormorant",
+  display: "swap",
+  fallback: ["serif"],
 });
 const marcellus = Marcellus({
   subsets: ["latin", "latin-ext"],
   weight: ["400"],
   variable: "--font-marcellus",
+  display: "swap",
+  fallback: ["serif"],
 });
 const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-cinzel",
+  display: "swap",
+  fallback: ["serif"],
 });
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-nunito",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 const lora = Lora({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-lora",
+  display: "swap",
+  fallback: ["serif"],
 });
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-montserrat",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 const openSans = Open_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-open-sans",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 const sourceSans = Source_Sans_3({
   subsets: ["latin", "latin-ext"],
-
   variable: "--font-source-sans",
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 
 const baloo = localFont({

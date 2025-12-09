@@ -54,7 +54,7 @@ export async function getUserById(userId) {
 
 // Notifications helpers
 // Structure: users/{uid}/notifications/{notificationId}
-export function subscribeToUserNotifications(uid, callback) {
+function subscribeToUserNotifications(uid, callback) {
   const notificationsRef = collection(db, "users", uid, "notifications");
   const q = query(notificationsRef, orderBy("createdAt", "desc"));
   return onSnapshot(q, (snapshot) => {
@@ -63,7 +63,7 @@ export function subscribeToUserNotifications(uid, callback) {
   });
 }
 
-export async function addUserNotification(uid, notification) {
+async function addUserNotification(uid, notification) {
   const id = notification?.id ?? uuidv4();
   const ref = doc(db, "users", uid, "notifications", id);
   const snap = await getDoc(ref);
@@ -79,23 +79,23 @@ export async function addUserNotification(uid, notification) {
   return id;
 }
 
-export async function markNotificationRead(uid, id) {
+async function markNotificationRead(uid, id) {
   const ref = doc(db, "users", uid, "notifications", id);
   await updateDoc(ref, { isRead: true, readAt: serverTimestamp() });
 }
 
-export async function softDeleteNotification(uid, id) {
+async function softDeleteNotification(uid, id) {
   const ref = doc(db, "users", uid, "notifications", id);
   await updateDoc(ref, { isDeleted: true, deletedAt: serverTimestamp() });
 }
 
-export async function deleteNotification(uid, id) {
+async function deleteNotification(uid, id) {
   const ref = doc(db, "users", uid, "notifications", id);
   await deleteDoc(ref);
 }
 
 // Unread count subscription (for header badges)
-export function subscribeToUserUnreadCount(uid, callback) {
+function subscribeToUserUnreadCount(uid, callback) {
   const notificationsRef = collection(db, "users", uid, "notifications");
   const q = query(
     notificationsRef,
@@ -108,7 +108,7 @@ export function subscribeToUserUnreadCount(uid, callback) {
 }
 
 // Paged notifications (first page live, subsequent pages on demand)
-export function subscribeToUserNotificationsPaged(
+function subscribeToUserNotificationsPaged(
   uid,
   pageSize = 20,
   callback
@@ -834,7 +834,7 @@ export async function deleteProduct(productId) {
 }
 
 // Subscribe to new reservations for a specialist
-export function subscribeToNewReservations(specialistUid, callback) {
+function subscribeToNewReservations(specialistUid, callback) {
   const reservationsRef = collection(db, "reservations");
   // Query for pending reservations for this specialist
   const q = query(
