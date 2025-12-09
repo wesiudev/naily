@@ -21,7 +21,7 @@ export default function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(id);
-      // @ts-ignore - lenis has destroy in runtime
+      // @ts-expect-error - lenis has destroy in runtime
       if (lenis?.destroy) lenis.destroy();
     };
   }, []);

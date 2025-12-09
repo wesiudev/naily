@@ -99,8 +99,8 @@ export async function POST(req: NextRequest) {
     const payload = response.content as unknown as Record<string, unknown>;
     
     // Ensure length constraints
-    let seoTitle = String(payload.seoTitle || userName || "Salon paznokci").slice(0, 60);
-    let seoDescription = String(payload.seoDescription || userDescription || "Profesjonalny salon paznokci").slice(0, 160);
+    const seoTitle = String(payload.seoTitle || userName || "Salon paznokci").slice(0, 60);
+    const seoDescription = String(payload.seoDescription || userDescription || "Profesjonalny salon paznokci").slice(0, 160);
 
     // Get current user to preserve existing metadata
     const user = await getDocument("users", uid);

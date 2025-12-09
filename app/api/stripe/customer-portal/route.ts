@@ -1,7 +1,8 @@
 import { fetchUser } from "@/utils/fetchUser";
 import { NextResponse } from "next/server";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {

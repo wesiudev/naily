@@ -1,5 +1,5 @@
 "use client";
-import { auth2 } from "@/firebase";
+import { auth } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import LoginPage from "./LoginPage";
 import Loading from "./loading";
@@ -8,7 +8,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, loading] = useAuthState(auth2);
+  const [user, loading] = useAuthState(auth);
   if (loading) {
     return <Loading />;
   } else
