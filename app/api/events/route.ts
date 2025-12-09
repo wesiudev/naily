@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     };
     await addDocument("events", id, event);
-    return NextResponse.json({ id, ...event }, { status: 201 });
+    return NextResponse.json(event, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
