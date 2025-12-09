@@ -338,20 +338,21 @@ export default function Header({
                 </button>
               </div>
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex rounded-xl p-2 h-max space-x-6 px-3 items-center">
-                <nav className="flex items-center space-x-6">
+              <div className="hidden lg:flex rounded-xl p-2 h-max space-x-8 px-3 items-center">
+                <nav className="flex items-center space-x-8">
+                  {/* Primary Navigation Items */}
                   <Link
                     href="/szkolenia"
-                    className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                      pathname === "/login" ? "text-white" : "text-blue-700"
+                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                      pathname === "/login" ? "text-white" : "text-zinc-800"
                     }`}
                   >
                     Szkolenia
                   </Link>
                   <Link
                     href="/kariera"
-                    className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                      pathname === "/login" ? "text-white" : "text-blue-700"
+                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                      pathname === "/login" ? "text-white" : "text-zinc-800"
                     }`}
                   >
                     Kariera
@@ -364,23 +365,23 @@ export default function Header({
                       onClick={() => setIsEarnMenuOpen((prev) => !prev)}
                       aria-haspopup="menu"
                       aria-expanded={isEarnMenuOpen}
-                      className={`py-3 px-5 rounded-full border ${
+                      className={`py-2.5 px-5 rounded-full border-2 ${
                         pathname === "/login"
-                          ? "border-white"
-                          : "border-blue-700"
-                      } flex items-center gap-2 text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                        pathname === "/login" ? "text-white" : "text-blue-700"
-                      } focus:outline-none hover:bg-gray-100/80`}
+                          ? "border-white/80 bg-white/10"
+                          : "border-blue-600 bg-blue-600"
+                      } flex items-center gap-2 text-base transition-all duration-200 font-semibold whitespace-nowrap ${
+                        pathname === "/login" ? "text-white" : "text-white"
+                      } focus:outline-none hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]`}
                     >
-                      Zarabiaj z Naily <FaChevronDown className="h-4 w-4" />
+                      Zarabiaj z Naily <FaChevronDown className="h-3.5 w-3.5" />
                     </button>
                     {isEarnMenuOpen && (
-                      <div className="absolute left-0 mt-2 w-72 rounded-lg border border-neutral-200 bg-white shadow-lg p-2 z-50">
+                      <div className="absolute left-0 mt-2 w-72 rounded-xl border border-neutral-200 bg-white shadow-xl p-2 z-50">
                         {user?.uid ? (
                           <Link
                             href="/dashboard"
                             onClick={() => setIsEarnMenuOpen(false)}
-                            className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                            className="block w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-zinc-800 font-medium text-sm transition-colors"
                           >
                             Zarabiaj jako stylistka
                           </Link>
@@ -388,7 +389,7 @@ export default function Header({
                           <Link
                             href="/kreator-profilu"
                             onClick={() => setIsEarnMenuOpen(false)}
-                            className="block w-full text-left px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                            className="block w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-zinc-800 font-medium text-sm transition-colors"
                           >
                             Zarabiaj jako stylistka
                           </Link>
@@ -396,7 +397,7 @@ export default function Header({
                         <Link
                           href="/influencer-program"
                           onClick={() => setIsEarnMenuOpen(false)}
-                          className="block px-3 py-2 rounded-md hover:bg-neutral-50 text-blue-700"
+                          className="block px-4 py-3 rounded-lg hover:bg-blue-50 text-zinc-800 font-medium text-sm transition-colors"
                         >
                           Zarabiaj jako influencer
                         </Link>
@@ -415,15 +416,15 @@ export default function Header({
                           );
                         } catch (_e) {}
                       }}
-                      className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                        pathname === "/login" ? "text-white" : "text-blue-700"
+                      className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                        pathname === "/login" ? "text-white" : "text-zinc-800"
                       }`}
                       title="Powiadomienia"
                       aria-label="Powiadomienia"
                     >
                       Powiadomienia
                       {dashboardNotificationCount > 0 && (
-                        <span className="ml-2 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] w-5 h-5">
+                        <span className="ml-2 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-xs font-semibold w-5 h-5">
                           {dashboardNotificationCount}
                         </span>
                       )}
@@ -431,7 +432,8 @@ export default function Header({
                   )}
                 </nav>
 
-                <div className="flex items-center space-x-4">
+                {/* User Actions - Secondary Navigation */}
+                <div className="flex items-center space-x-6 ml-4 pl-6 border-l border-neutral-200">
                   {user?.uid ? (
                     <>
                       {isDashboardRoute ? (
@@ -446,26 +448,26 @@ export default function Header({
                                 );
                               } catch (_e) {}
                             }}
-                            className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap
+                            className={`text-sm transition-colors duration-200 font-medium whitespace-nowrap hover:opacity-80
                             ${
                               pathname === "/login"
-                                ? "text-white"
-                                : "text-blue-700"
+                                ? "text-white/90"
+                                : "text-zinc-600"
                             }`}
                           >
                             Ustawienia
                           </button>
                           <button
                             onClick={handleViewPublicProfile}
-                            className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap
+                            className={`text-sm transition-colors duration-200 font-medium whitespace-nowrap hover:opacity-80
                             ${
                               pathname === "/login"
-                                ? "text-white"
-                                : "text-blue-700"
+                                ? "text-white/90"
+                                : "text-zinc-600"
                             } flex items-center gap-2`}
                             title="Zobacz profil publiczny"
                           >
-                             <FaUser className="text-sm"/>
+                             <FaUser className="text-xs"/>
                             Moje konto
                           </button>
                         </>
@@ -473,13 +475,13 @@ export default function Header({
                         <>
                           <Link
                             href="/dashboard"
-                            className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
+                            className={`text-sm transition-colors duration-200 font-medium whitespace-nowrap hover:opacity-80 ${
                               pathname === "/login"
-                                ? "text-white"
-                                : "text-blue-700"
+                                ? "text-white/90"
+                                : "text-zinc-600"
                             } flex items-center gap-2`}
                           >
-                             <FaUser className="text-sm"/>
+                             <FaUser className="text-xs"/>
                             Moje konto
                           </Link>
                         </>
@@ -488,8 +490,8 @@ export default function Header({
                   ) : (
                     <Link
                       href="/login"
-                      className={`text-lg transition-colors duration-200 font-medium whitespace-nowrap ${
-                        pathname === "/login" ? "text-white" : "text-blue-700"
+                      className={`text-sm transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                        pathname === "/login" ? "text-white" : "text-blue-600"
                       }`}
                     >
                       Zaloguj
@@ -594,106 +596,129 @@ export default function Header({
               <div className="mb-6">
                 <HeaderSearch />
               </div>
-              <nav className="space-y-2">
+              
+              {/* Login CTA - Prominent at top when not logged in */}
+              {!user?.uid && (
                 <Link
-                  href="/"
+                  href="/login"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                  className="w-full mb-6 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-base transition-all duration-200 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
                 >
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                    <FaHome className="text-lg text-blue-700" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="font-semibold text-sm block">Strona główna</span>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      Powrót do strony głównej
-                    </p>
-                  </div>
-                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
+                  <FaUser className="text-base" />
+                  <span>Zaloguj się</span>
+                  <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
                 </Link>
-
-                <Link
-                  href="/manicure-pedicure/warszawa"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
-                >
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                    <FaGem className="text-lg text-blue-700" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="font-semibold text-sm block">Usługi</span>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      Znajdź usługi manicure
-                    </p>
-                  </div>
-                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
-                </Link>
-
-                {isFeatureEnabled("blog") && (
-                <Link
-                  href="/blog"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
-                >
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                    <FaBookOpen className="text-lg text-blue-700" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="font-semibold text-sm block">Blog</span>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      Artykuły i porady
-                    </p>
-                  </div>
-                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
-                </Link>
-                )}
-
-                {user?.uid && (
+              )}
+              
+              {/* Primary Navigation Section */}
+              <div className="mb-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3 px-2">
+                  Nawigacja
+                </h3>
+                <nav className="space-y-1">
                   <Link
-                    href="/dashboard"
+                    href="/"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                    className="flex items-center gap-4 p-3.5 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
                   >
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <MdDashboard className="text-lg text-blue-700" />
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors flex-shrink-0">
+                      <FaHome className="text-base text-blue-700" />
                     </div>
-                    <div className="flex-1">
-                      <span className="font-semibold text-sm block">Dashboard</span>
-                      <p className="text-xs text-neutral-500 mt-0.5">
-                        Panel użytkownika
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-base block leading-tight">Strona główna</span>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
+                        Powrót do strony głównej
                       </p>
                     </div>
-                    <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
+                    <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
                   </Link>
-                )}
-              </nav>
+
+                  <Link
+                    href="/manicure-pedicure/warszawa"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-4 p-3.5 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                  >
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors flex-shrink-0">
+                      <FaGem className="text-base text-blue-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-base block leading-tight">Usługi</span>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
+                        Znajdź usługi manicure
+                      </p>
+                    </div>
+                    <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
+                  </Link>
+
+                  {isFeatureEnabled("blog") && (
+                  <Link
+                    href="/blog"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-4 p-3.5 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                  >
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors flex-shrink-0">
+                      <FaBookOpen className="text-base text-blue-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-base block leading-tight">Blog</span>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
+                        Artykuły i porady
+                      </p>
+                    </div>
+                    <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
+                  </Link>
+                  )}
+
+                  {user?.uid && (
+                    <Link
+                      href="/dashboard"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-4 p-3.5 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                    >
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors flex-shrink-0">
+                        <MdDashboard className="text-base text-blue-700" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-base block leading-tight">Dashboard</span>
+                        <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
+                          Panel użytkownika
+                        </p>
+                      </div>
+                      <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
+                    </Link>
+                  )}
+                </nav>
+              </div>
             </div>
 
             {/* Enhanced User Section */}
-            <div className="p-6 border-t border-neutral-200 bg-gradient-to-b from-purple-50/50 to-white">
-              {user?.uid ? (
+            {user?.uid && (
+              <div className="p-6 border-t-2 border-neutral-200 bg-gradient-to-b from-purple-50/50 to-white">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-neutral-100">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <FaUser className="text-blue-700 text-base" />
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-neutral-100">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <FaUser className="text-blue-700 text-sm" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-zinc-800 truncate">
+                      <p className="font-semibold text-sm text-zinc-800 truncate leading-tight">
                         {user.name || "Użytkownik"}
                       </p>
-                      <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                      <p className="text-xs text-neutral-500 truncate leading-tight mt-0.5">{user.email}</p>
                     </div>
                   </div>
                   
@@ -703,7 +728,7 @@ export default function Header({
                       handleViewPublicProfile();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-full font-semibold text-sm transition-all duration-200 hover:bg-blue-700 shadow-md"
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm transition-all duration-200 hover:bg-blue-700 shadow-md hover:shadow-lg"
                   >
                     Zobacz profil
                   </button>
@@ -713,36 +738,19 @@ export default function Header({
                       e.stopPropagation();
                       logout();
                     }}
-                    className="w-full flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-white hover:text-blue-700 transition-all duration-200 group border border-neutral-200"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-800 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group border border-neutral-200"
                   >
-                    <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center group-hover:bg-red-50 transition-colors">
-                      <FaSignOutAlt className="text-lg text-neutral-600 group-hover:text-red-600" />
+                    <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors flex-shrink-0">
+                      <FaSignOutAlt className="text-sm text-neutral-600 group-hover:text-red-600" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <span className="font-semibold text-sm block">Wyloguj</span>
-                      <p className="text-xs text-neutral-500 mt-0.5">Zamknij sesję</p>
+                    <div className="flex-1 text-left min-w-0">
+                      <span className="font-semibold text-sm block leading-tight">Wyloguj</span>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-tight">Zamknij sesję</p>
                     </div>
                   </button>
                 </div>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openLoginPopup();
-                  }}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl text-zinc-800 hover:bg-white hover:text-blue-700 transition-all duration-200 group border border-neutral-200 bg-white"
-                >
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                    <FaUser className="text-lg text-blue-700" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <span className="font-semibold text-sm block">Zaloguj</span>
-                    <p className="text-xs text-neutral-500 mt-0.5">Dostęp do konta</p>
-                  </div>
-                  <FaChevronRight className="text-neutral-400 group-hover:text-blue-700 transition-colors" />
-                </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,23 +1,13 @@
 "use server";
+import { getCitiesData } from "@/utils/buildCities";
+
 export async function getCities() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/cities/`, {
-      next: { revalidate: 3600 },
-      method: "GET",
-    });
-    if (!res.ok) {
-      console.warn(`Failed to fetch cities: ${res.status} ${res.statusText}`);
-      return [];
-    }
-    try {
-      return await res.json();
-    } catch (error) {
-      console.warn("Error parsing cities JSON:", error);
-      return [];
-    }
+    // Use the data source directly instead of fetching from API
+    // This avoids ECONNREFUSED errors during build time
+    return getCitiesData();
   } catch (error) {
-    console.warn("Error fetching cities:", error);
+    console.warn("Error getting cities:", error);
     return [];
   }
 }
