@@ -4,108 +4,12 @@ import ConditionalNav from "@/components/ConditionalNav";
 import Footer from "@/components/Footer";
 import { Providers } from "@/redux/Provider";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  Inter,
-  Playfair_Display,
-  Poppins,
-  Roboto,
-  Cormorant_Garamond,
-  Marcellus,
-  Cinzel,
-  Nunito,
-  Lora,
-  Montserrat,
-  Open_Sans,
-  Source_Sans_3,
-} from "next/font/google";
 import FontManager from "@/components/FontManager";
 import { ToastContainer } from "react-toastify";
 import Script from "next/script";
 import ModalManager from "@/components/ModalManager";
 import InitUser from "@/components/User/Init";
 import localFont from "next/font/local";
-
-const inter = Inter({ 
-  subsets: ["latin"], 
-  variable: "--font-inter",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
-  fallback: ["serif"],
-});
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  variable: "--font-roboto",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-cormorant",
-  display: "swap",
-  fallback: ["serif"],
-});
-const marcellus = Marcellus({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400"],
-  variable: "--font-marcellus",
-  display: "swap",
-  fallback: ["serif"],
-});
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-cinzel",
-  display: "swap",
-  fallback: ["serif"],
-});
-const nunito = Nunito({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-nunito",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const lora = Lora({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-lora",
-  display: "swap",
-  fallback: ["serif"],
-});
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-montserrat",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const openSans = Open_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-open-sans",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
-const sourceSans = Source_Sans_3({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-source-sans",
-  display: "swap",
-  fallback: ["system-ui", "arial"],
-});
 
 const baloo = localFont({
   src: "../public/baloo.ttf",
@@ -120,9 +24,24 @@ export default async function RootLayout({
   return (
     <html
       lang="pl"
-      className={`${inter.variable} ${playfair.variable} ${poppins.variable} ${roboto.variable} ${cormorant.variable} ${marcellus.variable} ${cinzel.variable} ${nunito.variable} ${lora.variable} ${montserrat.variable} ${openSans.variable} ${sourceSans.variable} ${baloo.variable}`}
+      className={baloo.variable}
     >
       <head>
+        {/* Google Fonts - Loaded at runtime to avoid build failures */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Marcellus:wght@400&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet" />
         {/* PWA Meta Tags */}
         <meta name="theme-color" content="#2563eb" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

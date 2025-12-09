@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase";
+import { auth, subscribeToUserUnreadCount } from "@/firebase";
 import { useRouter } from "next/navigation";
 import FastConfigurationPopup from "@/components/User/Dashboard/FastConfigurationPopup";
 import PremiumGiftPopup from "@/components/User/PremiumGiftPopup";
@@ -76,7 +76,6 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
   useEffect(() => {
     let unsubscribe: any;
     if (reduxUser?.uid) {
-      const { subscribeToUserUnreadCount } = require("@/firebase");
       unsubscribe = subscribeToUserUnreadCount(reduxUser?.uid, (count: number) => {
         setNotificationCount(count || 0);
       });

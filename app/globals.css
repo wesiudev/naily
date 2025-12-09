@@ -4,6 +4,18 @@
 
 /* Custom CSS Variables for Professional Theme */
 :root {
+  --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+  --font-poppins: 'Poppins', system-ui, sans-serif;
+  --font-roboto: 'Roboto', system-ui, sans-serif;
+  --font-cormorant: 'Cormorant Garamond', serif;
+  --font-marcellus: 'Marcellus', serif;
+  --font-cinzel: 'Cinzel', serif;
+  --font-nunito: 'Nunito', system-ui, sans-serif;
+  --font-lora: 'Lora', serif;
+  --font-montserrat: 'Montserrat', system-ui, sans-serif;
+  --font-open-sans: 'Open Sans', system-ui, sans-serif;
+  --font-source-sans: 'Source Sans 3', system-ui, sans-serif;
   --primary-blue: #1e40af;
   --primary-blue-light: #3b82f6;
   --primary-blue-dark: #1e3a8a;

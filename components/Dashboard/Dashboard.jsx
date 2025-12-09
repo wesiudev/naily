@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase";
+import { auth, subscribeToUserUnreadCount } from "@/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FastConfigurationPopup from "@/components/User/Dashboard/FastConfigurationPopup";
@@ -204,7 +204,6 @@ export default function Dashboard() {
   useEffect(() => {
     let unsubscribe;
     if (reduxUser?.uid) {
-      const { subscribeToUserUnreadCount } = require("@/firebase");
       unsubscribe = subscribeToUserUnreadCount(reduxUser.uid, (count) => {
         setNotificationCount(count || 0);
       });
