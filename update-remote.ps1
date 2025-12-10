@@ -38,3 +38,4 @@ Write-Host "New remote: $(git remote get-url origin)" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "You can now push with:" -ForegroundColor Yellow
 Write-Host "git push -u origin main" -ForegroundColor White
+

@@ -16,20 +16,20 @@ interface Testimonial {
 
 const testimonialsSeed: Testimonial[] = [
   {
+    name: "Nail Room Mani&Pedi",
+    role: "Salon Urody",
+    city: "Kraków",
+    text: "W jeden weekend zdobyłyśmy 12 nowych klientek. Mogę polecić naily.",
+    rating: 5,
+    image: "/opinions/opinion2.png",
+  },
+  {
     name: "Anna K.",
     role: "Manicurzystka",
     city: "Warszawa",
     text: "Dzięki tej platformie mam stały napływ rezerwacji. Prosty panel i świetna widoczność.",
     rating: 5,
     image: "/opinions/opinion.png",
-  },
-  {
-    name: "Marysia N.",
-    role: "Salon Urody",
-    city: "Kraków",
-    text: "W jeden weekend zdobyłyśmy 12 nowych klientek. Mogę polecić naily.",
-    rating: 5,
-    image: "/opinions/opinion2.png",
   },
   {
     name: "Katarzyna Z.",

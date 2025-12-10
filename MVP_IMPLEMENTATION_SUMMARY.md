@@ -126,3 +126,4 @@ To re-enable features after MVP launch:
 4. Verify offline functionality works
 5. Deploy to production with MVP configuration
 
+
