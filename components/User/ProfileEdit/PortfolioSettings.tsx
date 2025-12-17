@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { storage } from "@/firebase";
+import { storage, updateUser } from "@/firebase";
 import { setUser } from "@/redux/slices/user";
 import { PortfolioImage, User } from "@/types";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -75,6 +75,9 @@ export default function PortfolioSettings({ user }: { user: User }) {
         ? [...user?.portfolioImages, ...localImagesArray]
         : localImagesArray;
       dispatch(setUser({ ...user, portfolioImages: updatedImages }));
+      if (user?.uid) {
+        await updateUser(user.uid, { portfolioImages: updatedImages });
+      }
       setUploading(false);
     } catch (err: any) {
       setUploading(false);
@@ -219,7 +222,7 @@ export default function PortfolioSettings({ user }: { user: User }) {
                 value={image.text}
                 placeholder="Uzupełnij opis zdjęcia"
                 className="text-sm sm:text-base border-gray-300 border rounded-md p-2 w-full h-full"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const updatedImages = user?.portfolioImages.map(
                     (img, index) =>
                       index === i ? { ...img, text: e.target.value } : img
@@ -227,6 +230,9 @@ export default function PortfolioSettings({ user }: { user: User }) {
                   dispatch(
                     setUser({ ...user, portfolioImages: updatedImages })
                   );
+                  if (user?.uid) {
+                    await updateUser(user.uid, { portfolioImages: updatedImages });
+                  }
                 }}
               ></textarea>
             </div>

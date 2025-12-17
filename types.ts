@@ -164,3 +164,48 @@ export type EditSectionProps = {
   setSectionEditorOpen: (open: boolean) => void;
   sectionEditorOpen: boolean;
 };
+
+// Training offer types
+export type TrainingOffer = {
+  id: string;
+  title: string;
+  description: string;
+  city: string;
+  cityId: string;
+  instructor: string;
+  instructorId?: string; // User ID if created by a user
+  price: number;
+  duration: number; // in hours
+  maxParticipants?: number;
+  image?: string;
+  createdAt: number;
+  updatedAt?: number;
+  isActive: boolean;
+  isAdminCreated: boolean; // true if created by admin as example
+  contactEmail?: string;
+  contactPhone?: string;
+  requirements?: string[];
+  whatYouWillLearn?: string[];
+};
+
+// Job offer types
+export type JobOffer = {
+  id: string;
+  title: string;
+  description: string;
+  city: string;
+  cityId: string;
+  salonName: string;
+  salonId: string; // User ID of the salon
+  salary?: string;
+  employmentType?: "full-time" | "part-time" | "contract" | "internship";
+  requirements?: string[];
+  benefits?: string[];
+  createdAt: number;
+  updatedAt?: number;
+  isActive: boolean;
+  isAdminCreated: boolean; // true if created by admin as example
+  contactEmail?: string;
+  contactPhone?: string;
+  location?: string;
+};

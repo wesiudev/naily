@@ -209,6 +209,7 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 notificationCount={notificationCount}
+                user={reduxUser || user}
               />
             </div>
             

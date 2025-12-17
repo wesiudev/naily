@@ -43,6 +43,16 @@ export default function Admin() {
             description="Dodaj nowy produkt"
           />
           <AdminCard
+            href="/admin/szkolenia"
+            title="Szkolenia"
+            description="Zarządzaj ofertami szkoleń"
+          />
+          <AdminCard
+            href="/admin/kariera"
+            title="Kariera"
+            description="Zarządzaj ofertami pracy"
+          />
+          <AdminCard
             href="/admin/logout"
             title="Wyloguj"
             description="Zakończ sesję administracyjną"

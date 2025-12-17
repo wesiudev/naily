@@ -32,7 +32,7 @@ const testimonialsSeed: Testimonial[] = [
     image: "/opinions/opinion.png",
   },
   {
-    name: "Katarzyna Z.",
+    name: "Kasia Z.",
     role: "Stylistka paznokci",
     city: "Gdańsk",
     text: "Łatwe zarządzanie terminami. Polecam każdej profesjonalistce.",
@@ -75,7 +75,7 @@ const testimonialsSeed: Testimonial[] = [
     name: "Karolina M.",
     role: "Manicurzystka",
     city: "Szczecin",
-    text: "Podniosłam ceny o 15% i dalej przychodzą nowe klientki. Tu jest popyt.",
+    text: "Podniosłam ceny o 15% i dalej przychodzą nowe klientki. Jest popyt.",
     rating: 5,
     image: "/opinions/opinion8.png",
   },

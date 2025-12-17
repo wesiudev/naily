@@ -810,6 +810,59 @@ export async function fetchJobOffers() {
   const querySnapshot = await getDocs(collection(db, "offers"));
   return querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 }
+
+export async function fetchJobOffersByCity(cityId) {
+  const querySnapshot = await getDocs(
+    query(collection(db, "offers"), where("cityId", "==", cityId), where("isActive", "==", true))
+  );
+  return querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+}
+
+// Training offers functions
+export async function addTrainingOffer(trainingOffer) {
+  const trainingOfferDocRef = doc(collection(db, "trainingOffers"), trainingOffer.id);
+  await setDoc(trainingOfferDocRef, {
+    ...trainingOffer,
+    createdAt: Date.now(),
+  });
+  return trainingOfferDocRef;
+}
+
+export async function updateTrainingOffer(trainingOfferId, trainingOffer) {
+  const trainingOfferDocRef = doc(db, "trainingOffers", trainingOfferId);
+  await updateDoc(trainingOfferDocRef, {
+    ...trainingOffer,
+    updatedAt: Date.now(),
+  });
+  return trainingOfferDocRef;
+}
+
+export async function fetchTrainingOffer(trainingOfferId) {
+  const trainingOfferDocRef = doc(db, "trainingOffers", trainingOfferId);
+  const trainingOfferDoc = await getDoc(trainingOfferDocRef);
+  return trainingOfferDoc.exists()
+    ? { ...trainingOfferDoc.data(), id: trainingOfferDoc.id }
+    : null;
+}
+
+export async function fetchTrainingOffers() {
+  const querySnapshot = await getDocs(collection(db, "trainingOffers"));
+  return querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+}
+
+export async function fetchTrainingOffersByCity(cityId) {
+  const querySnapshot = await getDocs(
+    query(collection(db, "trainingOffers"), where("cityId", "==", cityId), where("isActive", "==", true))
+  );
+  return querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+}
+
+export async function deleteTrainingOffer(trainingOfferId) {
+  const trainingOfferDocRef = doc(db, "trainingOffers", trainingOfferId);
+  await deleteDoc(trainingOfferDocRef);
+}
+
+
 export async function getProduct(productId) {
   const productDocRef = doc(db, "products", productId);
   const productDoc = await getDoc(productDocRef);

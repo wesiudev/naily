@@ -1,34 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice?: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
   platforms?: string[];
 };
-import { FaDownload } from "react-icons/fa6";
 
 function DownloadApp({ pt, variant }: { pt?: string; variant?: string }) {
-  const [supportsPWA, setSupportsPWA] = useState<boolean>(false);
+  const pathname = usePathname();
   const [promptInstall, setPromptInstall] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [shouldShow, setShouldShow] = useState(false);
+  const [shouldShow, setShouldShow] = useState(true);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
-      setSupportsPWA(true);
       setPromptInstall(e as unknown as BeforeInstallPromptEvent);
     };
 
     const checkInstallation = () => {
-      // Check if app is not installed
-      if (window.matchMedia("(display-mode: browser)").matches) {
-        setShouldShow(true);
-      } else {
-        setShouldShow(false);
-      }
+      // Check if app is installed (standalone mode)
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://');
+      
+      // Show button if NOT in standalone mode (i.e., app is not installed)
+      setShouldShow(!isStandalone);
     };
 
     window.addEventListener("beforeinstallprompt", handler);
@@ -56,21 +56,24 @@ function DownloadApp({ pt, variant }: { pt?: string; variant?: string }) {
     promptInstall.prompt();
   };
 
-  if (!supportsPWA || !shouldShow) {
+  if (!shouldShow) {
     return null;
   }
 
   return (
     <>
       <button
-        className={`text-xs bg-primary-600 text-white font-semibold px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-primary-700 transition-colors duration-200 ${pt} ${variant}`}
+        className={`p-3 px-5 rounded-full border ${
+          pathname === "/login" ? "border-white" : "border-blue-700"
+        } ${
+          pathname === "/login" ? "text-white" : "text-blue-700"
+        } focus:outline-none hover:opacity-80 transition-colors duration-200 whitespace-nowrap ${pt} ${variant}`}
         id="setup_button"
         aria-label="Install app"
         title="Install app"
         onClick={onClick}
       >
-        <FaDownload className="text-sm" />
-        <span className="whitespace-nowrap">Pobierz Aplikację</span>
+        Pobierz aplikację
       </button>
     </>
   );

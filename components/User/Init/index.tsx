@@ -1,6 +1,6 @@
 "use client";
 import { auth } from "@/firebase";
-import { setUser } from "@/redux/slices/user";
+import { setUser, initialState } from "@/redux/slices/user";
 import { fetchUser } from "@/utils/fetchUser";
 import { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -14,6 +14,15 @@ export default function InitUser() {
 
   useEffect(() => {
     let unsubscribe: undefined | (() => void);
+    
+    // Clear user state when logged out
+    if (!user && !loading) {
+      dispatch(setUser(initialState.user));
+      // Clear UID cookie
+      document.cookie = "uid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      return;
+    }
+    
     if (user && !loading) {
       // Set UID cookie for server-side authentication
       document.cookie = `uid=${user.uid}; path=/; max-age=86400; SameSite=Lax`;

@@ -22,6 +22,7 @@ import {
   FaCog,
   FaPalette,
 } from "react-icons/fa";
+import { MdWork } from "react-icons/md";
 import ReservationManager from "@/components/User/Dashboard/ReservationManager";
 import AdsTab from "@/components/User/Payments/Pricing/AdsTab";
 import ServiceConfiguration from "@/components/User/Dashboard/ServiceConfiguration";
@@ -37,6 +38,7 @@ import CalendarTab from "./CalendarTab";
 import PremiumExpiredPopup from "./PremiumExpiredPopup";
 import { uploadBanner as uploadBannerUtil, uploadProfilePhoto as uploadProfilePhotoUtil } from "./bannerUtils";
 import { FaTrophy } from "react-icons/fa6";
+import JobOffersManager from "@/components/User/Dashboard/JobOffersManager";
 
 export default function DashboardContent({
   activeTab,
@@ -636,6 +638,46 @@ export default function DashboardContent({
           {hasPremiumAccess() ? (
             <CalendarTab user={user} />
           ) : null}
+        </>
+      )}
+
+      {activeTab === "joboffers" && (
+        <>
+          {user?.seek === false ? (
+            <Card className="shadow-lg rounded-2xl border-2 border-blue-100 my-6 overflow-hidden">
+              <CardHeader className="hidden md:block pt-8 pb-6 px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex items-start gap-5">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
+                      <div className="relative p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:scale-105 transition-transform">
+                        <MdWork className="text-white text-2xl" />
+                      </div>
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <CardTitle className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+                        Oferty pracy
+                      </CardTitle>
+                      <CardDescription className="text-base text-gray-600 leading-relaxed">
+                        Dodawaj i zarządzaj ofertami pracy w Twoim salonie.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2 pb-8 px-4 md:px-8">
+                <JobOffersManager user={user} />
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-sm rounded-xl">
+              <CardContent className="p-6">
+                <p className="text-center text-gray-600">
+                  Ta funkcja jest dostępna tylko dla salonów.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 

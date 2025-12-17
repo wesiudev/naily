@@ -13,9 +13,11 @@ interface City {
 export default function Logic({
   slugCity,
   variant = "stacked",
+  baseRoute = "manicure",
 }: {
   slugCity?: string;
   variant?: "inline" | "stacked";
+  baseRoute?: "manicure" | "kariera" | "szkolenia-manicure";
 }) {
   const [city, setCity] = useState<City>({
     name: "",
@@ -31,6 +33,8 @@ export default function Logic({
   const [debouncedCityName, setDebouncedCityName] = useState<string>(city.name);
   // Keep track of in-flight request to cancel stale ones
   const abortRef = useRef<AbortController | null>(null);
+  // Track if city was initialized from slugCity prop (after redirect)
+  const initializedFromSlugRef = useRef<boolean>(false);
   // Fetch cities with abort controller for cancelling previous requests
   const fetchCities = useCallback(
     async (query: string) => {
@@ -101,6 +105,14 @@ export default function Logic({
       setIsFetching(false);
       return;
     }
+    
+    // Don't fetch if city was initialized from slugCity (after redirect)
+    if (initializedFromSlugRef.current) {
+      setCurrentCitiesArray([]);
+      setIsFetching(false);
+      return;
+    }
+    
     if (debouncedCityName.length >= 2) {
       fetchCities(debouncedCityName);
     } else {
@@ -112,24 +124,84 @@ export default function Logic({
   // Prefill current city when provided
   useEffect(() => {
     if (slugCity && !city.name) {
+      initializedFromSlugRef.current = true;
       setCity({ name: slugCity, id: "" });
+      // Clear the flag after a short delay to allow normal user interaction
+      setTimeout(() => {
+        initializedFromSlugRef.current = false;
+      }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slugCity]);
 
+  // Service keywords to detect if user is searching for a service
+  const SERVICE_KEYWORDS = [
+    "manicure", "pedicure", "hybrydowy", "klasyczny", "przedłużanie",
+    "zdobienie", "nail art", "akryl", "żel", "hybryda", "szyjka",
+    "stylizacja", "paznokcie", "nail", "manicurzystka", "pedicurzystka"
+  ];
+
+  const hasServiceKeyword = (query: string): boolean => {
+    const normalized = query.toLowerCase();
+    return SERVICE_KEYWORDS.some(keyword => normalized.includes(keyword));
+  };
+
   const search = () => {
-    if (!city.name.length) {
-      toast.error("Proszę wybrać miasto.", {
+    const query = city.name.trim();
+    
+    if (!query.length) {
+      toast.error("Proszę wpisać miasto lub usługę.", {
         position: "top-center",
         draggable: true,
         autoClose: 5000,
       });
       return;
     }
-    if (city.name.length > 0) {
-      const cityLink = createLinkFromText(city.name);
-      setIsNavigating(true);
-      router.push(`/manicure/${cityLink}`);
+
+    setIsNavigating(true);
+    
+    // For Szkolenia and Kariera pages, prioritize city route over service search
+    if (baseRoute === "szkolenia-manicure" || baseRoute === "kariera") {
+      // If we have a city ID from dropdown selection, use it
+      if (city.id) {
+        router.push(`/${baseRoute}/${city.id}`);
+      } 
+      // If we have cities in the dropdown results, use the first one
+      else if (currentCitiesArray.length > 0) {
+        const matchedCity = currentCitiesArray[0];
+        router.push(`/${baseRoute}/${matchedCity.id}`);
+      }
+      // Otherwise, try to extract city from query by removing service keywords
+      else {
+        // Remove service keywords and try to find city
+        let cityQuery = query.toLowerCase();
+        for (const keyword of SERVICE_KEYWORDS) {
+          cityQuery = cityQuery.replace(new RegExp(keyword, 'gi'), '').trim();
+        }
+        // If there's still text left, try to use it as city
+        if (cityQuery.length > 0) {
+          const cityLink = createLinkFromText(cityQuery);
+          router.push(`/${baseRoute}/${cityLink}`);
+        } else {
+          // Fallback to smart search
+          router.push(`/wyniki?q=${encodeURIComponent(query)}`);
+        }
+      }
+    } else {
+      // For manicure (default) - use smart search if service keyword found
+      if (hasServiceKeyword(query)) {
+        router.push(`/wyniki?q=${encodeURIComponent(query)}`);
+      } else if (city.id) {
+        // Exact city match - go to city page based on baseRoute
+        router.push(`/${baseRoute}/${city.id}`);
+      } else if (currentCitiesArray.length > 0) {
+        // Use first dropdown result
+        const matchedCity = currentCitiesArray[0];
+        router.push(`/${baseRoute}/${matchedCity.id}`);
+      } else {
+        // Try smart search for partial matches
+        router.push(`/wyniki?q=${encodeURIComponent(query)}`);
+      }
     }
   };
   return (
@@ -144,9 +216,16 @@ export default function Logic({
               value={city.name}
               onChange={(e) => {
                 setResultSelected(false);
+                initializedFromSlugRef.current = false; // Clear flag on user input
                 setCity({ ...city, name: e.target.value });
               }}
-              placeholder={slugCity || "np. Warszawa"}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  search();
+                }
+              }}
+              placeholder={slugCity || "np. Warszawa, manicure, Warszawa manicure"}
               disabled={isNavigating}
               className="w-full bg-white border border-neutral-300 rounded-full placeholder:text-neutral-500 text-zinc-800 pl-12 pr-12 py-4 text-base focus:outline-none transition-all duration-300"
               autoComplete="off"
@@ -208,9 +287,8 @@ export default function Logic({
                         setCurrentCitiesArray([]);
                         setSuppressFetch(true);
                         setResultSelected(true);
-                        const cityLink = createLinkFromText(c.name);
                         setIsNavigating(true);
-                        router.push(`/manicure/${cityLink}`);
+                        router.push(`/${baseRoute}/${c.id}`);
                       }}
                     >
                       <div className="flex items-center justify-between">
@@ -255,9 +333,16 @@ export default function Logic({
               value={city.name}
               onChange={(e) => {
                 setResultSelected(false);
+                initializedFromSlugRef.current = false; // Clear flag on user input
                 setCity({ ...city, name: e.target.value });
               }}
-              placeholder={slugCity || "np. Warszawa"}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  search();
+                }
+              }}
+              placeholder={slugCity || "np. Warszawa, manicure, Warszawa manicure"}
               disabled={isNavigating}
               className="w-full bg-white border border-neutral-300 rounded-full placeholder:text-neutral-500 text-zinc-800 pl-16 pr-12 py-5 text-base lg:text-xl focus:outline-none transition-all duration-300"
               autoComplete="off"
@@ -319,9 +404,8 @@ export default function Logic({
                         setCurrentCitiesArray([]);
                         setSuppressFetch(true);
                         setResultSelected(true);
-                        const cityLink = createLinkFromText(c.name);
                         setIsNavigating(true);
-                        router.push(`/manicure/${cityLink}`);
+                        router.push(`/${baseRoute}/${c.id}`);
                       }}
                     >
                       <div className="flex items-center justify-between">

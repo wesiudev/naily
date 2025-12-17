@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { MdBookOnline, MdCategory, MdPhotoLibrary, MdSettings } from "react-icons/md";
+import { MdBookOnline, MdCategory, MdPhotoLibrary, MdSettings, MdWork } from "react-icons/md";
 import { FaHome, FaSignOutAlt } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import styles from "./dashboardChips.module.css";
@@ -14,6 +14,7 @@ export default function DashboardNavigation({
   activeTab,
   setActiveTab,
   notificationCount,
+  user,
 }) {
   const router = useRouter();
 
@@ -35,6 +36,8 @@ export default function DashboardNavigation({
     { id: "calendar", label: "Kalendarz", icon: MdBookOnline },
     { id: "services", label: "Cennik", icon: MdCategory },
     { id: "portfolio", label: "Galeria", icon: MdPhotoLibrary },
+    // Only show job offers tab for salons (seek === false)
+    ...(user?.seek === false ? [{ id: "joboffers", label: "Oferty pracy", icon: MdWork }] : []),
     { id: "settings", label: "Ustawienia", icon: MdSettings },
     { id: "logout", label: "Wyloguj się", icon: FaSignOutAlt },
   ];

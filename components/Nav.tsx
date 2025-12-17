@@ -26,7 +26,7 @@ import LoginRegisterPopup from "./User/LoginRegisterPopup";
 import Image from "next/image";
 import logo from "@/public/naily-logo2.png";
 import HeaderSearch from "@/components/SearchBar/HeaderSearch";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FaArrowRight, FaChevronRight } from "react-icons/fa6";
 
 declare global {
@@ -54,6 +54,7 @@ export default function Header({
 }) {
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const [loginPopupTab, setLoginPopupTab] = useState<"login" | "register">(
@@ -228,14 +229,21 @@ export default function Header({
     };
   }, [isMobileMenuOpen]);
 
-  const logout = () => {
-    signOut(auth);
-    dispatch(setUser(initialState.user));
-    
-    // Clear UID cookie
-    document.cookie = "uid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    
-    setIsMobileMenuOpen(false);
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      dispatch(setUser(initialState.user));
+      
+      // Clear UID cookie
+      document.cookie = "uid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      
+      setIsMobileMenuOpen(false);
+      
+      // Redirect to landing page
+      router.push("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const handleViewPublicProfile = () => {
@@ -294,6 +302,8 @@ export default function Header({
             pathname.includes("/pedicure/")) &&
           "bg-purple-50"
         } 
+        ${pathname.includes("/szkolenia") && "bg-purple-50"}
+        ${pathname.includes("/kariera") && "bg-purple-50"}
         ${pathname === "/influencer-program" && "bg-purple-50"}
         ${pathname === "/kreator-profilu" && "bg-white"}
         `}
@@ -459,7 +469,7 @@ export default function Header({
                           </button>
                           <button
                             onClick={handleViewPublicProfile}
-                            className={`text-sm transition-colors duration-200 font-medium whitespace-nowrap hover:opacity-80
+                            className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80
                             ${
                               pathname === "/login"
                                 ? "text-white/90"
@@ -467,7 +477,7 @@ export default function Header({
                             } flex items-center gap-2`}
                             title="Zobacz profil publiczny"
                           >
-                             <FaUser className="text-xs"/>
+                             <FaUser className="text-sm"/>
                             Moje konto
                           </button>
                         </>
@@ -475,13 +485,13 @@ export default function Header({
                         <>
                           <Link
                             href="/dashboard"
-                            className={`text-sm transition-colors duration-200 font-medium whitespace-nowrap hover:opacity-80 ${
+                            className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
                               pathname === "/login"
                                 ? "text-white/90"
                                 : "text-zinc-600"
                             } flex items-center gap-2`}
                           >
-                             <FaUser className="text-xs"/>
+                             <FaUser className="text-sm"/>
                             Moje konto
                           </Link>
                         </>
@@ -490,7 +500,7 @@ export default function Header({
                   ) : (
                     <Link
                       href="/login"
-                      className={`text-sm transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                      className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
                         pathname === "/login" ? "text-white" : "text-blue-600"
                       }`}
                     >

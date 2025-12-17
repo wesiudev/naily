@@ -17,18 +17,41 @@ import {
   FaPhone,
 } from "react-icons/fa";
 import { MdSpa } from "react-icons/md";
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck, FaUserNinja } from "react-icons/fa6";
+import { IService } from "@/types";
 import slug1 from "../../../public/slug/slug1.png";
 import slug2 from "../../../public/slug/slug2.png";
 import slug3 from "../../../public/slug/slug3.png";
 import Logic from "@/components/SearchBar/Logic";
+import UserSliderWrapper from "@/components/CityPage/UserSliderWrapper";
+import UserCard from "@/components/CityPage/UserCard";
+import { getUserById, getUsers, db } from "@/firebase";
+import { User } from "@/types";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
 export const dynamic = "force-dynamic";
 
+async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
+  try {
+    const all = (await getUsers()) as User[];
+    const bySlug = all.find(
+      (u) => (u as User & { userSlugUrl?: string })?.userSlugUrl === slug
+    );
+    if (bySlug) return bySlug as User;
+    // fallback to uid
+    const byUid = (await getUserById(slug)) as User | null;
+    return byUid || null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function ServiceCitySlug({
   params,
+  searchParams,
 }: {
   params: Promise<{ city: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const cityParam = (await params).city;
   const city = await getSingleCity(cityParam);
@@ -39,6 +62,29 @@ export default async function ServiceCitySlug({
 
   // Fetch registered users matching city
   const cityUsers = await getCityUsers(city.id);
+
+  // Pre-load user data if query parameter is present
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const userSlug = resolvedSearchParams.user as string | undefined;
+  let preloadedUser: User | null = null;
+  let preloadedPortfolio: Array<{ id: string; url?: string; title?: string }> = [];
+
+  if (userSlug) {
+    preloadedUser = await fetchUserBySlugOrUid(userSlug);
+    if (preloadedUser?.uid) {
+      try {
+        const colRef = collection(db, "users", preloadedUser.uid, "portfolio");
+        const q = query(colRef, orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        preloadedPortfolio = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+        }));
+      } catch (_) {
+        preloadedPortfolio = [];
+      }
+    }
+  }
 
   // Add promotional AD to salons array
   const salonsWithAd = [
@@ -150,61 +196,41 @@ export default async function ServiceCitySlug({
             </div>
           </div>
 
-          {/* Results grid moved here */}
+          {/* Results full-width cards */}
           {Array.isArray(cityUsers) && cityUsers.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 mb-10">
+            <div className="flex flex-col gap-6 md:gap-8 mb-10">
               {cityUsers.map(
                 (u: {
                   uid: string;
                   name: string;
                   logo?: string;
                   userSlugUrl?: string;
-                  services?: unknown[];
+                  services?: IService[];
                   portfolioImages?: unknown[];
+                  portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
                   premiumActive?: boolean;
                   seek?: boolean;
                   location?: { address?: string };
-                }) => (
-                  <Link
-                    key={u.uid}
-                    href={`/zarezerwuj/${u.userSlugUrl || u.uid}`}
-                    className="group bg-white rounded-2xl border border-neutral-200 p-4 md:p-5 hover:shadow-md transition text-left"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Image
-                        src={u.logo || "/default-user.png"}
-                        alt={u.name}
-                        width={72}
-                        height={72}
-                        className="w-16 h-16 rounded-full object-cover border"
-                      />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-baloo text-lg md:text-xl font-bold text-neutral-900 group-hover:text-blue-700 truncate">
-                            {u.name}
-                          </h3>
-                          {u?.premiumActive && (
-                            <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2.5 py-0.5 text-[10px] md:text-xs font-poppins">
-                              Premium
-                            </span>
-                          )}
-                          {u?.seek && (
-                            <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-2.5 py-0.5 text-[10px] md:text-xs font-poppins">
-                              Przyjmuje nowe klientki
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs md:text-sm text-neutral-600 truncate font-poppins">
-                          {u.location?.address || ""}
-                        </p>
-                        <p className="text-xs text-neutral-500 mt-1 font-poppins">
-                          Usługi: {u?.services?.length || 0} • Zdjęcia:{" "}
-                          {u?.portfolioImages?.length || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                )
+                  phoneNumber?: string;
+                  description?: string;
+                }) => {
+                  const isIndividualSpecialist = u.seek === true;
+                  const isSalon = u.seek === false;
+                  // Get portfolio images from either portfolioImages or portfolio field
+                  // portfolioImages uses {src: string}, portfolio uses {url: string}
+                  const getPortfolioImages = () => {
+                    if (u.portfolioImages && Array.isArray(u.portfolioImages) && u.portfolioImages.length > 0) {
+                      return u.portfolioImages.map((img: any) => ({ src: img.src || img.url }));
+                    }
+                    if (u.portfolio && Array.isArray(u.portfolio) && u.portfolio.length > 0) {
+                      return u.portfolio.map((item: any) => ({ src: item.url || item.src }));
+                    }
+                    return [];
+                  };
+                  return (
+                    <UserCard key={u.uid} user={u} cityParam={cityParam} />
+                  );
+                }
               )}
             </div>
           )}
@@ -508,6 +534,14 @@ export default async function ServiceCitySlug({
       <div className="py-20">
         <FAQ className="animate-fade-in-up" items={cityFaq} />
       </div>
+
+      {/* User Slider Wrapper */}
+      <UserSliderWrapper
+        cityUsers={cityUsers || []}
+        preloadedUser={preloadedUser}
+        preloadedPortfolio={preloadedPortfolio}
+        initialUserSlug={userSlug || null}
+      />
     </div>
   );
 }
