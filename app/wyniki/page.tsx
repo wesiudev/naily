@@ -46,3 +46,4 @@ export const metadata: Metadata = {
   description: "Znajdź najlepsze salony i specjalistki manicure w Polsce",
 };
 
+
