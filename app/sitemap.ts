@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           const slug = u?.userSlugUrl || u?.uid;
           if (!slug) return null;
           return {
-            url: `${baseUrl}/u/${slug}`,
+            url: `${baseUrl}/zarezerwuj/${slug}`,
             changeFrequency: "weekly",
             priority: 0.8,
           } as const;
@@ -49,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           const slug = c?.id || c?.name;
           if (!slug) return null;
           return {
-            url: `${baseUrl}/manicure-pedicure/${slug}`,
+            url: `${baseUrl}/manicure/${slug}`,
             changeFrequency: "weekly",
             priority: 0.6,
           } as const;

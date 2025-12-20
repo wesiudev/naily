@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Logic from "./Logic";
 import heroImage from "../../public/heroimg.png";
+import Link from "next/link";
 
 export default async function SearchBar({ slugCity }: { slugCity: string }) {
   return (
@@ -13,20 +14,44 @@ export default async function SearchBar({ slugCity }: { slugCity: string }) {
               <div className="mb-8 lg:mb-20">
                 <h1 className="font-baloo text-4xl xl:text-5xl font-bold text-zinc-800 mb-4 leading-tight">
                   <span className="inline-block animate-fade-in-up relative">
+                    Mniej wiadomości, więcej klientek
+                  </span>
+                  {/* <span className="inline-block animate-fade-in-up relative">
                     Manicure
                   </span>
                   <span className="inline-block animate-fade-in-up animation-delay-200 ml-2">
                     w Twojej okolicy
-                  </span>
+                  </span> */}
                 </h1>
-                <p className="text-black text-lg animate-fade-in-up animation-delay-400 mt-4 font-poppins">
-                  Znajdź najlepsze stylistki manicure i pedicure
+                <p className="text-black text-lg animate-fade-in-up animation-delay-400 mb-4 font-poppins">
+                  Klientki widzą ceny i wolne terminy, zanim napiszą.
                 </p>
+                
+                <div className="font-poppins text-sm gap-2 flex flex-row items-center">
+
+                <div className="rounded-full px-2 py-1 bg-blue-400 text-white">
+                  rezerwacje
+                </div>
+                <div className="rounded-full px-2 py-1 bg-green-400 text-white">
+                  szkolenia
+                </div>
+                <div className="rounded-full px-2 py-1 bg-purple-400 text-white">
+                  kariera
+                </div>
+
+                </div>
               </div>
 
               {/* Search logic with enhanced animations */}
               <div className="animate-fade-in-up animation-delay-800">
-                <Logic slugCity={slugCity} />
+                {/* <Logic slugCity={slugCity} /> */}
+                <Link
+            href="/kreator-profilu"
+            className="block w-full text-center lg:w-max lg:max-w-full rounded-full font-semibold p-3 text-base bg-blue-600 text-white hover:bg-blue-700 transition-all px-6 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            Załóż konto i stwórz cennik
+          </Link>
+                
               </div>
             </div>
           </div>

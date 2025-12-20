@@ -199,8 +199,9 @@ export default function Logic({
         const matchedCity = currentCitiesArray[0];
         router.push(`/${baseRoute}/${matchedCity.id}`);
       } else {
-        // Try smart search for partial matches
-        router.push(`/wyniki?q=${encodeURIComponent(query)}`);
+        // Try to create city link from query and go to city page
+        const cityLink = createLinkFromText(query);
+        router.push(`/${baseRoute}/${cityLink}`);
       }
     }
   };

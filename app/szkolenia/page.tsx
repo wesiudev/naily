@@ -4,7 +4,8 @@ import { getCities } from "@/utils/getCities";
 import { ICity } from "@/types";
 import Logic from "@/components/SearchBar/Logic";
 
-export const dynamic = "force-dynamic";
+// Enable ISR: Revalidate every 6 hours to keep city list fresh while maintaining fast static pages
+export const revalidate = 21600; // 6 hours
 
 export default async function SzkoleniaPage() {
   // Get cities excluding villages

@@ -82,13 +82,14 @@ export default function HeaderSearch({
       toast.error("Proszę wybrać miasto.");
       return;
     }
-    const cityLink = createLinkFromText(city.name);
     setIsNavigating(true);
-    router.push(`/manicure-pedicure/${cityLink}`);
+    // Use city.id if available (from dropdown selection), otherwise create link from name
+    const citySlug = city.id || createLinkFromText(city.name);
+    router.push(`/manicure/${citySlug}`);
   };
 
   return (
-    <div className="pl-4 relative w-full md:max-w-[320px] h-full flex items-end justify-end">
+    <div className="relative w-full md:max-w-[320px] h-full flex items-end justify-end">
       <div className="gap-2 relative flex h-max">
         <input
           type="text"
@@ -187,9 +188,8 @@ export default function HeaderSearch({
                     setCurrentCitiesArray([]);
                     setSuppressFetch(true);
                     setResultSelected(true);
-                    const cityLink = createLinkFromText(c.name);
                     setIsNavigating(true);
-                    router.push(`/manicure-pedicure/${cityLink}`);
+                    router.push(`/manicure/${c.id}`);
                   }}
                 >
                   {c.name}

@@ -20,6 +20,7 @@ import {
   FaBars,
   FaChevronDown,
   FaLongArrowAltRight,
+  FaGraduationCap,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import LoginRegisterPopup from "./User/LoginRegisterPopup";
@@ -336,16 +337,9 @@ export default function Header({
                     />
                   </Link>
                 </div>
-                <button
-                  onClick={toggleMobileMenu}
-                  className={`lg:hidden mobile-menu-button p-3 px-5 rounded-full border ${
-                    pathname === "/login" ? "border-white" : "border-blue-700"
-                  } ${
-                    pathname === "/login" ? "text-white" : "text-blue-700"
-                  } focus:outline-none`}
-                >
-                  Pobierz aplikację
-                </button>
+                <div className="lg:hidden">
+                  <DownloadApp />
+                </div>
               </div>
               {/* Desktop Navigation */}
               <div className="hidden lg:flex rounded-xl p-2 h-max space-x-8 px-3 items-center">
@@ -650,7 +644,27 @@ export default function Header({
                   </Link>
 
                   <Link
-                    href="/manicure-pedicure/warszawa"
+                    href="/szkolenia"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-4 p-3.5 rounded-xl text-zinc-800 hover:bg-purple-50 hover:text-blue-700 transition-all duration-200 group"
+                  >
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors flex-shrink-0">
+                      <FaGraduationCap className="text-base text-blue-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-base block leading-tight">Szkolenia</span>
+                      <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
+                        Szkolenia instruktorek
+                      </p>
+                    </div>
+                    <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
+                  </Link>
+
+                  <Link
+                    href="/kariera"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMobileMenuOpen(false);
@@ -661,9 +675,9 @@ export default function Header({
                       <FaGem className="text-base text-blue-700" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-base block leading-tight">Usługi</span>
+                      <span className="font-semibold text-base block leading-tight">Kariera</span>
                       <p className="text-xs text-neutral-500 mt-0.5 leading-tight">
-                        Znajdź usługi manicure
+                        Oferty pracy w salonach
                       </p>
                     </div>
                     <FaChevronRight className="text-neutral-300 group-hover:text-blue-700 transition-colors flex-shrink-0 text-xs" />
