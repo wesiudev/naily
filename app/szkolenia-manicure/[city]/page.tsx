@@ -13,18 +13,8 @@ import { fetchTrainingOffersByCity } from "@/firebase";
 import { TrainingOffer } from "@/types";
 
 // Enable ISR: Revalidate every hour to keep training offers fresh while maintaining fast static pages
+// Pages are generated on-demand (on first request) and then cached - no need to pre-generate all at build time
 export const revalidate = 3600; // 1 hour
-
-// Generate static params for all cities (excluding villages) at build time
-export async function generateStaticParams() {
-  const allCities = await getCities();
-  // Filter out villages, only include cities for better SEO
-  const cities = allCities.filter((city: ICity) => city.type === "city");
-  
-  return cities.map((city: ICity) => ({
-    city: city.id,
-  }));
-}
 
 export default async function SzkoleniaCityPage({
   params,
