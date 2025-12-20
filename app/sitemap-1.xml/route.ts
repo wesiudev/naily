@@ -5,18 +5,31 @@ import { ICity } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
+export const runtime = "nodejs"; // Ensure Node.js runtime for server-side functions
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
 
-  const [users, posts, allCities] = await Promise.all([
-    getUsers().catch(() => []),
-    // Prefer API list with real posts if available; fall back to samples util
-    fetch(`${baseUrl}/api/posts/list`)
-      .then((r) => r.json())
-      .catch(() => []),
-    getCities().catch(() => []),
-  ]);
+    // Use Promise.allSettled to prevent one failure from breaking the entire sitemap
+    const [usersResult, postsResult, citiesResult] = await Promise.allSettled([
+      getUsers(),
+      // Prefer API list with real posts if available; fall back to samples util
+      fetch(`${baseUrl}/api/posts/list`, {
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      })
+        .then((r) => {
+          if (!r.ok) return [];
+          return r.json();
+        })
+        .catch(() => []),
+      getCities(),
+    ]);
+
+    const users = usersResult.status === "fulfilled" ? usersResult.value : [];
+    const posts = postsResult.status === "fulfilled" ? postsResult.value : [];
+    const allCities = citiesResult.status === "fulfilled" ? citiesResult.value : [];
 
   // Filter out villages, only include cities (matching the page behavior)
   const cities = Array.isArray(allCities)
@@ -51,7 +64,7 @@ export async function GET() {
         .filter(Boolean)
     : [];
 
-  const cityEntries = cities
+  const manicureCityEntries = cities
     .map((c: ICity) => {
       const slug = c?.id || c?.name;
       if (!slug) return null;
@@ -99,7 +112,7 @@ ${postEntries
   </url>`
   )
   .join("\n")}
-${cityEntries
+${manicureCityEntries
   .map(
     (entry: any) => `  <url>
     <loc>${entry.url}</loc>
@@ -110,11 +123,30 @@ ${cityEntries
   .join("\n")}
 </urlset>`;
 
-  return new NextResponse(sitemap, {
-    headers: {
-      "Content-Type": "application/xml",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-    },
-  });
+    return new NextResponse(sitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
+  } catch (error) {
+    console.error("Error generating sitemap-1.xml:", error);
+    // Return minimal valid sitemap on error
+    const errorSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${process.env.NEXT_PUBLIC_URL || "https://naily.pl"}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1</priority>
+  </url>
+</urlset>`;
+    return new NextResponse(errorSitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+      },
+    });
+  }
 }
 

@@ -185,9 +185,9 @@ export default async function ServiceCitySlug({
       <section className="pb-20 px-6 bg-purple-50">
         <div className="container">
           <div className="mb-12">
-            <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              Najlepszy Manicure {city.name}
-            </h1>
+            <h2 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
+              Najlepszy Pedicure {city.name}
+            </h2>
             <p className="text-gray-500 max-w-2xl font-poppins font-normal">
               Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalną
               obsługą
@@ -309,7 +309,7 @@ export default async function ServiceCitySlug({
       <section className="py-20 px-6">
         <div className="container">
           <h2 className="mb-16 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 leading-tight">
-            Manicure i Pedicure {city.name}
+            Pedicure {city.name}
           </h2>
 
           {/* Enhanced Stats */}
@@ -317,7 +317,7 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug1}
-                alt={`Najlepsza jakość manicure ${city.name}`}
+                alt={`Najlepsza jakość pedicure ${city.name}`}
                 width={500}
                 height={500}
                 className="w-[350px]"
@@ -326,7 +326,7 @@ export default async function ServiceCitySlug({
                 Jakość, której możesz zaufać
               </h3>
               <p className="text-neutral-600 font-poppins font-normal">
-                Znajdź zaufaną stylistkę w swoim mieście i odkryj manicure,
+                Znajdź zaufaną stylistkę w swoim mieście i odkryj pedicure,
                 który podkreśli Twój charakter.
               </p>
             </div>
@@ -334,7 +334,7 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug2}
-                alt={`Najlepsze opinie manicure ${city.name}`}
+                alt={`Najlepsze opinie pedicure ${city.name}`}
                 width={500}
                 height={500}
                 className="w-[350px]"
@@ -344,7 +344,7 @@ export default async function ServiceCitySlug({
                 Zachwycone klientki
               </h3>
               <p className="text-neutral-600 font-poppins font-normal">
-                Setki pozytywnych opinii i tysiące zachwyconych dłoni. Sprawdź,
+                Setki pozytywnych opinii i tysiące zachwyconych stóp. Sprawdź,
                 dlaczego kobiety wybierają Naily.
               </p>
             </div>
@@ -352,7 +352,7 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug3}
-                alt={`Rezerwuj manicure ${city.name}`}
+                alt={`Rezerwuj pedicure ${city.name}`}
                 width={500}
                 height={500}
                 className="w-[350px]"
@@ -564,10 +564,10 @@ export async function generateMetadata({
   const { city } = await params;
   const cityData: ICity = await getSingleCity(city);
   return {
-    title: `Stylistki Manicure ${cityData.name} - Salony Manicure ${cityData.name}`,
-    description: `Profesjonalne salony manicure ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+    title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
+    description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
     publisher: "naily.pl",
-    url: `https://naily.pl/manicure/${cityData.id}`,
+    url: `https://naily.pl/pedicure/${cityData.id}`,
     authors: [
       {
         name: "Naily",
@@ -583,8 +583,8 @@ export async function generateMetadata({
     ],
     openGraph: {
       type: "website",
-      title: `Stylistki Manicure ${cityData.name} - Salony Manicure ${cityData.name}`,
-      description: `Profesjonalne salony manicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+      title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
+      description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
       siteName: "Naily",
       images: [
         {
@@ -596,8 +596,8 @@ export async function generateMetadata({
     twitter: {
       cardType: "summary_large_image",
       site: "@Naily",
-      title: `Stylistki Manicure ${cityData.name} - Salony Manicure ${cityData.name}`,
-      description: `Profesjonalne salony manicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+      title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
+      description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
       image: {
         url: "/pricing.png",
       },
@@ -639,3 +639,4 @@ const cityFaq: FaqItem[] = [
       "Tak, zgodnie z polityką danej specjalistki. Szczegóły znajdziesz w potwierdzeniu rezerwacji.",
   },
 ];
+

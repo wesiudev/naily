@@ -4,15 +4,17 @@ import { ICity } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
+export const runtime = "nodejs"; // Ensure Node.js runtime for server-side functions
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
 
-  const allCities = await getCities().catch(() => []);
-  // Filter out villages, only include cities (matching the page behavior)
-  const cities = Array.isArray(allCities)
-    ? allCities.filter((city: ICity) => city.type === "city")
-    : [];
+    const allCities = await getCities().catch(() => []);
+    // Filter out villages, only include cities (matching the page behavior)
+    const cities = Array.isArray(allCities)
+      ? allCities.filter((city: ICity) => city.type === "city")
+      : [];
 
   const base = [
     { url: `${baseUrl}/szkolenia`, changefreq: "weekly", priority: 0.8 },
@@ -52,11 +54,30 @@ ${cityEntries
   .join("\n")}
 </urlset>`;
 
-  return new NextResponse(sitemap, {
-    headers: {
-      "Content-Type": "application/xml",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-    },
-  });
+    return new NextResponse(sitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
+  } catch (error) {
+    console.error("Error generating sitemap-szkolenia.xml:", error);
+    // Return minimal valid sitemap on error
+    const errorSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${process.env.NEXT_PUBLIC_URL || "https://naily.pl"}/szkolenia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>`;
+    return new NextResponse(errorSitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+      },
+    });
+  }
 }
 

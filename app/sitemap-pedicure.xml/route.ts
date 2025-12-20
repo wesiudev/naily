@@ -16,16 +16,12 @@ export async function GET() {
       ? allCities.filter((city: ICity) => city.type === "city")
       : [];
 
-  const base = [
-    { url: `${baseUrl}/kariera`, changefreq: "weekly", priority: 0.8 },
-  ];
-
   const cityEntries = cities
     .map((c: ICity) => {
       const slug = c?.id || c?.name;
       if (!slug) return null;
       return {
-        url: `${baseUrl}/kariera/${slug}`,
+        url: `${baseUrl}/pedicure/${slug}`,
         changefreq: "weekly",
         priority: 0.7,
       };
@@ -34,15 +30,6 @@ export async function GET() {
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${base
-  .map(
-    (entry) => `  <url>
-    <loc>${entry.url}</loc>
-    <changefreq>${entry.changefreq}</changefreq>
-    <priority>${entry.priority}</priority>
-  </url>`
-  )
-  .join("\n")}
 ${cityEntries
   .map(
     (entry: any) => `  <url>
@@ -62,15 +49,10 @@ ${cityEntries
       },
     });
   } catch (error) {
-    console.error("Error generating sitemap-kariera.xml:", error);
+    console.error("Error generating sitemap-pedicure.xml:", error);
     // Return minimal valid sitemap on error
     const errorSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${process.env.NEXT_PUBLIC_URL || "https://naily.pl"}/kariera</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
 </urlset>`;
     return new NextResponse(errorSitemap, {
       status: 200,
