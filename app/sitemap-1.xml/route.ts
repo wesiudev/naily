@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUsers } from "@/utils/getUsers";
+import { getCities } from "@/utils/getCities";
+import { ICity } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // Revalidate every hour
@@ -7,13 +9,19 @@ export const revalidate = 3600; // Revalidate every hour
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
 
-  const [users, posts] = await Promise.all([
+  const [users, posts, allCities] = await Promise.all([
     getUsers().catch(() => []),
     // Prefer API list with real posts if available; fall back to samples util
     fetch(`${baseUrl}/api/posts/list`)
       .then((r) => r.json())
       .catch(() => []),
+    getCities().catch(() => []),
   ]);
+
+  // Filter out villages, only include cities (matching the page behavior)
+  const cities = Array.isArray(allCities)
+    ? allCities.filter((city: ICity) => city.type === "city")
+    : [];
 
   const userEntries = Array.isArray(users)
     ? users
@@ -43,6 +51,18 @@ export async function GET() {
         .filter(Boolean)
     : [];
 
+  const cityEntries = cities
+    .map((c: ICity) => {
+      const slug = c?.id || c?.name;
+      if (!slug) return null;
+      return {
+        url: `${baseUrl}/manicure/${slug}`,
+        changefreq: "weekly",
+        priority: 0.6,
+      };
+    })
+    .filter(Boolean);
+
   const base = [
     { url: `${baseUrl}/`, changefreq: "weekly", priority: 1 },
     { url: `${baseUrl}/blog`, changefreq: "weekly", priority: 0.7 },
@@ -71,6 +91,15 @@ ${userEntries
   )
   .join("\n")}
 ${postEntries
+  .map(
+    (entry: any) => `  <url>
+    <loc>${entry.url}</loc>
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>
+  </url>`
+  )
+  .join("\n")}
+${cityEntries
   .map(
     (entry: any) => `  <url>
     <loc>${entry.url}</loc>
