@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <div id="reserve">
-        <SearchBar slugCity="" />
+        <SearchBar />
       </div>
       {/* <ImageCollage /> */}
       <WhatMakesUsUniqueSection />
