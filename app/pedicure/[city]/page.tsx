@@ -15,6 +15,7 @@ import {
   FaStar,
   FaClock,
   FaPhone,
+  FaArrowRight,
 } from "react-icons/fa";
 import { MdSpa } from "react-icons/md";
 import { FaCheck, FaUserNinja } from "react-icons/fa6";
@@ -369,6 +370,64 @@ export default async function ServiceCitySlug({
           </div>
         </div>
       </section>
+      {/* Szkolenia & Kariera Section */}
+      <section className="py-12 px-6 bg-white">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            {/* Szkolenia Card */}
+            <Link
+              href={`/szkolenia-pedicure/${city.id}`}
+              className="group bg-white rounded-xl p-8 lg:p-10 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
+            >
+              <div className="flex flex-col h-full">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+                    <FaGem className="text-2xl text-purple-700" />
+                  </div>
+                  <h3 className="text-2xl lg:text-3xl font-baloo font-bold text-zinc-800 mb-3 group-hover:text-blue-600 transition-colors">
+                    Szkolenia Pedicure {city.name}
+                  </h3>
+                  <p className="text-neutral-600 text-base font-poppins leading-relaxed">
+                    Znajdź najlepsze szkolenia z pedicure w {city.name}. Profesjonalne kursy, certyfikaty i rozwój umiejętności.
+                  </p>
+                </div>
+                <div className="mt-auto pt-4">
+                  <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
+                    Sprawdź szkolenia
+                    <FaArrowRight className="text-sm" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Kariera Card */}
+            <Link
+              href={`/kariera/${city.id}`}
+              className="group bg-white rounded-xl p-8 lg:p-10 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
+            >
+              <div className="flex flex-col h-full">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                    <FaStar className="text-2xl text-blue-700" />
+                  </div>
+                  <h3 className="text-2xl lg:text-3xl font-baloo font-bold text-zinc-800 mb-3 group-hover:text-blue-600 transition-colors">
+                    Pracuj w Salonie Pedicure {city.name}
+                  </h3>
+                  <p className="text-neutral-600 text-base font-poppins leading-relaxed">
+                    Znajdź najlepsze oferty pracy w {city.name}. Profesjonalne kariery i rozwój umiejętności w branży beauty.
+                  </p>
+                </div>
+                <div className="mt-auto pt-4">
+                  <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
+                    Zobacz oferty pracy
+                    <FaArrowRight className="text-sm" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
       {/* Nearby Cities Section - distance based */}
       <section className="py-20 px-6 bg-white">
         <div className="container">
@@ -563,9 +622,11 @@ export async function generateMetadata({
 }) {
   const { city } = await params;
   const cityData: ICity = await getSingleCity(city);
+  const title = `Najlepsze stylistki i salony pedicure ${cityData.name}`;
+  const description = `Profesjonalne stylistki i salony pedicure ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
   return {
-    title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
-    description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+    title: title,
+    description: description,
     publisher: "naily.pl",
     url: `https://naily.pl/pedicure/${cityData.id}`,
     authors: [
@@ -583,8 +644,8 @@ export async function generateMetadata({
     ],
     openGraph: {
       type: "website",
-      title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
-      description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+      title: title,
+      description: description,
       siteName: "Naily",
       images: [
         {
@@ -596,8 +657,8 @@ export async function generateMetadata({
     twitter: {
       cardType: "summary_large_image",
       site: "@Naily",
-      title: `Pedicure ${cityData.name} - Salony Pedicure ${cityData.name}`,
-      description: `Profesjonalne salony pedicure w ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`,
+      title: title,
+      description: description,
       image: {
         url: "/pricing.png",
       },

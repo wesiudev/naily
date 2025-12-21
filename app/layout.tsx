@@ -49,6 +49,10 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Naily" />
         <link rel="apple-touch-icon" href="/naily-logo.png" />
         <link rel="manifest" href="/manifest.json" />
+        {/* Favicon links for better browser and search engine support */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/fav/favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className={`max-w-screen overflow-x-hidden font-body bg-white`}>
         <Script
@@ -123,6 +127,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/fav/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/naily-logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/naily-logo-big.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/naily-logo.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     siteName: "Naily",
