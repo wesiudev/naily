@@ -34,7 +34,7 @@ export async function GET(
     .slice(0, 10); // Limit to 10 results for better performance
 
   // Sort exact matches first
-  filteredCities.sort((a, b) => {
+  filteredCities.sort((a: { id: string; name: string }, b: { id: string; name: string }) => {
     const aIdMatch = a.id.toLowerCase() === query;
     const bIdMatch = b.id.toLowerCase() === query;
     const aNameMatch = a.name.toLowerCase() === query;

@@ -142,7 +142,7 @@ export async function POST(request: Request) {
     
     // Sort results: exact city matches first, then by relevance
     if (parsed.city) {
-      filteredUsers.sort((a, b) => {
+      filteredUsers.sort((a: User, b: User) => {
         const aCityLink = createLinkFromText(a.location?.address || "");
         const bCityLink = createLinkFromText(b.location?.address || "");
         const aExact = aCityLink === parsed.city;

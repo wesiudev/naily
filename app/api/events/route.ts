@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const all = (await getDocuments("events")) as any[];
     const filtered = all.filter((e) => e.userId === userId);
     // Sort by date, then by time if available
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       const dateCompare = a.date.localeCompare(b.date);
       if (dateCompare !== 0) return dateCompare;
       const timeA = a.time || "00:00";

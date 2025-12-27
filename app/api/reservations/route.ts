@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       return bySpec && byPhone;
     });
     // newest first
-    filtered.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    filtered.sort((a: any, b: any) => (a.createdAt < b.createdAt ? 1 : -1));
     return NextResponse.json(filtered);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

@@ -25,7 +25,7 @@ export async function POST(
     return NextResponse.json([]);
   } else {
     // Sort by priorityLevel (higher value = higher position), then by name
-    const sortedUsers = filteredUsers.sort((a, b) => {
+    const sortedUsers = filteredUsers.sort((a: User, b: User) => {
       const priorityA = a.priorityLevel ?? 0;
       const priorityB = b.priorityLevel ?? 0;
       if (priorityB !== priorityA) {
