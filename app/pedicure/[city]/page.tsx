@@ -2,11 +2,13 @@ import NotFound from "@/app/not-found";
 import JoinNowButton from "@/components/AdCard/JoinNowButton";
 import Link from "next/link";
 import { getCityUsers } from "@/utils/getCityUsers";
+import { getUsers as getAllUsers } from "@/utils/getUsers";
 import { ICity } from "@/types";
 import { getSingleCity } from "@/utils/getSingleCity";
 import { getCities } from "@/utils/getCities";
 import { Viewport } from "next";
 import Image from "next/image";
+import Script from "next/script";
 import RecentPosts from "@/components/Blog/RecentPosts";
 import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
 import {
@@ -29,10 +31,105 @@ import UserCard from "@/components/CityPage/UserCard";
 import { getUserById, getUsers, db } from "@/firebase";
 import { User } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { Metadata } from "next";
 
 // Enable ISR: Revalidate every hour to keep salon listings fresh while maintaining fast static pages
 // Pages are generated on-demand (on first request) and then cached - no need to pre-generate all at build time
 export const revalidate = 3600; // 1 hour
+
+// Generate JSON-LD structured data for SEO
+function generateStructuredData(city: ICity, serviceType: "manicure" | "pedicure") {
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  const serviceName = serviceType === "manicure" ? "Manicure" : "Pedicure";
+  
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#webpage`,
+        "url": `${baseUrl}/${serviceType}/${city.id}`,
+        "name": `TOP 10 PEDICURE ${city.name} - Cennik Katalog`,
+        "description": `TOP 10 najlepszych stylistek i salonów ${serviceType} ${city.name}. Pełny cennik, katalog usług i opinie.`,
+        "inLanguage": "pl-PL",
+        "isPartOf": {
+          "@id": `${baseUrl}#website`
+        },
+        "breadcrumb": {
+          "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Strona główna",
+            "item": baseUrl
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `${serviceName} ${city.name}`,
+            "item": `${baseUrl}/${serviceType}/${city.id}`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#faq`,
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Jak zarezerwować wizytę w tym mieście?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Rezerwacja wizyty na pedicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem. Szczególnie w sezonie letnim, gdy zapotrzebowanie na usługi pedicure jest większe, warto planować wizyty z kilkutygodniowym wyprzedzeniem."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Czy ceny różnią się między specjalistkami?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tak, ceny usług pedicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy pedicure klasyczny może kosztować od 50 do 90 złotych, pedicure hybrydowy od 70 do 130 złotych, a pedicure z dodatkowymi zabiegami pielęgnacyjnymi (np. peeling, masaż, parafina) od 100 do 180 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia, przedłużanie paznokci czy zabiegi pielęgnacyjne stóp."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Jak sprawdzić lokalizację salonu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu, co jest szczególnie wygodne w przypadku zabiegów pedicure. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony i łatwo dostępny."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Czy mogę zmienić termin wizyty?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu. Pamiętaj, że wczesne poinformowanie o potrzebie zmiany terminu zwiększa szanse na znalezienie dogodnego rozwiązania."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#itemlist`,
+        "name": `TOP 10 PEDICURE ${city.name} - Cennik Katalog`,
+        "description": `Lista najlepszych stylistek i salonów ${serviceType} w ${city.name}`,
+        "numberOfItems": 10,
+        "itemListElement": {
+          "@type": "ListItem",
+          "position": 1,
+          "name": `Najlepsze salony ${serviceName} w ${city.name}`
+        }
+      }
+    ]
+  };
+}
 
 async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
   try {
@@ -48,6 +145,39 @@ async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
     return null;
   }
 }
+
+const preVisitFaq: FaqItem[] = [
+  {
+    id: "prep-before-visit",
+    question: "Jak przygotować się do wizyty na pedicure?",
+    answer:
+      "Przed wizytą na pedicure warto umyć stopy, ale nie musisz ich specjalnie przygotowywać - stylistka zajmie się pełną pielęgnacją. Jeśli masz grzybicę stóp lub inne problemy skórne, poinformuj o tym stylistkę przed rozpoczęciem zabiegu. Warto przemyśleć, jaki kolor lub styl paznokci Cię interesuje - możesz przynieść zdjęcia inspiracji. Zalecamy założenie wygodnych, otwartych butów na wizytę, aby lakier mógł wyschnąć. Jeśli to możliwe, unikaj noszenia skarpetek bezpośrednio po zabiegu.",
+  },
+  {
+    id: "how-long-pedicure",
+    question: "Ile trwa wizyta na pedicure?",
+    answer:
+      "Czas trwania wizyty zależy od wybranego typu pedicure. Podstawowy pedicure klasyczny trwa zazwyczaj około 45-60 minut, pedicure hybrydowy około 60-90 minut, a pedicure z dodatkowymi zabiegami pielęgnacyjnymi (peeling, masaż, parafina) może zająć nawet 90-120 minut. Czas może się również różnić w zależności od stylistki i zakresu usługi. Warto zarezerwować sobie odpowiednią ilość czasu i cieszyć się relaksującym zabiegiem.",
+  },
+  {
+    id: "what-to-bring-pedicure",
+    question: "Czy muszę coś przynieść na wizytę?",
+    answer:
+      "Nie musisz przynosić niczego specjalnego na wizytę - stylistka ma wszystkie niezbędne narzędzia i produkty. Możesz jednak przynieść zdjęcia inspiracji, jeśli masz konkretny pomysł na wygląd paznokci. Jeśli masz własne lakiery, które chcesz użyć, możesz je przynieść, ale większość salonów ma szeroki wybór kolorów. Pamiętaj o zabraniu ze sobą wygodnych, otwartych butów oraz środków płatniczych lub możliwości płatności online.",
+  },
+  {
+    id: "hybrid-duration-pedicure",
+    question: "Jak długo utrzymuje się pedicure hybrydowy?",
+    answer:
+      "Pedicure hybrydowy utrzymuje się zazwyczaj od 3 do 4 tygodni, a nawet dłużej, ponieważ paznokcie u stóp rosną wolniej niż u rąk. Aby przedłużyć trwałość pedicure hybrydowego, unikaj długich kąpieli w gorącej wodzie, noś wygodne buty, które nie uciskają paznokci, i regularnie nawilżaj stopy. Jeśli zauważysz odklejanie się lakieru lub pękanie, skontaktuj się ze stylistką w celu korekty. Pamiętaj, że regularna pielęgnacja stóp jest ważna dla zdrowia i wyglądu.",
+  },
+  {
+    id: "first-time-visit-pedicure",
+    question: "Czy muszę umawiać się z wyprzedzeniem?",
+    answer:
+      "Zdecydowanie tak - umawianie się z wyprzedzeniem jest bardzo ważne, szczególnie jeśli chcesz wizytę u konkretnej stylistki lub w określonym terminie. Popularne stylistki mogą mieć terminy zarezerwowane nawet na kilka tygodni do przodu, szczególnie w sezonie letnim, gdy zapotrzebowanie na usługi pedicure jest większe. Rezerwacja z wyprzedzeniem daje Ci również możliwość wyboru najlepszego dla Ciebie terminu i zapewnia, że stylistka będzie miała czas na wykonanie pełnego zabiegu zgodnie z Twoimi oczekiwaniami.",
+  },
+];
 
 export default async function ServiceCitySlug({
   params,
@@ -65,6 +195,37 @@ export default async function ServiceCitySlug({
 
   // Fetch registered users matching city
   const cityUsers = await getCityUsers(city.id);
+  
+  // Fetch users without a city (empty location address)
+  const allUsers = await getAllUsers() as User[];
+  const usersWithoutCity = allUsers.filter((user: User) => {
+    const isConfigured = Boolean(user?.configured);
+    const isPublic = Boolean(user?.settings?.publicProfile ?? true);
+    const hasNoCity = !user?.location?.address || user.location.address.trim() === "";
+    return hasNoCity && isConfigured && isPublic;
+  });
+  
+  // Merge city users with users without city, assigning city name to users without city
+  const mergedUsers = [
+    ...cityUsers,
+    ...usersWithoutCity.map((user: User) => ({
+      ...user,
+      location: {
+        ...user.location,
+        address: city.name, // Assign city name from slug
+      },
+    })),
+  ];
+  
+  // Sort merged users by priorityLevel, then by name
+  const sortedMergedUsers = mergedUsers.sort((a: User, b: User) => {
+    const priorityA = a.priorityLevel ?? 0;
+    const priorityB = b.priorityLevel ?? 0;
+    if (priorityB !== priorityA) {
+      return priorityB - priorityA; // Higher priority first
+    }
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
   // Pre-load user data if query parameter is present
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -180,18 +341,28 @@ export default async function ServiceCitySlug({
         .map((x) => x.city)
     : [];
 
+  // Generate structured data for SEO
+  const structuredData = generateStructuredData(city, "pedicure");
+
   return (
     <div className="min-h-screen bg-white">
+      {/* JSON-LD Structured Data for SEO */}
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
       {/* Featured Salons Section - Modern Design */}
       <section className="pb-20 px-6 bg-purple-50">
         <div className="container">
           <div className="mb-12">
-            <h2 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              Najlepszy Pedicure {city.name}
-            </h2>
+            <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
+              TOP 10 PEDICURE {city.name} - Cennik Katalog
+            </h1>
             <p className="text-gray-500 max-w-2xl font-poppins font-normal">
               Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalną
-              obsługą
+              obsługą. Pełny cennik i katalog najlepszych stylistek w {city.name}.
             </p>
             {/* Inline search bar matching screenshot */}
             <div className="mt-6">
@@ -199,10 +370,10 @@ export default async function ServiceCitySlug({
             </div>
           </div>
 
-          {/* Results full-width cards */}
-          {Array.isArray(cityUsers) && cityUsers.length > 0 && (
+          {/* Results single column cards */}
+          {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
             <div className="flex flex-col gap-6 md:gap-8 mb-10">
-              {cityUsers.map(
+              {sortedMergedUsers.map(
                 (u: {
                   uid: string;
                   name: string;
@@ -231,7 +402,9 @@ export default async function ServiceCitySlug({
                     return [];
                   };
                   return (
-                    <UserCard key={u.uid} user={u} cityParam={cityParam} />
+                    <div key={u.uid} className="w-full">
+                      <UserCard user={u} cityParam={cityParam} />
+                    </div>
                   );
                 }
               )}
@@ -306,11 +479,131 @@ export default async function ServiceCitySlug({
           </div>
         </div>
       </section>
+
+      {/* Pedicure Hybrydowy Section */}
+      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
+        <section className="py-20 px-6 bg-white">
+          <div className="container">
+            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+              Pedicure hybrydowy w {city.name} – sprawdzone stylistki
+            </h2>
+            <div className="flex flex-col gap-6 md:gap-8">
+              {sortedMergedUsers.slice(0, 3).map((u: {
+                uid: string;
+                name: string;
+                logo?: string;
+                userSlugUrl?: string;
+                services?: IService[];
+                portfolioImages?: unknown[];
+                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
+                premiumActive?: boolean;
+                seek?: boolean;
+                location?: { address?: string };
+                phoneNumber?: string;
+                description?: string;
+              }) => (
+                <div key={u.uid} className="w-full">
+                  <UserCard user={u} cityParam={cityParam} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Najlepsze Stylistki Section */}
+      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 3 && (
+        <section className="py-20 px-6 bg-neutral-50">
+          <div className="container">
+            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+              Najlepsze stylistki paznokci w {city.name}
+            </h2>
+            <div className="flex flex-col gap-6 md:gap-8">
+              {sortedMergedUsers.slice(3, 6).map((u: {
+                uid: string;
+                name: string;
+                logo?: string;
+                userSlugUrl?: string;
+                services?: IService[];
+                portfolioImages?: unknown[];
+                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
+                premiumActive?: boolean;
+                seek?: boolean;
+                location?: { address?: string };
+                phoneNumber?: string;
+                description?: string;
+              }) => (
+                <div key={u.uid} className="w-full">
+                  <UserCard user={u} cityParam={cityParam} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Ceny Pedicure Section */}
+      <section className="py-20 px-6 bg-white">
+        <div className="container">
+          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+            Ceny pedicure w {city.name} (2026)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border border-purple-200">
+              <h3 className="text-2xl font-baloo font-bold text-purple-900 mb-4">
+                Pedicure klasyczny
+              </h3>
+              <div className="text-4xl font-bold text-purple-700 mb-2">
+                od 70 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Podstawowy pedicure z lakierem klasycznym, pielęgnacją stóp i kształtowaniem paznokci.
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border border-blue-200">
+              <h3 className="text-2xl font-baloo font-bold text-blue-900 mb-4">
+                Pedicure hybrydowy
+              </h3>
+              <div className="text-4xl font-bold text-blue-700 mb-2">
+                od 80 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Trwały pedicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 4 tygodni.
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-8 border border-pink-200">
+              <h3 className="text-2xl font-baloo font-bold text-pink-900 mb-4">
+                Pedicure z zabiegami
+              </h3>
+              <div className="text-4xl font-bold text-pink-700 mb-2">
+                od 120 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Pełny pedicure z peelingiem, masażem, parafiną i dodatkowymi zabiegami pielęgnacyjnymi.
+              </p>
+            </div>
+          </div>
+          <p className="mt-6 text-neutral-600 font-poppins text-sm text-center">
+            * Ceny mogą się różnić w zależności od stylistki, lokalizacji i zakresu usługi. Aktualny cennik znajdziesz na profilu każdej specjalistki.
+          </p>
+        </div>
+      </section>
+
+      {/* Najczęstsze Pytania Section */}
+      <section className="py-20 px-6 bg-neutral-50">
+        <div className="container">
+          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+            Najczęstsze pytania przed wizytą
+          </h2>
+          <FAQ className="animate-fade-in-up" items={preVisitFaq} />
+        </div>
+      </section>
+
       {/* City Overview Section - Enhanced */}
       <section className="py-20 px-6">
         <div className="container">
           <h2 className="mb-16 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 leading-tight">
-            Pedicure {city.name}
+            TOP 10 PEDICURE {city.name} - Cennik Katalog
           </h2>
 
           {/* Enhanced Stats */}
@@ -318,10 +611,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug1}
-                alt={`Najlepsza jakość pedicure ${city.name}`}
+                alt={`Najlepsza jakość pedicure ${city.name} - Profesjonalne usługi paznokci`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
                 Jakość, której możesz zaufać
@@ -335,10 +630,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug2}
-                alt={`Najlepsze opinie pedicure ${city.name}`}
+                alt={`Najlepsze opinie pedicure ${city.name} - Zadowolone klientki`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
@@ -353,10 +650,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug3}
-                alt={`Rezerwuj pedicure ${city.name}`}
+                alt={`Rezerwuj pedicure ${city.name} - Umów wizytę online`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
@@ -598,7 +897,7 @@ export default async function ServiceCitySlug({
 
       {/* User Slider Wrapper */}
       <UserSliderWrapper
-        cityUsers={cityUsers || []}
+        cityUsers={sortedMergedUsers || []}
         preloadedUser={preloadedUser}
         preloadedPortfolio={preloadedPortfolio}
         initialUserSlug={userSlug || null}
@@ -619,22 +918,40 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ city: string }>;
-}) {
+}): Promise<Metadata> {
   const { city } = await params;
   const cityData: ICity = await getSingleCity(city);
-  const title = `Najlepsze stylistki i salony pedicure ${cityData.name}`;
-  const description = `Profesjonalne stylistki i salony pedicure ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  const canonicalUrl = `${baseUrl}/pedicure/${cityData.id}`;
+  const title = `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`;
+  const description = `TOP 10 najlepszych stylistek i salonów pedicure ${cityData.name}. Pełny cennik, katalog usług i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const keywords = `pedicure ${cityData.name}, cennik pedicure ${cityData.name}, najlepsze salony paznokci ${cityData.name}, stylistki paznokci ${cityData.name}, pedicure hybrydowy ${cityData.name}, manicure ${cityData.name}`;
+  
   return {
     title: title,
     description: description,
-    publisher: "naily.pl",
-    url: `https://naily.pl/pedicure/${cityData.id}`,
+    keywords: keywords,
     authors: [
       {
         name: "Naily",
         url: "https://naily.pl",
       },
     ],
+    publisher: "naily.pl",
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     icons: [
       {
         url: "/fav/favicon.ico",
@@ -647,30 +964,33 @@ export async function generateMetadata({
       title: title,
       description: description,
       siteName: "Naily",
+      url: canonicalUrl,
+      locale: "pl_PL",
       images: [
         {
-          url: "/pricing.png",
+          url: `${baseUrl}/pricing.png`,
+          width: 1200,
+          height: 630,
+          alt: `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`,
           type: "image/png",
         },
       ],
     },
     twitter: {
-      cardType: "summary_large_image",
+      card: "summary_large_image",
       site: "@Naily",
       title: title,
       description: description,
-      image: {
-        url: "/pricing.png",
-      },
-    },
-    meta: [
-      {
-        name: "theme-color",
-        image: {
-          url: "/pricing.png",
+      images: [
+        {
+          url: `${baseUrl}/pricing.png`,
+          alt: `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`,
         },
-      },
-    ],
+      ],
+    },
+    other: {
+      "theme-color": "#1e40af",
+    },
   };
 }
 
@@ -679,25 +999,25 @@ const cityFaq: FaqItem[] = [
     id: "booking-city",
     question: "Jak zarezerwować wizytę w tym mieście?",
     answer:
-      "Wybierz specjalistkę z listy w Twoim mieście, sprawdź jej dostępne terminy i potwierdź rezerwację online.",
+      "Rezerwacja wizyty na pedicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem. Szczególnie w sezonie letnim, gdy zapotrzebowanie na usługi pedicure jest większe, warto planować wizyty z kilkutygodniowym wyprzedzeniem.",
   },
   {
     id: "prices-city",
     question: "Czy ceny różnią się między specjalistkami?",
     answer:
-      "Tak, ceny ustalane są indywidualnie. Aktualny cennik znajdziesz na profilu każdej specjalistki.",
+      "Tak, ceny usług pedicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy pedicure klasyczny może kosztować od 50 do 90 złotych, pedicure hybrydowy od 70 do 130 złotych, a pedicure z dodatkowymi zabiegami pielęgnacyjnymi (np. peeling, masaż, parafina) od 100 do 180 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia, przedłużanie paznokci czy zabiegi pielęgnacyjne stóp.",
   },
   {
     id: "location-city",
     question: "Jak sprawdzić lokalizację salonu?",
     answer:
-      "Adres i wskazówki dojazdu są widoczne na profilu specjalistki, często z mapą i informacją o parkingu.",
+      "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu, co jest szczególnie wygodne w przypadku zabiegów pedicure. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony i łatwo dostępny.",
   },
   {
     id: "change-city",
     question: "Czy mogę zmienić termin wizyty?",
     answer:
-      "Tak, zgodnie z polityką danej specjalistki. Szczegóły znajdziesz w potwierdzeniu rezerwacji.",
+      "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu. Pamiętaj, że wczesne poinformowanie o potrzebie zmiany terminu zwiększa szanse na znalezienie dogodnego rozwiązania.",
   },
 ];
 

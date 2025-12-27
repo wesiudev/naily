@@ -53,6 +53,11 @@ export default function Admin() {
             description="Zarządzaj ofertami pracy"
           />
           <AdminCard
+            href="/admin/profiles"
+            title="Profile"
+            description="Zarządzaj profilami użytkowników"
+          />
+          <AdminCard
             href="/admin/logout"
             title="Wyloguj"
             description="Zakończ sesję administracyjną"

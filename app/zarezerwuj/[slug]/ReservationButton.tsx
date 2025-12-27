@@ -43,10 +43,10 @@ export default function ReservationButton({ user, preselectedService = null, onM
     <>
       <button
         onClick={handleOpen}
-        className="group relative px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-primary-700 hover:scale-105 shadow-lg hover:shadow-xl w-full sm:w-auto mt-4 flex items-center justify-center"
+        className="group relative px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-poppins font-semibold text-sm md:text-base transition-all duration-200 hover:from-purple-700 hover:to-blue-700 active:scale-95 shadow-md hover:shadow-lg w-full flex items-center justify-center gap-2"
       >
-        <FaCalendarAlt className="text-sm mr-2" />
-        Zarezerwuj wizytę
+        <FaCalendarAlt className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+        <span>Zarezerwuj wizytę</span>
       </button>
 
       <ReservationModal

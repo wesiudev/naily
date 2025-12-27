@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 import {
   FaMapMarkerAlt,
   FaPhone,
@@ -14,6 +15,7 @@ import {
   FaUser,
   FaBuilding,
   FaGem,
+  FaExternalLinkAlt,
 } from "react-icons/fa";
 import { MdSpa } from "react-icons/md";
 import { FaUserNinja } from "react-icons/fa6";
@@ -45,70 +47,180 @@ export function UserProfileHero({
   const isIndividualSpecialist = user.seek === true;
   const isSalon = user.seek === false;
   
+  // Determine banner image source: bannerUrl > portfolio[0] > gradient
+  const bannerImage = user.bannerUrl || (portfolio.length > 0 ? portfolio[0].url : null);
+  const bannerHeight = isFullPage ? "h-[40vh] min-h-[200px] max-h-[400px]" : "h-48 md:h-56";
+  
   return (
     <div
       className={`bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden transition-all duration-300 hover:shadow-xl ${
         isFullPage ? "mb-8" : "mb-6"
       }`}
     >
-      {/* Featured Image Banner - Show first portfolio image or gradient */}
-      {portfolio.length > 0 && isFullPage && (
-        <div className="relative h-48 md:h-64 bg-gradient-to-r from-purple-50 via-blue-50 to-purple-50 overflow-hidden">
-          <Image
-            src={portfolio[0].url || ""}
-            alt={`${user.name} featured`}
-            fill
-            className="object-cover opacity-60"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        </div>
-      )}
-      
-      <div className={`p-6 md:p-8 ${isFullPage && portfolio.length > 0 ? "pt-8 md:pt-12" : ""}`}>
-        <div className="flex flex-col md:flex-row md:items-start gap-6">
-          {/* Avatar */}
-          <div className={`relative shrink-0 ${isFullPage && portfolio.length > 0 ? "-mt-16 md:-mt-20" : ""}`}>
-            <div className="relative">
-              <Image
-                src={user.logo || "/default-user.png"}
-                alt={user.name}
-                width={160}
-                height={160}
-                className={`${
+      {/* Banner Image Section */}
+      <div className={`relative w-full overflow-hidden bg-gradient-to-br ${
+        bannerImage 
+          ? "from-purple-100 via-blue-100 to-purple-100" 
+          : "from-purple-50 via-blue-50 to-purple-50"
+      }`}>
+        {bannerImage ? (
+          <div className={`relative w-full ${bannerHeight}`}>
+            <Image
+              src={bannerImage}
+              alt={`${user.name} banner`}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
+            
+            {/* Avatar - Positioned at top-left of banner */}
+            <div className={`absolute z-10 ${
+              isFullPage 
+                ? "top-4 md:top-6 left-4 md:left-6" 
+                : "top-3 md:top-4 left-3 md:left-4"
+            }`}>
+              <div className="relative">
+                <div className={`relative ${
                   isFullPage
                     ? "w-32 h-32 md:w-40 md:h-40"
-                    : "w-28 h-28 md:w-32 md:h-32"
-                } rounded-full object-cover border-4 border-white shadow-xl`}
-              />
-              {(user?.subscription?.status === "active" ||
-                user?.premiumActive ||
-                user?.active) && (
-                <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-2 shadow-lg">
-                  <FaCheckCircle className="w-5 h-5" />
+                    : "w-24 h-24 md:w-28 md:h-28"
+                }`}>
+                  <Image
+                    src={user.logo || "/default-user.png"}
+                    alt={user.name}
+                    fill
+                    className="rounded-full object-cover border-4 border-white shadow-xl"
+                    sizes="(max-width: 768px) 96px, 160px"
+                  />
+                  {(user?.subscription?.status === "active" ||
+                    user?.premiumActive ||
+                    user?.active) && (
+                    <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1.5 md:p-2 shadow-lg z-10">
+                      <FaCheckCircle className="w-4 h-4 md:w-5 md:h-5" />
+                    </div>
+                  )}
+                  {user?.premiumActive && (
+                    <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1 md:p-1.5 shadow-lg z-10">
+                      <FaGem className="w-3 h-3 md:w-4 md:h-4 text-yellow-900" />
+                    </div>
+                  )}
                 </div>
-              )}
-              {user?.premiumActive && (
-                <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1.5 shadow-lg">
-                  <FaGem className="w-4 h-4 text-yellow-900" />
+              </div>
+            </div>
+
+            {/* Buttons - Positioned at bottom of banner */}
+            <div className="absolute bottom-4 md:bottom-6 left-3 md:left-4 right-3 md:right-4 z-10">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                <div className="flex-1 min-w-0">
+                  <ReservationButton user={user} onModalOpen={onReservationOpen} />
                 </div>
-              )}
+                {user.userSlugUrl || user.uid ? (
+                  <Link
+                    href={`/zarezerwuj/${user.userSlugUrl || user.uid}`}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-6 md:py-3 rounded-lg border-2 border-white bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white hover:border-blue-700 active:bg-white transition-all duration-200 font-poppins font-semibold text-sm md:text-base shadow-lg hover:shadow-xl whitespace-nowrap flex-shrink-0 w-full sm:w-auto"
+                  >
+                    <span className="hidden sm:inline">
+                      {isIndividualSpecialist
+                        ? "Pokaż profil specjalistki"
+                        : isSalon
+                          ? "Pokaż profil salonu"
+                          : "Pokaż profil"}
+                    </span>
+                    <span className="sm:hidden">Profil</span>
+                    <FaExternalLinkAlt className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
-          
+        ) : (
+          <div className={`relative w-full ${bannerHeight} flex items-center justify-center`}>
+            <div className="text-center opacity-30">
+              <FaImages className="w-16 h-16 text-neutral-400 mx-auto mb-3" />
+            </div>
+            
+            {/* Avatar - Positioned at top-left of banner (fallback) */}
+            <div className={`absolute z-10 ${
+              isFullPage 
+                ? "top-4 md:top-6 left-4 md:left-6" 
+                : "top-3 md:top-4 left-3 md:left-4"
+            }`}>
+              <div className="relative">
+                <div className={`relative ${
+                  isFullPage
+                    ? "w-32 h-32 md:w-40 md:h-40"
+                    : "w-24 h-24 md:w-28 md:h-28"
+                }`}>
+                  <Image
+                    src={user.logo || "/default-user.png"}
+                    alt={user.name}
+                    fill
+                    className="rounded-full object-cover border-4 border-white shadow-xl"
+                    sizes="(max-width: 768px) 96px, 160px"
+                  />
+                  {(user?.subscription?.status === "active" ||
+                    user?.premiumActive ||
+                    user?.active) && (
+                    <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1.5 md:p-2 shadow-lg z-10">
+                      <FaCheckCircle className="w-4 h-4 md:w-5 md:h-5" />
+                    </div>
+                  )}
+                  {user?.premiumActive && (
+                    <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1 md:p-1.5 shadow-lg z-10">
+                      <FaGem className="w-3 h-3 md:w-4 md:h-4 text-yellow-900" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Buttons - Positioned at bottom of banner (fallback) */}
+            <div className="absolute bottom-4 md:bottom-6 left-3 md:left-4 right-3 md:right-4 z-10">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                <div className="flex-1 min-w-0">
+                  <ReservationButton user={user} onModalOpen={onReservationOpen} />
+                </div>
+                {user.userSlugUrl || user.uid ? (
+                  <Link
+                    href={`/zarezerwuj/${user.userSlugUrl || user.uid}`}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-6 md:py-3 rounded-lg border-2 border-white bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white hover:border-blue-700 active:bg-white transition-all duration-200 font-poppins font-semibold text-sm md:text-base shadow-lg hover:shadow-xl whitespace-nowrap flex-shrink-0 w-full sm:w-auto"
+                  >
+                    <span className="hidden sm:inline">
+                      {isIndividualSpecialist
+                        ? "Pokaż profil specjalistki"
+                        : isSalon
+                          ? "Pokaż profil salonu"
+                          : "Pokaż profil"}
+                    </span>
+                    <span className="sm:hidden">Profil</span>
+                    <FaExternalLinkAlt className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Content Card */}
+      <div className="relative">
+        <div className={`bg-white rounded-xl shadow-sm ${isFullPage ? "p-6 md:p-8" : "p-4 md:p-6"}`}>
           {/* Content */}
-          <div className="flex-1 mt-4 md:mt-0">
-            <div className="flex flex-wrap items-center gap-3 mb-3">
-              <h1 className={`font-baloo font-bold text-neutral-900 break-words w-full sm:w-auto ${
+          <div>
+            {/* Name and Verification */}
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3">
+              <h1 className={`font-baloo font-bold text-neutral-900 break-words ${
                 isFullPage
-                  ? "text-2xl md:text-3xl"
+                  ? "text-2xl md:text-3xl lg:text-4xl"
                   : "text-xl md:text-2xl"
               }`}>
                 {user.name}
               </h1>
               {user.emailVerified && (
                 <FaCheckCircle
-                  className="text-blue-600 w-6 h-6 flex-shrink-0"
+                  className="text-blue-600 w-5 h-5 md:w-6 md:h-6 flex-shrink-0"
                   title="Zweryfikowany email"
                 />
               )}
@@ -117,25 +229,25 @@ export function UserProfileHero({
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {isIndividualSpecialist ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 text-purple-700 px-4 py-1.5 text-sm font-poppins font-medium">
-                  <FaUserNinja className="w-4 h-4" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 text-purple-700 px-3 py-1 md:px-4 md:py-1.5 text-xs md:text-sm font-poppins font-medium">
+                  <FaUserNinja className="w-3 h-3 md:w-4 md:h-4" />
                   Specjalistka
                 </span>
               ) : isSalon ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 text-blue-700 px-4 py-1.5 text-sm font-poppins font-medium">
-                  <MdSpa className="w-4 h-4" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 text-blue-700 px-3 py-1 md:px-4 md:py-1.5 text-xs md:text-sm font-poppins font-medium">
+                  <MdSpa className="w-3 h-3 md:w-4 md:h-4" />
                   Salon
                 </span>
               ) : null}
               
               {user?.premiumActive && (
-                <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-4 py-1.5 text-sm font-poppins font-medium">
+                <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-3 py-1 md:px-4 md:py-1.5 text-xs md:text-sm font-poppins font-medium">
                   Premium
                 </span>
               )}
               
               {user?.seek && (
-                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-4 py-1.5 text-sm font-poppins font-medium">
+                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 md:px-4 md:py-1.5 text-xs md:text-sm font-poppins font-medium">
                   Przyjmuje nowe klientki
                 </span>
               )}
@@ -150,34 +262,29 @@ export function UserProfileHero({
             )}
             
             {/* Stats */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-xl border border-blue-100">
-                <FaStar className="text-blue-600 w-4 h-4 flex-shrink-0" />
-                <span className="text-blue-700 font-semibold text-sm font-poppins whitespace-nowrap">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
+              <div className="flex items-center gap-2 px-2.5 py-1 md:px-3 md:py-1.5 bg-blue-50 rounded-xl border border-blue-100">
+                <FaStar className="text-blue-600 w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                <span className="text-blue-700 font-semibold text-xs md:text-sm font-poppins whitespace-nowrap">
                   {user.services?.length || 0} usług
                 </span>
               </div>
               {portfolio.length > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-xl border border-purple-100">
-                  <FaImages className="text-purple-600 w-4 h-4 flex-shrink-0" />
-                  <span className="text-purple-700 font-semibold text-sm font-poppins whitespace-nowrap">
+                <div className="flex items-center gap-2 px-2.5 py-1 md:px-3 md:py-1.5 bg-purple-50 rounded-xl border border-purple-100">
+                  <FaImages className="text-purple-600 w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                  <span className="text-purple-700 font-semibold text-xs md:text-sm font-poppins whitespace-nowrap">
                     {portfolio.length} zdjęć
                   </span>
                 </div>
               )}
               {user.profileComments && user.profileComments.length > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-xl border border-green-100">
-                  <FaStar className="text-green-600 w-4 h-4 flex-shrink-0" />
-                  <span className="text-green-700 font-semibold text-sm font-poppins whitespace-nowrap">
+                <div className="flex items-center gap-2 px-2.5 py-1 md:px-3 md:py-1.5 bg-green-50 rounded-xl border border-green-100">
+                  <FaStar className="text-green-600 w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                  <span className="text-green-700 font-semibold text-xs md:text-sm font-poppins whitespace-nowrap">
                     {user.profileComments.length} opinii
                   </span>
                 </div>
               )}
-            </div>
-            
-            {/* Reservation Button */}
-            <div className="mt-6">
-              <ReservationButton user={user} onModalOpen={onReservationOpen} />
             </div>
           </div>
         </div>

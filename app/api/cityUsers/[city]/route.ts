@@ -24,8 +24,18 @@ export async function POST(
   if (filteredUsers.length === 0) {
     return NextResponse.json([]);
   } else {
+    // Sort by priorityLevel (higher value = higher position), then by name
+    const sortedUsers = filteredUsers.sort((a, b) => {
+      const priorityA = a.priorityLevel ?? 0;
+      const priorityB = b.priorityLevel ?? 0;
+      if (priorityB !== priorityA) {
+        return priorityB - priorityA; // Higher priority first
+      }
+      return (a.name || "").localeCompare(b.name || "");
+    });
+
     return NextResponse.json(
-      filteredUsers.map((user: User) => ({ ...user, email: "hidden" }))
+      sortedUsers.map((user: User) => ({ ...user, email: "hidden" }))
     );
   }
 }

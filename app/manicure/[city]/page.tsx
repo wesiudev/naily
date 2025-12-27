@@ -2,11 +2,13 @@ import NotFound from "@/app/not-found";
 import JoinNowButton from "@/components/AdCard/JoinNowButton";
 import Link from "next/link";
 import { getCityUsers } from "@/utils/getCityUsers";
+import { getUsers as getAllUsers } from "@/utils/getUsers";
 import { ICity } from "@/types";
 import { getSingleCity } from "@/utils/getSingleCity";
 import { getCities } from "@/utils/getCities";
 import { Viewport } from "next";
 import Image from "next/image";
+import Script from "next/script";
 import RecentPosts from "@/components/Blog/RecentPosts";
 import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
 import {
@@ -29,10 +31,105 @@ import UserCard from "@/components/CityPage/UserCard";
 import { getUserById, getUsers, db } from "@/firebase";
 import { User } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { Metadata } from "next";
 
 // Enable ISR: Revalidate every hour to keep salon listings fresh while maintaining fast static pages
 // Pages are generated on-demand (on first request) and then cached - no need to pre-generate all at build time
 export const revalidate = 3600; // 1 hour
+
+// Generate JSON-LD structured data for SEO
+function generateStructuredData(city: ICity, serviceType: "manicure" | "pedicure") {
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  const serviceName = serviceType === "manicure" ? "Manicure" : "Pedicure";
+  
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#webpage`,
+        "url": `${baseUrl}/${serviceType}/${city.id}`,
+        "name": `TOP 10 MANICURE ${city.name} - Cennik Katalog`,
+        "description": `TOP 10 najlepszych stylistek i salonów ${serviceType} ${city.name}. Pełny cennik, katalog usług i opinie.`,
+        "inLanguage": "pl-PL",
+        "isPartOf": {
+          "@id": `${baseUrl}#website`
+        },
+        "breadcrumb": {
+          "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Strona główna",
+            "item": baseUrl
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": `${serviceName} ${city.name}`,
+            "item": `${baseUrl}/${serviceType}/${city.id}`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#faq`,
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Jak zarezerwować wizytę w tym mieście?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Czy ceny różnią się między specjalistkami?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tak, ceny usług manicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy manicure klasyczny może kosztować od 40 do 80 złotych, manicure hybrydowy od 60 do 120 złotych, a przedłużanie paznokci od 100 do 200 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia czy przedłużanie paznokci."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Jak sprawdzić lokalizację salonu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Czy mogę zmienić termin wizyty?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${baseUrl}/${serviceType}/${city.id}#itemlist`,
+        "name": `TOP 10 MANICURE ${city.name} - Cennik Katalog`,
+        "description": `Lista najlepszych stylistek i salonów ${serviceType} w ${city.name}`,
+        "numberOfItems": 10,
+        "itemListElement": {
+          "@type": "ListItem",
+          "position": 1,
+          "name": `Najlepsze salony ${serviceName} w ${city.name}`
+        }
+      }
+    ]
+  };
+}
 
 async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
   try {
@@ -48,6 +145,39 @@ async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
     return null;
   }
 }
+
+const preVisitFaq: FaqItem[] = [
+  {
+    id: "prep-before-visit",
+    question: "Jak przygotować się do wizyty na manicure?",
+    answer:
+      "Przed wizytą na manicure warto usunąć stary lakier z paznokci, jeśli masz. Nie musisz obcinać paznokci - stylistka zrobi to za Ciebie. Jeśli masz jakiekolwiek problemy skórne wokół paznokci, poinformuj o tym stylistkę przed rozpoczęciem zabiegu. Warto również przemyśleć, jaki kolor lub styl paznokci Cię interesuje - możesz przynieść zdjęcia inspiracji. Pamiętaj, aby przyjść na wizytę z czystymi dłońmi.",
+  },
+  {
+    id: "how-long-manicure",
+    question: "Ile trwa wizyta na manicure?",
+    answer:
+      "Czas trwania wizyty zależy od wybranego typu manicure. Podstawowy manicure klasyczny trwa zazwyczaj około 30-45 minut, manicure hybrydowy około 60-90 minut, a przedłużanie paznokci może zająć nawet 2-3 godziny. Czas może się również różnić w zależności od stylistki i zakresu usługi. Warto zarezerwować sobie odpowiednią ilość czasu i nie planować innych pilnych spraw zaraz po wizycie.",
+  },
+  {
+    id: "what-to-bring",
+    question: "Czy muszę coś przynieść na wizytę?",
+    answer:
+      "Nie musisz przynosić niczego specjalnego na wizytę - stylistka ma wszystkie niezbędne narzędzia i produkty. Możesz jednak przynieść zdjęcia inspiracji, jeśli masz konkretny pomysł na wygląd paznokci. Jeśli masz własne lakiery, które chcesz użyć, możesz je przynieść, ale większość salonów ma szeroki wybór kolorów. Pamiętaj tylko o zabraniu ze sobą środków płatniczych lub możliwości płatności online.",
+  },
+  {
+    id: "hybrid-duration",
+    question: "Jak długo utrzymuje się manicure hybrydowy?",
+    answer:
+      "Manicure hybrydowy utrzymuje się zazwyczaj od 2 do 3 tygodni, w zależności od tempa wzrostu paznokci i sposobu pielęgnacji. Aby przedłużyć trwałość manicure hybrydowego, unikaj agresywnych środków chemicznych, używaj rękawiczek podczas prac domowych i regularnie nawilżaj dłonie i skórki. Jeśli zauważysz odklejanie się lakieru lub pękanie, skontaktuj się ze stylistką w celu korekty.",
+  },
+  {
+    id: "first-time-visit",
+    question: "Czy muszę umawiać się z wyprzedzeniem?",
+    answer:
+      "Zdecydowanie tak - umawianie się z wyprzedzeniem jest bardzo ważne, szczególnie jeśli chcesz wizytę u konkretnej stylistki lub w określonym terminie. Popularne stylistki mogą mieć terminy zarezerwowane nawet na kilka tygodni do przodu. Rezerwacja z wyprzedzeniem daje Ci również możliwość wyboru najlepszego dla Ciebie terminu i zapewnia, że stylistka będzie miała czas na wykonanie usługi zgodnie z Twoimi oczekiwaniami.",
+  },
+];
 
 export default async function ServiceCitySlug({
   params,
@@ -65,6 +195,37 @@ export default async function ServiceCitySlug({
 
   // Fetch registered users matching city
   const cityUsers = await getCityUsers(city.id);
+  
+  // Fetch users without a city (empty location address)
+  const allUsers = await getAllUsers() as User[];
+  const usersWithoutCity = allUsers.filter((user: User) => {
+    const isConfigured = Boolean(user?.configured);
+    const isPublic = Boolean(user?.settings?.publicProfile ?? true);
+    const hasNoCity = !user?.location?.address || user.location.address.trim() === "";
+    return hasNoCity && isConfigured && isPublic;
+  });
+  
+  // Merge city users with users without city, assigning city name to users without city
+  const mergedUsers = [
+    ...cityUsers,
+    ...usersWithoutCity.map((user: User) => ({
+      ...user,
+      location: {
+        ...user.location,
+        address: city.name, // Assign city name from slug
+      },
+    })),
+  ];
+  
+  // Sort merged users by priorityLevel, then by name
+  const sortedMergedUsers = mergedUsers.sort((a: User, b: User) => {
+    const priorityA = a.priorityLevel ?? 0;
+    const priorityB = b.priorityLevel ?? 0;
+    if (priorityB !== priorityA) {
+      return priorityB - priorityA; // Higher priority first
+    }
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
   // Pre-load user data if query parameter is present
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -180,18 +341,28 @@ export default async function ServiceCitySlug({
         .map((x) => x.city)
     : [];
 
+  // Generate structured data for SEO
+  const structuredData = generateStructuredData(city, "manicure");
+
   return (
     <div className="min-h-screen bg-white">
+      {/* JSON-LD Structured Data for SEO */}
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
       {/* Featured Salons Section - Modern Design */}
       <section className="pb-20 px-6 bg-purple-50">
         <div className="container">
           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              Najlepszy Manicure {city.name}
+              TOP 10 MANICURE {city.name} - Cennik Katalog
             </h1>
             <p className="text-gray-500 max-w-2xl font-poppins font-normal">
               Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalną
-              obsługą
+              obsługą. Pełny cennik i katalog najlepszych stylistek w {city.name}.
             </p>
             {/* Inline search bar matching screenshot */}
             <div className="mt-6">
@@ -199,10 +370,10 @@ export default async function ServiceCitySlug({
             </div>
           </div>
 
-          {/* Results full-width cards */}
-          {Array.isArray(cityUsers) && cityUsers.length > 0 && (
-            <div className="flex flex-col gap-6 md:gap-8 mb-10">
-              {cityUsers.map(
+          {/* Results responsive grid cards */}
+          {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10">
+              {sortedMergedUsers.map(
                 (u: {
                   uid: string;
                   name: string;
@@ -306,11 +477,127 @@ export default async function ServiceCitySlug({
           </div>
         </div>
       </section>
+
+      {/* Manicure Hybrydowy Section */}
+      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
+        <section className="py-20 px-6 bg-white">
+          <div className="container">
+            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+              Manicure hybrydowy w {city.name} – sprawdzone stylistki
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {sortedMergedUsers.slice(0, 3).map((u: {
+                uid: string;
+                name: string;
+                logo?: string;
+                userSlugUrl?: string;
+                services?: IService[];
+                portfolioImages?: unknown[];
+                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
+                premiumActive?: boolean;
+                seek?: boolean;
+                location?: { address?: string };
+                phoneNumber?: string;
+                description?: string;
+              }) => (
+                <UserCard key={u.uid} user={u} cityParam={cityParam} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Najlepsze Stylistki Section */}
+      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 3 && (
+        <section className="py-20 px-6 bg-neutral-50">
+          <div className="container">
+            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+              Najlepsze stylistki paznokci w {city.name}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {sortedMergedUsers.slice(3, 6).map((u: {
+                uid: string;
+                name: string;
+                logo?: string;
+                userSlugUrl?: string;
+                services?: IService[];
+                portfolioImages?: unknown[];
+                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
+                premiumActive?: boolean;
+                seek?: boolean;
+                location?: { address?: string };
+                phoneNumber?: string;
+                description?: string;
+              }) => (
+                <UserCard key={u.uid} user={u} cityParam={cityParam} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Ceny Manicure Section */}
+      <section className="py-20 px-6 bg-white">
+        <div className="container">
+          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+            Ceny manicure w {city.name} (2026)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border border-purple-200">
+              <h3 className="text-2xl font-baloo font-bold text-purple-900 mb-4">
+                Manicure klasyczny
+              </h3>
+              <div className="text-4xl font-bold text-purple-700 mb-2">
+                od 70 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Podstawowy manicure z lakierem klasycznym, pielęgnacją skórek i kształtowaniem paznokci.
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border border-blue-200">
+              <h3 className="text-2xl font-baloo font-bold text-blue-900 mb-4">
+                Manicure hybrydowy
+              </h3>
+              <div className="text-4xl font-bold text-blue-700 mb-2">
+                od 80 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Trwały manicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 3 tygodni.
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-8 border border-pink-200">
+              <h3 className="text-2xl font-baloo font-bold text-pink-900 mb-4">
+                Przedłużanie paznokci
+              </h3>
+              <div className="text-4xl font-bold text-pink-700 mb-2">
+                od 120 zł
+              </div>
+              <p className="text-neutral-600 font-poppins text-sm">
+                Przedłużanie paznokci metodą żelową lub akrylową z możliwością zdobień.
+              </p>
+            </div>
+          </div>
+          <p className="mt-6 text-neutral-600 font-poppins text-sm text-center">
+            * Ceny mogą się różnić w zależności od stylistki, lokalizacji i zakresu usługi. Aktualny cennik znajdziesz na profilu każdej specjalistki.
+          </p>
+        </div>
+      </section>
+
+      {/* Najczęstsze Pytania Section */}
+      <section className="py-20 px-6 bg-neutral-50">
+        <div className="container">
+          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
+            Najczęstsze pytania przed wizytą
+          </h2>
+          <FAQ className="animate-fade-in-up" items={preVisitFaq} />
+        </div>
+      </section>
+
       {/* City Overview Section - Enhanced */}
       <section className="py-20 px-6">
         <div className="container">
           <h2 className="mb-16 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 leading-tight">
-            Manicure i Pedicure {city.name}
+            TOP 10 MANICURE {city.name} - Cennik Katalog
           </h2>
 
           {/* Enhanced Stats */}
@@ -318,10 +605,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug1}
-                alt={`Najlepsza jakość manicure ${city.name}`}
+                alt={`Najlepsza jakość manicure ${city.name} - Profesjonalne usługi paznokci`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
                 Jakość, której możesz zaufać
@@ -335,10 +624,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug2}
-                alt={`Najlepsze opinie manicure ${city.name}`}
+                alt={`Najlepsze opinie manicure ${city.name} - Zadowolone klientki`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
@@ -353,10 +644,12 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug3}
-                alt={`Rezerwuj manicure ${city.name}`}
+                alt={`Rezerwuj manicure ${city.name} - Umów wizytę online`}
                 width={500}
                 height={500}
                 className="w-[350px]"
+                loading="lazy"
+                fetchPriority="low"
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
@@ -598,7 +891,7 @@ export default async function ServiceCitySlug({
 
       {/* User Slider Wrapper */}
       <UserSliderWrapper
-        cityUsers={cityUsers || []}
+        cityUsers={sortedMergedUsers || []}
         preloadedUser={preloadedUser}
         preloadedPortfolio={preloadedPortfolio}
         initialUserSlug={userSlug || null}
@@ -619,22 +912,40 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ city: string }>;
-}) {
+}): Promise<Metadata> {
   const { city } = await params;
   const cityData: ICity = await getSingleCity(city);
-  const title = `Najlepsze stylistki i salony manicure ${cityData.name}`;
-  const description = `Profesjonalne stylistki isalony manicure ${cityData.name}. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  const canonicalUrl = `${baseUrl}/manicure/${cityData.id}`;
+  const title = `TOP 10 MANICURE ${cityData.name} - Cennik Katalog`;
+  const description = `TOP 10 najlepszych stylistek i salonów manicure ${cityData.name}. Pełny cennik, katalog usług i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const keywords = `manicure ${cityData.name}, cennik manicure ${cityData.name}, najlepsze salony paznokci ${cityData.name}, stylistki paznokci ${cityData.name}, manicure hybrydowy ${cityData.name}, pedicure ${cityData.name}`;
+  
   return {
     title: title,
     description: description,
-    publisher: "naily.pl",
-    url: `https://naily.pl/manicure/${cityData.id}`,
+    keywords: keywords,
     authors: [
       {
         name: "Naily",
         url: "https://naily.pl",
       },
     ],
+    publisher: "naily.pl",
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     icons: [
       {
         url: "/fav/favicon.ico",
@@ -647,30 +958,33 @@ export async function generateMetadata({
       title: title,
       description: description,
       siteName: "Naily",
+      url: canonicalUrl,
+      locale: "pl_PL",
       images: [
         {
-          url: "/pricing.png",
+          url: `${baseUrl}/pricing.png`,
+          width: 1200,
+          height: 630,
+          alt: `TOP 10 MANICURE ${cityData.name} - Cennik Katalog`,
           type: "image/png",
         },
       ],
     },
     twitter: {
-      cardType: "summary_large_image",
+      card: "summary_large_image",
       site: "@Naily",
-        title: title,
+      title: title,
       description: description,
-      image: {
-        url: "/pricing.png",
-      },
-    },
-    meta: [
-      {
-        name: "theme-color",
-        image: {
-          url: "/pricing.png",
+      images: [
+        {
+          url: `${baseUrl}/pricing.png`,
+          alt: `TOP 10 MANICURE ${cityData.name} - Cennik Katalog`,
         },
-      },
-    ],
+      ],
+    },
+    other: {
+      "theme-color": "#1e40af",
+    },
   };
 }
 
@@ -679,24 +993,24 @@ const cityFaq: FaqItem[] = [
     id: "booking-city",
     question: "Jak zarezerwować wizytę w tym mieście?",
     answer:
-      "Wybierz specjalistkę z listy w Twoim mieście, sprawdź jej dostępne terminy i potwierdź rezerwację online.",
+      "Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem.",
   },
   {
     id: "prices-city",
     question: "Czy ceny różnią się między specjalistkami?",
     answer:
-      "Tak, ceny ustalane są indywidualnie. Aktualny cennik znajdziesz na profilu każdej specjalistki.",
+      "Tak, ceny usług manicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy manicure klasyczny może kosztować od 40 do 80 złotych, manicure hybrydowy od 60 do 120 złotych, a przedłużanie paznokci od 100 do 200 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia czy przedłużanie paznokci.",
   },
   {
     id: "location-city",
     question: "Jak sprawdzić lokalizację salonu?",
     answer:
-      "Adres i wskazówki dojazdu są widoczne na profilu specjalistki, często z mapą i informacją o parkingu.",
+      "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony.",
   },
   {
     id: "change-city",
     question: "Czy mogę zmienić termin wizyty?",
     answer:
-      "Tak, zgodnie z polityką danej specjalistki. Szczegóły znajdziesz w potwierdzeniu rezerwacji.",
+      "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu.",
   },
 ];

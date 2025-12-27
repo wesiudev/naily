@@ -73,6 +73,8 @@ export type User = {
     fontFamily?: string;
   };
   allowedTabs?: string[]; // Array of allowed tab IDs (e.g., ["calendar", "portfolio", "services"])
+  priorityLevel?: number; // Higher value = higher position in listings (default: 0)
+  customVariables?: Record<string, any>; // Custom key-value pairs for additional data
 };
 
 export interface ICity {
