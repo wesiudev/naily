@@ -235,7 +235,7 @@ export default function TestimonialsCarousel() {
                     ))}
                   </div>
                   <p className="text-neutral-700 text-sm sm:text-base leading-relaxed mb-6 font-poppins">
-                    "{t.text}"
+                    &ldquo;{t.text}&rdquo;
                   </p>
                   <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
                     <div className="relative">
@@ -292,7 +292,7 @@ export default function TestimonialsCarousel() {
               
               {/* Testimonial Text */}
               <p className="text-neutral-700 text-sm sm:text-base leading-relaxed mb-6 font-poppins min-h-[80px]">
-                "{t.text}"
+                &ldquo;{t.text}&rdquo;
               </p>
               
               {/* Author Info */}
