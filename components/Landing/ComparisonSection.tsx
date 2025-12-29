@@ -19,34 +19,34 @@ export default function ComparisonSection() {
     }
   };
   return (
-    <section className="py-20 flex items-center justify-center bg-white">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12 md:mb-16 animate-fade-in">
-          <h2 className="text-4xl lg:text-5xl font-bold text-zinc-800 font-baloo mb-6 leading-tight">
+    <section className="py-12 sm:py-16 lg:py-20 flex items-center justify-center bg-white">
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16 animate-fade-in">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-800 font-baloo mb-3 sm:mb-4 md:mb-6 leading-tight">
             System rezerwacji dla specjalistek
           </h2>
-          <p className="font-poppins text-neutral-600 text-lg max-w-3xl mx-auto leading-relaxed">
+          <p className="font-poppins text-neutral-600 text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed px-2">
             Zyskaj dostęp do zaawansowanych funkcji, klientek manicure i
             pedicure w Naily
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
           {/* Other Platforms Column */}
-          <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden animate-slide-in hover:shadow-xl transition-shadow duration-300">
-            <div className="bg-neutral-100 px-6 py-4 border-b border-neutral-200">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-neutral-400 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">?</span>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200 overflow-hidden animate-slide-in hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-neutral-100 px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-200">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-neutral-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-xs sm:text-sm">?</span>
                 </div>
-                <h3 className="text-xl font-semibold text-neutral-900">
+                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-neutral-900">
                   Popularne aplikacje rezerwacyjne
                 </h3>
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-4 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
                 <FeatureItem
                   icon={<FaCheck className="text-green-500" />}
                   text="Podstawowe funkcje rezerwacji"
@@ -81,12 +81,12 @@ export default function ComparisonSection() {
                 />
               </div>
 
-              <div className="mt-8 pt-6 border-t border-neutral-200">
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-neutral-200">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-neutral-900 mb-2">
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1 sm:mb-2">
                     Standardowe rozwiązania
                   </div>
-                  <div className="text-sm text-neutral-600">
+                  <div className="text-xs sm:text-sm text-neutral-600">
                     z ograniczeniami rozwoju
                   </div>
                 </div>
@@ -95,23 +95,23 @@ export default function ComparisonSection() {
           </div>
 
           {/* Naily Column */}
-          <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-300 relative">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border-2 border-blue-300 relative">
             {/* Popular Badge */}
 
-            <div className="flex flex-row items-center justify-between rounded-t-2xl bg-gradient-to-r from-blue-100 to-blue-200 px-6 py-4 border-b border-purple-200">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-row items-center justify-between rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-blue-100 to-blue-200 px-4 sm:px-6 py-3 sm:py-4 border-b border-purple-200">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Image
                   src="/naily-logo2.png"
                   alt="Naily Logo"
                   width={100}
                   height={100}
-                  className="w-auto h-16"
+                  className="w-auto h-12 sm:h-14 md:h-16"
                 />
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="space-y-4">
+            <div className="p-4 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
                 <FeatureItem
                   icon={<FaCheck className="text-green-500" />}
                   text="0% prowizji od rezerwacji"
@@ -149,10 +149,10 @@ export default function ComparisonSection() {
                 />
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <button
                   onClick={go}
-                  className="w-full bg-blue-600 hover:blue-700 rounded-full text-white font-semibold text-lg px-6 py-3 transition-all duration-200 hover:bg-blue-700"
+                  className="w-full bg-blue-600 hover:bg-blue-700 rounded-full text-white font-semibold text-sm sm:text-base md:text-lg px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   Wypróbuj za darmo
                 </button>
@@ -174,17 +174,17 @@ interface FeatureItemProps {
 function FeatureItem({ icon, text, highlight = false }: FeatureItemProps) {
   return (
     <div
-      className={`flex items-start gap-3 ${
+      className={`flex items-start gap-2 sm:gap-3 ${
         highlight
-          ? "bg-blue-50 -mx-2 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+          ? "bg-blue-50 -mx-1 sm:-mx-2 px-2 sm:px-2 py-1 sm:py-1.5 rounded-lg hover:bg-blue-100 transition-colors duration-200"
           : ""
       }`}
     >
       <div className="flex-shrink-0 mt-0.5">{icon}</div>
       <span
-        className={`text-sm leading-relaxed ${
+        className={`text-xs sm:text-sm leading-relaxed ${
           highlight
-            ? "font-poppins text-neutral-800"
+            ? "font-poppins text-neutral-800 font-medium"
             : "font-inter text-neutral-700"
         }`}
       >

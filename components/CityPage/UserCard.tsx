@@ -59,57 +59,59 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="group bg-white rounded-2xl border border-neutral-200 p-6 md:p-8 hover:shadow-lg transition-all duration-300 text-left cursor-pointer"
+      className="group bg-white rounded-xl sm:rounded-2xl border border-neutral-200 p-4 sm:p-5 md:p-6 lg:p-8 hover:shadow-lg transition-all duration-300 text-left cursor-pointer"
     >
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
         {/* Left side - Avatar and basic info */}
-        <div className="flex items-start gap-4 md:gap-6 flex-shrink-0">
+        <div className="flex items-start gap-3 sm:gap-4 md:gap-6 flex-shrink-0">
           <div className="relative">
             <Image
               src={user.logo || "/default-user.png"}
               alt={user.name}
               width={120}
               height={120}
-              className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-neutral-100"
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-neutral-100"
             />
             {user?.premiumActive && (
-              <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1">
-                <FaGem className="w-3 h-3 text-yellow-900" />
+              <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-yellow-400 rounded-full p-0.5 sm:p-1">
+                <FaGem className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-900" />
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1 md:hidden">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <h3 className="font-baloo text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-blue-700">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+              <h3 className="font-baloo text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-blue-700 leading-tight">
                 {user.name}
               </h3>
               {isIndividualSpecialist ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 text-purple-700 px-3 py-1 text-xs md:text-sm font-poppins font-medium">
-                  <FaUserNinja className="w-3 h-3" />
-                  Specjalistka
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 text-purple-700 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-poppins font-medium">
+                  <FaUserNinja className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <span className="hidden xs:inline">Specjalistka</span>
+                  <span className="xs:hidden">Spec.</span>
                 </span>
               ) : isSalon ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-3 py-1 text-xs md:text-sm font-poppins font-medium">
-                  <MdSpa className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-poppins font-medium">
+                  <MdSpa className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   Salon
                 </span>
               ) : null}
               {user?.seek && (
-                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-xs md:text-sm font-poppins font-medium">
-                  Przyjmuje nowe klientki
+                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-poppins font-medium whitespace-nowrap">
+                  <span className="hidden sm:inline">Przyjmuje nowe klientki</span>
+                  <span className="sm:hidden">Nowe klientki</span>
                 </span>
               )}
             </div>
             {user.location?.address && (
-              <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2">
-                <FaMapMarkerAlt className="text-blue-600 flex-shrink-0" />
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600 mb-1.5 sm:mb-2">
+                <FaMapMarkerAlt className="text-blue-600 flex-shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span className="truncate">{user.location.address}</span>
               </div>
             )}
             {user.phoneNumber && (
-              <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2">
-                <FaPhone className="text-blue-600 flex-shrink-0" />
-                <span>{user.phoneNumber}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600 mb-1.5 sm:mb-2">
+                <FaPhone className="text-blue-600 flex-shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="break-all">{user.phoneNumber}</span>
               </div>
             )}
           </div>
@@ -117,28 +119,28 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
 
         {/* Center - Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <h3 className="font-baloo text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-blue-700 hidden md:block">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <h3 className="font-baloo text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 group-hover:text-blue-700 hidden md:block leading-tight">
               {user.name}
             </h3>
             {isIndividualSpecialist ? (
-              <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-purple-100 text-purple-700 px-3 py-1 text-xs font-poppins font-medium">
-                <FaUserNinja className="w-3 h-3" />
+              <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-purple-100 text-purple-700 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-poppins font-medium">
+                <FaUserNinja className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 Specjalistka
               </span>
             ) : isSalon ? (
-              <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-3 py-1 text-xs font-poppins font-medium">
-                <MdSpa className="w-3 h-3" />
+              <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-poppins font-medium">
+                <MdSpa className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 Salon
               </span>
             ) : null}
             {user?.premiumActive && (
-              <span className="hidden md:inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-3 py-1 text-xs font-poppins font-medium">
+              <span className="hidden md:inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-poppins font-medium">
                 Premium
               </span>
             )}
             {user?.seek && (
-              <span className="hidden md:inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-xs font-poppins font-medium">
+              <span className="hidden md:inline-flex items-center rounded-full bg-green-100 text-green-700 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-poppins font-medium">
                 Przyjmuje nowe klientki
               </span>
             )}
@@ -146,42 +148,42 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
           
           {user.location?.address && (
             <div className="hidden md:flex items-center gap-2 text-sm md:text-base text-neutral-600 mb-2">
-              <FaMapMarkerAlt className="text-blue-600 flex-shrink-0" />
-              <span>{user.location.address}</span>
+              <FaMapMarkerAlt className="text-blue-600 flex-shrink-0 w-3.5 h-3.5" />
+              <span className="truncate">{user.location.address}</span>
             </div>
           )}
           
           {user.phoneNumber && (
-            <div className="hidden md:flex items-center gap-2 text-sm md:text-base text-neutral-600 mb-3">
-              <FaPhone className="text-blue-600 flex-shrink-0" />
+            <div className="hidden md:flex items-center gap-2 text-sm md:text-base text-neutral-600 mb-2 sm:mb-3">
+              <FaPhone className="text-blue-600 flex-shrink-0 w-3.5 h-3.5" />
               <span>{user.phoneNumber}</span>
             </div>
           )}
 
           {user.description && (
-            <p className="text-sm md:text-base text-neutral-600 mb-4 line-clamp-2 font-poppins">
+            <p className="text-xs sm:text-sm md:text-base text-neutral-600 mb-3 sm:mb-4 line-clamp-2 font-poppins leading-relaxed">
               {user.description}
             </p>
           )}
 
           {/* Services List */}
           {user?.services && Array.isArray(user.services) && user.services.length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <MdSpa className="text-blue-600" />
-                <span className="text-sm font-semibold text-neutral-700 font-poppins">
+            <div className="mb-3 sm:mb-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <MdSpa className="text-blue-600 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="text-xs sm:text-sm font-semibold text-neutral-700 font-poppins">
                   Usługi:
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {user.services.map((service: IService, idx: number) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-poppins border border-blue-100"
+                    className="inline-flex items-center gap-1 px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-700 rounded-md sm:rounded-lg text-xs sm:text-sm font-poppins border border-blue-100"
                   >
-                    <span>{service.real_name}</span>
+                    <span className="truncate max-w-[120px] sm:max-w-none">{service.real_name}</span>
                     {service.price > 0 && (
-                      <span className="text-xs text-blue-600">
+                      <span className="text-[10px] sm:text-xs text-blue-600 whitespace-nowrap">
                         ({service.price} zł)
                       </span>
                     )}
@@ -192,13 +194,7 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
           )}
 
           {/* Stats */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 font-poppins">
-            {portfolioImages.length > 0 && (
-              <span className="flex items-center gap-1">
-                <FaStar className="text-blue-600" />
-                Zdjęcia: <strong className="text-neutral-700">{portfolioImages.length}</strong>
-              </span>
-            )}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-neutral-500 font-poppins">
             {user.profileComments && user.profileComments.length > 0 && (
               <span className="flex items-center gap-1">
                 Opinie: <strong className="text-neutral-700">{user.profileComments.length}</strong>
@@ -208,32 +204,32 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
         </div>
 
         {/* Right side - Portfolio images preview */}
+      </div>
         {portfolioImages.length > 0 && (
-          <div className="flex gap-2 md:gap-3 flex-shrink-0">
-            {portfolioImages.slice(0, 3).map((img: { src?: string }, idx: number) => (
+          <div className="flex flex-row flex-wrap gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0 justify-end md:justify-start">
+            {portfolioImages.slice(0, 20).map((img: { src?: string }, idx: number) => (
               <div
                 key={idx}
-                className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border border-neutral-200 flex-shrink-0"
+                className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-md sm:rounded-lg overflow-hidden border border-neutral-200 flex-shrink-0"
               >
                 <Image
                   src={img.src || "/default-user.png"}
                   alt={`${user.name} portfolio ${idx + 1}`}
                   fill
-                  sizes="80px"
+                  sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, 80px"
                   className="object-cover"
                 />
               </div>
             ))}
-            {portfolioImages.length > 3 && (
-              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs md:text-sm font-semibold text-neutral-600">
-                  +{portfolioImages.length - 3}
+            {portfolioImages.length > 20 && (
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-md sm:rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-neutral-600">
+                  +{portfolioImages.length - 20}
                 </span>
               </div>
             )}
           </div>
         )}
-      </div>
     </div>
   );
 }

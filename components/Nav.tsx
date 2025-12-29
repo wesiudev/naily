@@ -311,39 +311,40 @@ export default function Header({
       >
         {/* Main Header */}
         <div className="">
-          <div className="container">
-            <div className="flex py-3 lg:py-6 justify-between items-center">
-              <div className="flex flex-row w-full justify-between">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex py-2.5 sm:py-3 lg:py-6 justify-between items-center gap-3 sm:gap-4">
+              <div className="flex flex-row w-full justify-between items-center min-w-0">
                 {/* Mobile Menu Button */}
-                <div className="w-max flex items-center">
+                <div className="w-max flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
                   <button
                     onClick={toggleMobileMenu}
-                    className="mr-4 lg:hidden mobile-menu-button focus:outline-none"
+                    className="lg:hidden mobile-menu-button focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg p-1 transition-all duration-200 active:scale-95 flex-shrink-0"
                     aria-label="Otwórz menu"
                   >
                     <FaBars
-                      className={`h-6 w-6 ${
+                      className={`h-5 w-5 sm:h-6 sm:w-6 ${
                         pathname === "/login" ? "text-white" : "text-zinc-800"
                       }`}
                     />
                   </button>
-                  <Link href="/">
+                  <Link href="/" className="flex-shrink-0">
                     <Image
                       src={logo}
                       alt="Logo Naily.pl - Pierwszej strony internetowej poświęconej manicurzystkom i pedicurzystkom"
                       width={200}
                       height={150}
-                      className="h-auto min-w-24 lg:min-w-28 max-w-24"
+                      className="h-auto w-20 sm:w-24 lg:w-28 max-w-full"
+                      priority
                     />
                   </Link>
                 </div>
-                <div className="lg:hidden">
+                <div className="lg:hidden flex-shrink-0">
                   <DownloadApp />
                 </div>
               </div>
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex rounded-xl p-2 h-max space-x-8 px-3 items-center">
-                <nav className="flex items-center space-x-8">
+              <div className="hidden lg:flex rounded-xl p-2 h-max space-x-6 xl:space-x-8 px-3 items-center w-full justify-between">
+                <nav className="flex items-center space-x-6 xl:space-x-8 flex-1">
                   {/* Primary Navigation Items */}
                   <Link
                     href="/szkolenia"
@@ -437,7 +438,7 @@ export default function Header({
                 </nav>
 
                 {/* User Actions - Secondary Navigation */}
-                <div className="flex items-center space-x-6 ml-4 pl-6 border-l border-neutral-200">
+                <div className="flex items-center space-x-4 xl:space-x-6 ml-4 pl-4 xl:pl-6 border-l border-neutral-200">
                   {user?.uid ? (
                     <>
                       {isDashboardRoute ? (
@@ -502,7 +503,9 @@ export default function Header({
                     </Link>
                   )}
                 </div>
+                <div className="ml-4 pl-4 xl:pl-6 border-l border-neutral-200">
                 <DownloadApp />
+                </div>
               </div>
 
               {/* Right actions on mobile when on dashboard */}
@@ -558,17 +561,21 @@ export default function Header({
       {!isDashboardRoute && (
         <div
           onClick={toggleMobileMenu}
-          className={`fixed z-[110] inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          className={`fixed z-[110] inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+            isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
+          aria-hidden={!isMobileMenuOpen}
         />
       )}
       {!isDashboardRoute && (
         <div
-          className={`mobile-menu fixed left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out z-[120] ${
-            isMobileMenuOpen ? "translate-x-0" : "translate-x-[-100vw]"
+          className={`mobile-menu fixed top-0 h-full w-80 bg-white shadow-2xl transform transition-all duration-300 ease-out z-[120] lg:hidden ${
+            isMobileMenuOpen 
+              ? "left-0 translate-x-0 opacity-100 visible pointer-events-auto overflow-y-auto" 
+              : "-left-full -translate-x-full opacity-0 invisible pointer-events-none overflow-hidden"
           }`}
           onClick={(e) => e.stopPropagation()} // Prevent clicks inside menu from closing it
+          aria-hidden={!isMobileMenuOpen}
         >
           <div className="h-full flex flex-col">
             {/* Enhanced Header */}

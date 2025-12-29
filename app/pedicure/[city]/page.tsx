@@ -358,16 +358,16 @@ export default async function ServiceCitySlug({
         <div className="container">
           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              TOP 10 PEDICURE {city.name} - Cennik Katalog
+              TOP 10 PEDICURE {city.name} - Cennik Katalog na 2026 rok
             </h1>
             <p className="text-gray-500 max-w-2xl font-poppins font-normal">
-              Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalną
-              obsługą. Pełny cennik i katalog najlepszych stylistek w {city.name}.
+              Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalnym pedicure. Sprawdź przewidywane ceny i katalog stylistek pedicure w swoim mieście.
             </p>
             {/* Inline search bar matching screenshot */}
             <div className="mt-6">
               <Logic slugCity={city.name} variant="inline" />
             </div>
+            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 06.12.2025</p>
           </div>
 
           {/* Results single column cards */}
@@ -485,7 +485,7 @@ export default async function ServiceCitySlug({
         <section className="py-20 px-6 bg-white">
           <div className="container">
             <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-              Pedicure hybrydowy w {city.name} – sprawdzone stylistki
+              Pedicure hybrydowy {city.name} – sprawdzone stylistki w 2026 roku
             </h2>
             <div className="flex flex-col gap-6 md:gap-8">
               {sortedMergedUsers.slice(0, 3).map((u: {
@@ -516,7 +516,7 @@ export default async function ServiceCitySlug({
         <section className="py-20 px-6 bg-neutral-50">
           <div className="container">
             <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-              Najlepsze stylistki paznokci w {city.name}
+              Paznokcie hybrydowe {city.name}
             </h2>
             <div className="flex flex-col gap-6 md:gap-8">
               {sortedMergedUsers.slice(3, 6).map((u: {
@@ -546,7 +546,7 @@ export default async function ServiceCitySlug({
       <section className="py-20 px-6 bg-white">
         <div className="container">
           <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-            Ceny pedicure w {city.name} (2026)
+            Ceny pedicure {city.name} w 2026
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border border-purple-200">
@@ -554,7 +554,7 @@ export default async function ServiceCitySlug({
                 Pedicure klasyczny
               </h3>
               <div className="text-4xl font-bold text-purple-700 mb-2">
-                od 70 zł
+                od 120 zł
               </div>
               <p className="text-neutral-600 font-poppins text-sm">
                 Podstawowy pedicure z lakierem klasycznym, pielęgnacją stóp i kształtowaniem paznokci.
@@ -565,7 +565,7 @@ export default async function ServiceCitySlug({
                 Pedicure hybrydowy
               </h3>
               <div className="text-4xl font-bold text-blue-700 mb-2">
-                od 80 zł
+                od 180 zł
               </div>
               <p className="text-neutral-600 font-poppins text-sm">
                 Trwały pedicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 4 tygodni.
@@ -576,7 +576,7 @@ export default async function ServiceCitySlug({
                 Pedicure z zabiegami
               </h3>
               <div className="text-4xl font-bold text-pink-700 mb-2">
-                od 120 zł
+                od 250 zł
               </div>
               <p className="text-neutral-600 font-poppins text-sm">
                 Pełny pedicure z peelingiem, masażem, parafiną i dodatkowymi zabiegami pielęgnacyjnymi.
@@ -603,7 +603,7 @@ export default async function ServiceCitySlug({
       <section className="py-20 px-6">
         <div className="container">
           <h2 className="mb-16 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 leading-tight">
-            TOP 10 PEDICURE {city.name} - Cennik Katalog
+            Pedicure {city.name} - Przegląd cen w 2026
           </h2>
 
           {/* Enhanced Stats */}
@@ -619,10 +619,10 @@ export default async function ServiceCitySlug({
                 fetchPriority="low"
               />
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Jakość, której możesz zaufać
+                Stylistki paznokci w Twojej lokalizacji
               </h3>
               <p className="text-neutral-600 font-poppins font-normal">
-                Znajdź zaufaną stylistkę w swoim mieście i odkryj pedicure,
+                Twoja stylistka paznokci {city.name} - wypróbuj pedicure,
                 który podkreśli Twój charakter.
               </p>
             </div>
@@ -630,7 +630,7 @@ export default async function ServiceCitySlug({
             <div className="">
               <Image
                 src={slug2}
-                alt={`Najlepsze opinie pedicure ${city.name} - Zadowolone klientki`}
+                alt={`Najlepsze opinie pedicure ${city.name} - Zadowolone klientki na 2026 rok`}
                 width={500}
                 height={500}
                 className="w-[350px]"
@@ -639,7 +639,7 @@ export default async function ServiceCitySlug({
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Zachwycone klientki
+                Perfekcyjne stylizacje paznokci
               </h3>
               <p className="text-neutral-600 font-poppins font-normal">
                 Setki pozytywnych opinii i tysiące zachwyconych stóp. Sprawdź,
@@ -659,7 +659,7 @@ export default async function ServiceCitySlug({
               />
 
               <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Zawsze, kiedy chcesz
+                Rezerwuj pedicure, kiedy chcesz
               </h3>
               <p className="text-neutral-600 font-poppins font-normal">
                 Zarezerwuj termin lub przyjmuj klientki wtedy, gdy to dla Ciebie
@@ -687,12 +687,12 @@ export default async function ServiceCitySlug({
                     Szkolenia Pedicure {city.name}
                   </h3>
                   <p className="text-neutral-600 text-base font-poppins leading-relaxed">
-                    Znajdź najlepsze szkolenia z pedicure w {city.name}. Profesjonalne kursy, certyfikaty i rozwój umiejętności.
+                    Znajdź najlepsze szkolenia z pedicure {city.name}. Profesjonalne kursy, certyfikaty i rozwój umiejętności.
                   </p>
                 </div>
                 <div className="mt-auto pt-4">
                   <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
-                    Sprawdź szkolenia
+                    Instruktorki pedicure {city.name}
                     <FaArrowRight className="text-sm" />
                   </span>
                 </div>
@@ -710,15 +710,15 @@ export default async function ServiceCitySlug({
                     <FaStar className="text-2xl text-blue-700" />
                   </div>
                   <h3 className="text-2xl lg:text-3xl font-baloo font-bold text-zinc-800 mb-3 group-hover:text-blue-600 transition-colors">
-                    Pracuj w Salonie Pedicure {city.name}
+                    Pracuj w salonie pedicure {city.name}
                   </h3>
                   <p className="text-neutral-600 text-base font-poppins leading-relaxed">
-                    Znajdź najlepsze oferty pracy w {city.name}. Profesjonalne kariery i rozwój umiejętności w branży beauty.
+                    Najlepsze oferty pracy pedicurzystka {city.name}. Kariera i rozwój umiejętności w branży beauty.
                   </p>
                 </div>
                 <div className="mt-auto pt-4">
                   <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
-                    Zobacz oferty pracy
+                    Oferty pracy pedicurzystka {city.name}
                     <FaArrowRight className="text-sm" />
                   </span>
                 </div>
@@ -731,7 +731,7 @@ export default async function ServiceCitySlug({
       <section className="py-20 px-6 bg-white">
         <div className="container">
           <h3 className="mb-20 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900">
-            Szukaj też w innych miastach
+            Szukaj pedicure w innych miastach
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -777,11 +777,11 @@ export default async function ServiceCitySlug({
         <div className="container">
           <div className="mb-12">
             <h2 className="text-4xl lg:text-5xl font-baloo font-bold text-zinc-800 mb-4">
-              Dlaczego warto?
+              Dlaczego pedicure w Naily?
             </h2>
             <p className="text-neutral-600 max-w-2xl font-poppins font-normal">
               Profesjonalne salony oferują najwyższą jakość usług i
-              bezpieczeństwo
+              bezpieczeństwo zabiegów
             </p>
           </div>
 
@@ -793,10 +793,10 @@ export default async function ServiceCitySlug({
                 </div>
                 <div>
                   <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Certyfikowane produkty
+                    Najlepsze produkty do pedicure
                   </h3>
                   <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Używanie tylko sprawdzonych i bezpiecznych kosmetyków
+                    Sprawdzone i bezpieczne narzędzia i produkty
                   </p>
                 </div>
               </div>
@@ -809,10 +809,10 @@ export default async function ServiceCitySlug({
                 </div>
                 <div>
                   <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Doświadczone stylistki
+                    Doświadczone stylistki paznokci
                   </h3>
                   <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Wykwalifikowany personel z wieloletnim doświadczeniem
+                    Stylistki pedicure z wieloletnim doświadczeniem
                   </p>
                 </div>
               </div>
@@ -923,8 +923,8 @@ export async function generateMetadata({
   const cityData: ICity = await getSingleCity(city);
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
   const canonicalUrl = `${baseUrl}/pedicure/${cityData.id}`;
-  const title = `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`;
-  const description = `TOP 10 najlepszych stylistek i salonów pedicure ${cityData.name}. Pełny cennik, katalog usług i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const title = `TOP 10 PEDICURE ${cityData.name} 2026 - Cennik Katalog Opinie`;
+  const description = `TOP 10 najlepszych stylistek i salonów pedicure ${cityData.name} na 2026 rok. Pełny cennik, katalog usług i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
   const keywords = `pedicure ${cityData.name}, cennik pedicure ${cityData.name}, najlepsze salony paznokci ${cityData.name}, stylistki paznokci ${cityData.name}, pedicure hybrydowy ${cityData.name}, manicure ${cityData.name}`;
   
   return {
@@ -971,7 +971,7 @@ export async function generateMetadata({
           url: `${baseUrl}/pricing.png`,
           width: 1200,
           height: 630,
-          alt: `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`,
+          alt: `TOP 10 PEDICURE ${cityData.name} w 2026 - Cennik Katalog`,
           type: "image/png",
         },
       ],
@@ -984,7 +984,7 @@ export async function generateMetadata({
       images: [
         {
           url: `${baseUrl}/pricing.png`,
-          alt: `TOP 10 PEDICURE ${cityData.name} - Cennik Katalog`,
+          alt: `TOP 10 PEDICURE ${cityData.name} w 2026 - Cennik Katalog`,
         },
       ],
     },

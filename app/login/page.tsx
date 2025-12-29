@@ -13,6 +13,7 @@ import Link from "next/link";
 import { auth, getDocument } from "@/firebase";
 import { setUser } from "@/redux/slices/user";
 import { errorCatcher } from "@/utils/errorCatcher";
+import { FaEnvelope, FaLock, FaArrowRight, FaUser } from "react-icons/fa";
 
 type LoginFormState = {
   email: string;
@@ -112,8 +113,8 @@ export default function LoginPage() {
   return (
     // Use min-h-screen instead of h-screen to allow scroll on overflow.
     // Also, set overflow-y-auto and prevent "overflow: hidden"
-    <main className="py-32 min-h-screen w-full flex items-center justify-center p-4 sm:px-8 md:px-12 overflow-y-auto relative">
-      <div className="fixed top-0 left-0 w-full h-full bg-zinc-800/80 z-[-1] pointer-events-none" />
+    <main className="py-12 sm:py-16 md:py-24 min-h-screen w-full flex items-center justify-center p-4 sm:px-8 md:px-12 overflow-y-auto relative">
+      <div className="fixed top-0 left-0 w-full h-full bg-zinc-900/85 z-[-1] pointer-events-none" />
       <div className="fixed top-0 left-0 w-full h-full z-[-2] pointer-events-none">
         <video
           src={"/loginvideo.mp4"}
@@ -123,15 +124,19 @@ export default function LoginPage() {
           className="w-full h-full object-cover"
         />
       </div>
-      <div className="border border-white/10 backdrop-blur-[6px] relative w-full md:max-w-md lg:max-w-lg xl:max-w-xl bg-white/5 shadow-2xl p-6 lg:p-12 rounded-2xl flex flex-col gap-8">
-        <div>
-          <h1 className="text-2xl font-baloo font-bold text-white mb-2 text-center">
+      <div className="border border-white/20 backdrop-blur-xl relative w-full md:max-w-md lg:max-w-lg xl:max-w-xl bg-white/10 shadow-2xl p-6 sm:p-8 lg:p-10 xl:p-12 rounded-3xl flex flex-col gap-6 sm:gap-8">
+        {/* Header Section */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/20 mb-2">
+            <FaUser className="text-2xl sm:text-3xl text-white/90" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-baloo font-bold text-white mb-2 leading-tight">
             {isRecoveryOpen
               ? "Odzyskiwanie hasła"
               : "Zaloguj się do panelu stylistki"}
           </h1>
           {!isRecoveryOpen && (
-            <p className="text-center text-gray-200 text-sm mb-6 font-poppins">
+            <p className="text-center text-gray-200/90 text-base sm:text-lg mb-2 font-poppins leading-relaxed max-w-md mx-auto">
               Witaj ponownie! Zaloguj się, aby zarządzać swoim profilem.
             </p>
           )}
@@ -139,122 +144,156 @@ export default function LoginPage() {
 
         {!isRecoveryOpen && (
           <>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
+            <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-white mb-2"
+                  className="block text-sm font-semibold text-white/90 mb-2 font-poppins"
                 >
                   Email
                 </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <FaEnvelope className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full pl-12 pr-4 py-3.5 border-2 border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm sm:text-base bg-white/95 backdrop-blur-sm text-zinc-800 placeholder:text-gray-400 transition-all duration-200"
+                    placeholder="email@example.com"
+                    required
+                    autoComplete="username"
+                    inputMode="email"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-white/90 mb-2 font-poppins"
+                >
+                  Hasło
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <FaLock className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    value={form.password}
+                    onChange={(e) =>
+                      setForm({ ...form, password: e.target.value })
+                    }
+                    className="w-full pl-12 pr-4 py-3.5 border-2 border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm sm:text-base bg-white/95 backdrop-blur-sm text-zinc-800 placeholder:text-gray-400 transition-all duration-200"
+                    placeholder="Wpisz hasło"
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 space-y-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center gap-2"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    {isLoading ? (
+                      "Ładowanie..."
+                    ) : (
+                      <>
+                        Zaloguj się
+                        <FaArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRecoveryOpen(true)}
+                  className="w-full text-white/80 hover:text-white text-sm font-poppins transition-colors duration-200"
+                >
+                  Przypomnij hasło
+                </button>
+              </div>
+            </form>
+            
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-sm text-gray-300/80 font-poppins">
+                  Nie posiadasz jeszcze konta?
+                </span>
+                <Link
+                  href="/kreator-profilu"
+                  className="text-base text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  Zarejestruj się
+                  <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
+
+        {isRecoveryOpen && (
+          <form onSubmit={handlePasswordReset} className="space-y-5 sm:space-y-6">
+            <div className="space-y-2">
+              <label
+                htmlFor="recovery-email"
+                className="block text-sm font-semibold text-white/90 mb-2 font-poppins"
+              >
+                Email powiązany z kontem
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  <FaEnvelope className="w-4 h-4" />
+                </div>
                 <input
-                  id="email"
+                  id="recovery-email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/85"
+                  className="w-full pl-12 pr-4 py-3.5 border-2 border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm sm:text-base bg-white/95 backdrop-blur-sm text-zinc-800 placeholder:text-gray-400 transition-all duration-200"
                   placeholder="email@example.com"
                   required
                   autoComplete="username"
                   inputMode="email"
                 />
               </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-white mb-2"
-                >
-                  Hasło
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  className="w-full p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/85"
-                  placeholder="Hasło"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-4">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full sm:w-auto professional-button py-3 px-6 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Ładowanie..." : "Zaloguj się"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsRecoveryOpen(true)}
-                  className="w-full sm:w-auto text-white hover:text-gray-300 text-sm font-poppins underline underline-offset-2"
-                >
-                  Przypomnij hasło
-                </button>
-              </div>
-            </form>
-            <div className="mt-8 flex flex-col items-center gap-1">
-              <span className="text-xs text-gray-300 font-poppins">
+            </div>
+            <div className="pt-2 space-y-3">
+              <button
+                type="submit"
+                className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Wyślij link resetujący
+                  <FaArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRecoveryOpen(false)}
+                className="w-full py-2.5 text-sm text-white/80 hover:text-white transition-colors duration-200 font-poppins"
+              >
+                Wróć do logowania
+              </button>
+            </div>
+            <div className="pt-4 border-t border-white/10 text-center">
+              <span className="text-sm text-gray-300/80 font-poppins block mb-2">
                 Nie posiadasz jeszcze konta?
               </span>
               <Link
                 href="/kreator-profilu"
-                className="text-sm text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-2 transition"
+                className="inline-flex items-center gap-2 text-base text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-200 group"
               >
                 Zarejestruj się
-              </Link>
-            </div>
-          </>
-        )}
-
-        {isRecoveryOpen && (
-          <form onSubmit={handlePasswordReset} className="space-y-4">
-            <div>
-              <label
-                htmlFor="recovery-email"
-                className="block text-sm font-poppins text-white mb-2"
-              >
-                Email powiązany z kontem
-              </label>
-              <input
-                id="recovery-email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/85"
-                placeholder="email@example.com"
-                required
-                autoComplete="username"
-                inputMode="email"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full professional-button py-3 text-sm font-semibold"
-            >
-              Wyślij link resetujący
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsRecoveryOpen(false)}
-              className="w-full py-2 text-sm text-white hover:text-gray-300"
-            >
-              Wróć do logowania
-            </button>
-            <div className="mt-4 text-center">
-              <span className="text-xs text-gray-300 font-poppins">
-                Nie posiadasz jeszcze konta?
-              </span>
-              <Link
-                href="/kreator-profilu"
-                className="block text-sm text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-2 transition mt-2"
-              >
-                Zarejestruj się
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </form>

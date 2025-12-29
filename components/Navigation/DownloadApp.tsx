@@ -60,20 +60,54 @@ function DownloadApp({ pt, variant }: { pt?: string; variant?: string }) {
     return null;
   }
 
+  const isLoginPage = pathname === "/login";
+  
   return (
     <>
       <button
-        className={`p-3 px-5 rounded-full border ${
-          pathname === "/login" ? "border-white" : "border-blue-700"
-        } ${
-          pathname === "/login" ? "text-white" : "text-blue-700"
-        } focus:outline-none hover:opacity-80 transition-colors duration-200 whitespace-nowrap ${pt} ${variant}`}
+        className={`
+          relative
+          px-3 py-2.5 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3
+          rounded-full
+          border-2
+          font-semibold
+          text-xs sm:text-sm lg:text-base
+          whitespace-nowrap
+          min-h-[36px] sm:min-h-[40px] lg:min-h-[44px]
+          focus:outline-none
+          focus:ring-2 focus:ring-offset-2
+          transition-all duration-200
+          active:scale-95
+          touch-target
+          ${isLoginPage 
+            ? "border-white/90 bg-white/10 text-white hover:bg-white/20 focus:ring-white/50 backdrop-blur-sm" 
+            : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md"
+          }
+          ${pt} ${variant}
+        `}
         id="setup_button"
-        aria-label="Install app"
-        title="Install app"
+        aria-label="Pobierz aplikację"
+        title="Pobierz aplikację"
         onClick={onClick}
       >
-        Pobierz aplikację
+        <span className="flex items-center gap-1.5 sm:gap-2">
+          <svg 
+            className="w-3 h-3 sm:w-4 sm:h-4 lg:w-4 lg:h-4" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" 
+            />
+          </svg>
+          <span className="hidden xs:inline">Pobierz aplikację</span>
+          <span className="xs:hidden">Pobierz</span>
+        </span>
       </button>
     </>
   );

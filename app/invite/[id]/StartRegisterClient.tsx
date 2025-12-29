@@ -18,7 +18,7 @@ export default function StartRegisterClient() {
       onClick={start}
       className="group relative px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold text-base transition-colors duration-200 hover:bg-primary-700 shadow-sm w-full sm:w-auto"
     >
-      Załóż konto i stwórz cennik
+      Sprawdź za darmo!
       <FaArrowRight className="text-sm ml-2" />
     </Button>
   );
