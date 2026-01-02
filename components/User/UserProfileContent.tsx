@@ -23,6 +23,7 @@ import { User, IService } from "@/types";
 import ReservationButton from "@/app/zarezerwuj/[slug]/ReservationButton";
 import ReservationModal from "@/app/zarezerwuj/[slug]/ReservationModal";
 import OpinionsSection from "@/components/User/OpinionsSection";
+import ImageCarousel from "@/components/User/ImageCarousel";
 
 interface UserProfileContentProps {
   user: User;
@@ -118,18 +119,28 @@ export function UserProfileHero({
                 </div>
                 {user.userSlugUrl || user.uid ? (
                   <Link
-                    href={`/zarezerwuj/${user.userSlugUrl || user.uid}`}
+                    href={`/zarezerwuj/${user.userSlugUrl || user.uid}#opinie`}
+                    onClick={(e) => {
+                      // If we're already on this page, scroll to opinions section
+                      const currentPath = window.location.pathname;
+                      const targetPath = `/zarezerwuj/${user.userSlugUrl || user.uid}`;
+                      
+                      if (currentPath === targetPath) {
+                        e.preventDefault();
+                        setTimeout(() => {
+                          const opinionsSection = document.getElementById('opinie');
+                          if (opinionsSection) {
+                            opinionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Update URL hash without reload
+                            window.history.pushState(null, '', `${targetPath}#opinie`);
+                          }
+                        }, 100);
+                      }
+                    }}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-6 md:py-3 rounded-lg border-2 border-white bg-white/90 backdrop-blur-sm text-blue-600 hover:bg-white hover:border-blue-700 active:bg-white transition-all duration-200 font-poppins font-semibold text-sm md:text-base shadow-lg hover:shadow-xl whitespace-nowrap flex-shrink-0 w-full sm:w-auto"
                   >
-                    <span className="hidden sm:inline">
-                      {isIndividualSpecialist
-                        ? "Pokaż profil specjalistki"
-                        : isSalon
-                          ? "Pokaż profil salonu"
-                          : "Pokaż profil"}
-                    </span>
-                    <span className="sm:hidden">Profil</span>
-                    <FaExternalLinkAlt className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                    <FaStar className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                    <span>Dodaj opinie</span>
                   </Link>
                 ) : null}
               </div>
@@ -306,7 +317,7 @@ export function UserProfileMainContent({
   onServiceClick?: (service: IService) => void;
 }) {
   const isFullPage = variant === "fullpage";
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   
   return (
     <>
@@ -342,10 +353,12 @@ export function UserProfileMainContent({
             }`}
           >
             {portfolio.map((image, index) => (
-              <div
-                key={index}
-                className="relative group cursor-pointer aspect-square overflow-hidden rounded-xl border-2 border-neutral-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
-                onClick={() => setSelectedImage(index)}
+              <button
+                key={image.id || index}
+                type="button"
+                className="relative group cursor-pointer aspect-square overflow-hidden rounded-xl border-2 border-neutral-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={() => setSelectedImageIndex(index)}
+                aria-label={`Pokaż zdjęcie ${index + 1}${image.title ? `: ${image.title}` : ""}`}
               >
                 <Image
                   src={image.url || ""}
@@ -361,83 +374,63 @@ export function UserProfileMainContent({
                     </p>
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
           
-          {/* Image Modal */}
-          {selectedImage !== null && (
-            <div
-              className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-              onClick={() => setSelectedImage(null)}
-            >
-              <div className="relative max-w-4xl max-h-[90vh] w-full">
-                <button
-                  onClick={() => setSelectedImage(null)}
-                  className="absolute -top-12 right-0 text-white text-2xl hover:text-gray-300"
-                >
-                  ✕
-                </button>
-                <Image
-                  src={portfolio[selectedImage].url || ""}
-                  alt={portfolio[selectedImage].title || `Portfolio ${selectedImage + 1}`}
-                  width={1200}
-                  height={1200}
-                  className="w-full h-auto rounded-lg"
-                />
-                {portfolio[selectedImage].title && (
-                  <p className="text-white text-center mt-4 font-poppins text-lg">
-                    {portfolio[selectedImage].title}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Image Carousel Modal */}
+          <ImageCarousel
+            images={portfolio}
+            isOpen={selectedImageIndex !== null}
+            onClose={() => setSelectedImageIndex(null)}
+            initialIndex={selectedImageIndex || 0}
+          />
         </div>
       )}
 
       {/* Services */}
       {!!user.services?.length && (
-        <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-6 md:p-8 mb-6 animate-fade-in animation-delay-400">
+        <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-6 md:p-8 mb-6 animate-fade-in animation-delay-400 max-w-full overflow-hidden">
           <h2 className="font-baloo text-xl md:text-2xl font-bold text-zinc-800 mb-6 flex items-center gap-3">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
               <FaStar className="text-green-600 w-5 h-5" />
             </div>
             Oferowane usługi ({user.services.length})
           </h2>
-          <div className="grid gap-4">
+          <div className="grid gap-4 max-w-full">
             {user.services.map((service) => (
               <div
                 key={service.flatten_name}
                 onClick={() => onServiceClick?.(service)}
-                className={`border-2 border-neutral-200 rounded-xl p-4 md:p-5 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white group ${
+                className={`border-2 border-neutral-200 rounded-xl p-4 md:p-5 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white group max-w-full overflow-hidden ${
                   onServiceClick ? "cursor-pointer" : ""
                 }`}
+                style={{ maxWidth: "100vw" }}
               >
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-baloo text-lg md:text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors break-words">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4 max-w-full">
+                  <div className="flex-1 min-w-0 max-w-full overflow-hidden">
+                    <h3 className="font-baloo text-lg md:text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors break-words max-w-full">
                       {service.real_name}
                     </h3>
                     {service.description && (
-                      <p className="text-sm text-neutral-600 mt-2 break-words font-poppins leading-relaxed line-clamp-2">
+                      <p className="text-sm text-neutral-600 mt-2 break-words font-poppins leading-relaxed max-w-full">
                         {service.description}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3 sm:gap-2 flex-shrink-0">
                     {typeof service.price === "number" && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-xl border border-blue-100">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-xl border border-blue-100 whitespace-nowrap">
                         <FaTag className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <span className="text-blue-700 font-bold text-base font-poppins whitespace-nowrap">
+                        <span className="text-blue-700 font-bold text-base font-poppins">
                           {service.price} zł
                         </span>
                       </div>
                     )}
                     {service.duration && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 rounded-xl border border-neutral-100 whitespace-nowrap">
                         <FaClock className="w-4 h-4 text-neutral-600 flex-shrink-0" />
-                        <span className="text-neutral-700 font-semibold text-sm font-poppins whitespace-nowrap">
+                        <span className="text-neutral-700 font-semibold text-sm font-poppins">
                           {service.duration} min
                         </span>
                       </div>
@@ -464,7 +457,7 @@ export function UserProfileMainContent({
 
       {/* Opinions */}
       {user.uid && (
-        <div className="mb-6 animate-fade-in animation-delay-600">
+        <div id="opinie" className="mb-6 animate-fade-in animation-delay-600 scroll-mt-20">
           <OpinionsSection profileUid={user.uid as string} />
         </div>
       )}

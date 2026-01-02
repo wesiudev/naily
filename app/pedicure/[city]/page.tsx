@@ -18,6 +18,7 @@ import {
   FaClock,
   FaPhone,
   FaArrowRight,
+  FaTags,
 } from "react-icons/fa";
 import { MdSpa } from "react-icons/md";
 import { FaCheck, FaUserNinja } from "react-icons/fa6";
@@ -28,6 +29,7 @@ import slug3 from "../../../public/slug/slug3.png";
 import Logic from "@/components/SearchBar/Logic";
 import UserSliderWrapper from "@/components/CityPage/UserSliderWrapper";
 import UserCard from "@/components/CityPage/UserCard";
+import PricingTable, { type PricingItem } from "@/components/CityPage/PricingTable";
 import { getUserById, getUsers, db } from "@/firebase";
 import { User } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
@@ -145,6 +147,58 @@ async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
     return null;
   }
 }
+
+const pedicurePricing: PricingItem[] = [
+  {
+    id: "pedicure-classic",
+    name: "Pedicure klasyczny (tradycyjny lakier)",
+    minPrice: 160,
+    maxPrice: 160,
+    description: "Podstawowy pedicure z tradycyjnym lakierem, pielęgnacją stóp, kształtowaniem paznokci i usuwaniem zrogowaciałego naskórka. Idealny dla osób, które preferują klasyczne rozwiązania.",
+  },
+  {
+    id: "pedicure-hybrid",
+    name: "Pedicure hybrydowy",
+    minPrice: 160,
+    maxPrice: 160,
+    description: "Trwały pedicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 4 tygodni. Idealny dla osób, które chcą długotrwałej ochrony i pięknego wyglądu paznokci u stóp.",
+  },
+  {
+    id: "pedicure-spa",
+    name: "Pedicure SPA (z peelingiem i maską)",
+    minPrice: 210,
+    maxPrice: 210,
+    description: "Luksusowy pedicure z pełną pielęgnacją stóp, peelingiem, maseczką nawilżającą i relaksującym masażem. Kompleksowa regeneracja skóry stóp i paznokci z elementami aromaterapii.",
+  },
+  {
+    id: "pedicure-medical",
+    name: "Pedicure leczniczy",
+    minPrice: 160,
+    maxPrice: 160,
+    description: "Specjalistyczny pedicure leczniczy dla osób z problemami skórnymi stóp, wrastającymi paznokciami lub innymi dolegliwościami. Wykonywany z użyciem profesjonalnych narzędzi i preparatów medycznych.",
+  },
+  {
+    id: "pedicure-male",
+    name: "Pedicure męski",
+    minPrice: 25,
+    maxPrice: 25,
+    description: "Profesjonalna pielęgnacja stóp i paznokci dla mężczyzn, obejmująca czyszczenie, kształtowanie i polerowanie paznokci oraz pielęgnację skóry stóp. Idealny dla aktywnych mężczyzn.",
+  },
+  {
+    id: "paraffin-treatment",
+    name: "Zabieg parafinowy na stopy",
+    minPrice: 140,
+    maxPrice: 140,
+    description: "Relaksujący zabieg parafinowy na stopy, który głęboko nawilża i zmiękcza skórę. Idealny dla suchych, zrogowaciałych stóp. Zabieg poprawia elastyczność skóry i zapewnia długotrwałe nawilżenie.",
+  },
+  {
+    id: "heel-regeneration",
+    name: "Zabieg regeneracyjny na pękające pięty",
+    minPrice: 210,
+    maxPrice: 210,
+    description: "Specjalistyczny zabieg regeneracyjny dla pękających pięt z użyciem profesjonalnych preparatów i narzędzi. Intensywna kuracja przywracająca zdrowy wygląd i funkcjonalność skóry pięt.",
+  },
+];
 
 const preVisitFaq: FaqItem[] = [
   {
@@ -543,49 +597,36 @@ export default async function ServiceCitySlug({
       )}
 
       {/* Ceny Pedicure Section */}
-      <section className="py-20 px-6 bg-white">
-        <div className="container">
-          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-            Ceny pedicure {city.name} w 2026
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border border-purple-200">
-              <h3 className="text-2xl font-baloo font-bold text-purple-900 mb-4">
-                Pedicure klasyczny
-              </h3>
-              <div className="text-4xl font-bold text-purple-700 mb-2">
-                od 120 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Podstawowy pedicure z lakierem klasycznym, pielęgnacją stóp i kształtowaniem paznokci.
-              </p>
+      <section className="relative py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-blue-200/20 blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full bg-purple-200/20 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-blue-100/10 blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 container mx-auto max-w-4xl">
+          {/* Enhanced Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-200/50 mb-4 sm:mb-6 shadow-sm">
+              <FaTags className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
             </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border border-blue-200">
-              <h3 className="text-2xl font-baloo font-bold text-blue-900 mb-4">
-                Pedicure hybrydowy
-              </h3>
-              <div className="text-4xl font-bold text-blue-700 mb-2">
-                od 180 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Trwały pedicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 4 tygodni.
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-8 border border-pink-200">
-              <h3 className="text-2xl font-baloo font-bold text-pink-900 mb-4">
-                Pedicure z zabiegami
-              </h3>
-              <div className="text-4xl font-bold text-pink-700 mb-2">
-                od 250 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Pełny pedicure z peelingiem, masażem, parafiną i dodatkowymi zabiegami pielęgnacyjnymi.
-              </p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 mb-3 leading-tight">
+              Ceny pedicure {city.name} w 2026
+            </h2>
+            <p className="text-base sm:text-lg text-neutral-600 font-poppins max-w-2xl mx-auto">
+              Sprawdź szczegółowy cennik wszystkich usług pedicure. Ceny mogą się różnić w zależności od stylistki i zakresu usługi.
+            </p>
+          </div>
+
+          {/* Enhanced Pricing Table Container */}
+          <div className="relative">
+            {/* Decorative border accent */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-20 blur-sm"></div>
+            <div className="relative bg-white rounded-xl shadow-xl border border-neutral-200/50 p-6 sm:p-8">
+              <PricingTable items={pedicurePricing} />
             </div>
           </div>
-          <p className="mt-6 text-neutral-600 font-poppins text-sm text-center">
-            * Ceny mogą się różnić w zależności od stylistki, lokalizacji i zakresu usługi. Aktualny cennik znajdziesz na profilu każdej specjalistki.
-          </p>
         </div>
       </section>
 

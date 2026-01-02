@@ -5,8 +5,8 @@ import { User, IService } from "@/types";
 import { getUsers } from "@/utils/getUsers";
 import { toast } from "react-toastify";
 import Image from "next/image";
-import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash, FaMagic } from "react-icons/fa";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash, FaMagic, FaImage } from "react-icons/fa";
+import { getDownloadURL, ref, uploadBytes, uploadBytesResumable, deleteObject } from "firebase/storage";
 import { storage } from "@/firebase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,6 +18,12 @@ export default function ProfilesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [uploadingImage, setUploadingImage] = useState<"logo" | "banner" | null>(null);
   const [generatingServiceIndex, setGeneratingServiceIndex] = useState<number | null>(null);
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
+  const [portfolioProgress, setPortfolioProgress] = useState(0);
+  const [editingPortfolioItem, setEditingPortfolioItem] = useState<{ id: string; title: string; description: string } | null>(null);
+  const [deletingPortfolioItem, setDeletingPortfolioItem] = useState<string | null>(null);
+  const [editingSeo, setEditingSeo] = useState({ title: false, description: false });
+  const [metaDraft, setMetaDraft] = useState({ seoTitle: "", seoDescription: "", seoKeywords: "" });
 
   useEffect(() => {
     loadUsers();
@@ -39,6 +45,13 @@ export default function ProfilesPage() {
   function handleEdit(user: User) {
     setSelectedUser(user);
     setEditingUser({ ...user });
+    // Initialize SEO metadata draft
+    setMetaDraft({
+      seoTitle: user.metadata?.seoTitle || "",
+      seoDescription: user.metadata?.seoDescription || "",
+      seoKeywords: user.metadata?.seoKeywords || "",
+    });
+    setEditingSeo({ title: false, description: false });
   }
 
   function handleCancel() {
@@ -67,6 +80,128 @@ export default function ProfilesPage() {
       toast.error("Nie udało się zaktualizować profilu");
       console.error(error);
     }
+  }
+
+  async function handlePortfolioUpload(files: FileList | null) {
+    if (!editingUser || !files || files.length === 0) return;
+
+    const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    if (fileArray.length === 0) return;
+
+    setUploadingPortfolio(true);
+    setPortfolioProgress(0);
+
+    try {
+      const currentPortfolio = Array.isArray(editingUser.portfolio) ? [...editingUser.portfolio] : [];
+      const newItems: Array<{
+        id: string;
+        url: string;
+        path: string;
+        title: string;
+        originalFileName: string;
+        description: string;
+        serviceIds: string[];
+        createdAt: number;
+      }> = [];
+      const totalFiles = fileArray.length;
+      let uploadedFiles = 0;
+
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i];
+        const id = uuidv4();
+        const path = `users/${editingUser.uid}/portfolio/${id}-${file.name}`;
+        const imageRef = ref(storage, path);
+        
+        const task = uploadBytesResumable(imageRef, file);
+        
+        await new Promise<void>((resolve, reject) => {
+          task.on("state_changed", 
+            (snapshot) => {
+              const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              const overallProgress = ((uploadedFiles + fileProgress / 100) / totalFiles) * 100;
+              setPortfolioProgress(Math.round(overallProgress));
+            },
+            (error) => reject(error),
+            async () => {
+              const url = await getDownloadURL(imageRef);
+              newItems.push({
+                id,
+                url,
+                path,
+                title: "",
+                originalFileName: file.name,
+                description: "",
+                serviceIds: [],
+                createdAt: Date.now(),
+              });
+              uploadedFiles++;
+              resolve();
+            }
+          );
+        });
+      }
+
+      const updatedPortfolio = [...currentPortfolio, ...newItems];
+      setEditingUser({ ...editingUser, portfolio: updatedPortfolio });
+      
+      toast.success(`${newItems.length} zdjęć zostało dodanych`);
+    } catch (error) {
+      toast.error("Nie udało się wgrać zdjęć");
+      console.error(error);
+    } finally {
+      setUploadingPortfolio(false);
+      setPortfolioProgress(0);
+    }
+  }
+
+  async function handlePortfolioDelete(itemId: string) {
+    if (!editingUser || !itemId) return;
+
+    const item = editingUser.portfolio?.find((p: any) => p.id === itemId);
+    if (!item) return;
+
+    try {
+      // Remove from portfolio array
+      const updatedPortfolio = editingUser.portfolio?.filter((p: any) => p.id !== itemId) || [];
+      setEditingUser({ ...editingUser, portfolio: updatedPortfolio });
+
+      // Delete from storage
+      if (item.path) {
+        try {
+          await deleteObject(ref(storage, item.path));
+        } catch (storageError) {
+          console.error("Error deleting from storage:", storageError);
+        }
+      }
+
+      toast.success("Zdjęcie zostało usunięte");
+      setDeletingPortfolioItem(null);
+    } catch (error) {
+      toast.error("Nie udało się usunąć zdjęcia");
+      console.error(error);
+    }
+  }
+
+  function handlePortfolioEdit(item: any) {
+    setEditingPortfolioItem({
+      id: item.id,
+      title: item.title || "",
+      description: item.description || "",
+    });
+  }
+
+  async function handlePortfolioSaveEdit() {
+    if (!editingUser || !editingPortfolioItem) return;
+
+    const updatedPortfolio = editingUser.portfolio?.map((item: any) =>
+      item.id === editingPortfolioItem.id
+        ? { ...item, title: editingPortfolioItem.title, description: editingPortfolioItem.description }
+        : item
+    ) || [];
+
+    setEditingUser({ ...editingUser, portfolio: updatedPortfolio });
+    setEditingPortfolioItem(null);
+    toast.success("Zmiany zostały zapisane");
   }
 
   async function handleImageUpload(file: File, type: "logo" | "banner") {
@@ -109,6 +244,22 @@ export default function ProfilesPage() {
     }
     current[path[path.length - 1]] = value;
     setEditingUser(newUser);
+  }
+
+  function updateMetadataField(field: "seoTitle" | "seoDescription" | "seoKeywords", value: string) {
+    if (!editingUser) return;
+    const currentMetadata = editingUser.metadata || {};
+    setEditingUser({
+      ...editingUser,
+      metadata: {
+        ...currentMetadata,
+        [field]: value,
+      },
+    });
+    setMetaDraft({
+      ...metaDraft,
+      [field]: value,
+    });
   }
 
   function addCustomVariable() {
@@ -647,6 +798,307 @@ export default function ProfilesPage() {
                     {(!editingUser.services || editingUser.services.length === 0) && (
                       <p className="text-gray-500 text-sm">Brak usług</p>
                     )}
+                  </div>
+                </div>
+
+                {/* Portfolio Images */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-gray-300 text-lg font-semibold">Portfolio</label>
+                    <label className="block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handlePortfolioUpload(e.target.files)}
+                        disabled={uploadingPortfolio}
+                        className="hidden"
+                        id="portfolio-upload"
+                      />
+                      <button
+                        onClick={() => document.getElementById("portfolio-upload")?.click()}
+                        disabled={uploadingPortfolio}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+                      >
+                        <FaPlus /> {uploadingPortfolio ? `Przesyłanie... ${portfolioProgress}%` : "Dodaj zdjęcia"}
+                      </button>
+                    </label>
+                  </div>
+
+                  {uploadingPortfolio && (
+                    <div className="mb-4">
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${portfolioProgress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {editingUser.portfolio?.map((item: any, index: number) => (
+                      <div
+                        key={item.id || index}
+                        className="bg-gray-900 rounded-lg p-4 border border-gray-700 relative group"
+                      >
+                        <div className="relative aspect-square mb-3 w-full">
+                          <Image
+                            src={item.url}
+                            alt={item.title || `Portfolio ${index + 1}`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="rounded-lg object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
+                            <button
+                              onClick={() => handlePortfolioEdit(item)}
+                              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm flex items-center gap-1"
+                            >
+                              <FaEdit /> Edytuj
+                            </button>
+                            <button
+                              onClick={() => setDeletingPortfolioItem(item.id)}
+                              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm flex items-center gap-1"
+                            >
+                              <FaTrash /> Usuń
+                            </button>
+                          </div>
+                        </div>
+                        {item.title && (
+                          <p className="text-white text-sm font-semibold mb-1 truncate">{item.title}</p>
+                        )}
+                        {item.description && (
+                          <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
+                        )}
+                        {!item.title && !item.description && (
+                          <p className="text-gray-500 text-xs">Brak opisu</p>
+                        )}
+                      </div>
+                    ))}
+                    {(!editingUser.portfolio || editingUser.portfolio.length === 0) && (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        <FaImage className="text-4xl mx-auto mb-2 opacity-50" />
+                        <p>Brak zdjęć w portfolio</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Edit Modal */}
+                  {editingPortfolioItem && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                      <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+                        <h3 className="text-white text-xl font-bold mb-4">Edytuj zdjęcie</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-gray-300 mb-2">Tytuł</label>
+                            <input
+                              type="text"
+                              value={editingPortfolioItem.title}
+                              onChange={(e) =>
+                                setEditingPortfolioItem({ ...editingPortfolioItem, title: e.target.value })
+                              }
+                              className="w-full px-4 py-2 rounded-lg bg-white border border-gray-300 text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              style={{ color: 'black', backgroundColor: 'white' }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-gray-300 mb-2">Opis</label>
+                            <textarea
+                              value={editingPortfolioItem.description}
+                              onChange={(e) =>
+                                setEditingPortfolioItem({ ...editingPortfolioItem, description: e.target.value })
+                              }
+                              rows={4}
+                              className="w-full px-4 py-2 rounded-lg bg-white border border-gray-300 text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              style={{ color: 'black', backgroundColor: 'white' }}
+                            />
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={() => setEditingPortfolioItem(null)}
+                              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg"
+                            >
+                              Anuluj
+                            </button>
+                            <button
+                              onClick={handlePortfolioSaveEdit}
+                              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                            >
+                              Zapisz
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Delete Confirmation Modal */}
+                  {deletingPortfolioItem && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                      <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                        <h3 className="text-white text-xl font-bold mb-4">Usunąć zdjęcie?</h3>
+                        <p className="text-gray-300 mb-6">
+                          Czy na pewno chcesz usunąć to zdjęcie? Tej operacji nie można cofnąć.
+                        </p>
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => setDeletingPortfolioItem(null)}
+                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg"
+                          >
+                            Anuluj
+                          </button>
+                          <button
+                            onClick={() => handlePortfolioDelete(deletingPortfolioItem)}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                          >
+                            Usuń
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* SEO Metadata */}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-300 mb-4 flex items-center gap-2">
+                    <FaMagic className="text-purple-400" />
+                    SEO - Wygląd w Google
+                  </h3>
+                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-700 space-y-4">
+                    <div>
+                      <label className="block text-gray-300 mb-2">Tytuł SEO (max 60 znaków)</label>
+                      {!editingSeo.title ? (
+                        <div className="flex items-center group">
+                          <div
+                            onClick={() => setEditingSeo((p) => ({ ...p, title: true }))}
+                            className="text-white text-base cursor-pointer hover:text-blue-400 flex-1 min-w-0"
+                          >
+                            {metaDraft.seoTitle || editingUser.metadata?.seoTitle || "Kliknij, aby dodać tytuł SEO"}
+                          </div>
+                          <button
+                            onClick={() => setEditingSeo((p) => ({ ...p, title: true }))}
+                            className="opacity-0 group-hover:opacity-100 px-2 py-1 text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            Edytuj
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={metaDraft.seoTitle}
+                            onChange={(e) => {
+                              const value = e.target.value.slice(0, 60);
+                              updateMetadataField("seoTitle", value);
+                            }}
+                            className="w-full px-3 py-2 rounded bg-white border border-gray-300 text-black text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            style={{ color: 'black', backgroundColor: 'white' }}
+                            placeholder="Wprowadź tytuł (max 60 znaków)"
+                            maxLength={60}
+                            autoFocus
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setEditingSeo((p) => ({ ...p, title: false }))}
+                              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+                            >
+                              Zapisz
+                            </button>
+                            <button
+                              onClick={() => {
+                                setMetaDraft({ ...metaDraft, seoTitle: editingUser.metadata?.seoTitle || "" });
+                                setEditingSeo((p) => ({ ...p, title: false }));
+                              }}
+                              className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
+                            >
+                              Anuluj
+                            </button>
+                            <span className="text-gray-400 text-xs">
+                              {metaDraft.seoTitle.length}/60
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 mb-2">Opis SEO (max 160 znaków)</label>
+                      {!editingSeo.description ? (
+                        <div className="flex items-start gap-2 group">
+                          <p
+                            onClick={() => setEditingSeo((p) => ({ ...p, description: true }))}
+                            className="text-gray-400 text-sm line-clamp-2 cursor-pointer hover:text-gray-300 flex-1 min-w-0"
+                          >
+                            {metaDraft.seoDescription || editingUser.metadata?.seoDescription || "Kliknij, aby dodać opis SEO"}
+                          </p>
+                          <button
+                            onClick={() => setEditingSeo((p) => ({ ...p, description: true }))}
+                            className="opacity-0 group-hover:opacity-100 px-2 py-1 text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            Edytuj
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <textarea
+                            value={metaDraft.seoDescription}
+                            onChange={(e) => {
+                              const value = e.target.value.slice(0, 160);
+                              updateMetadataField("seoDescription", value);
+                            }}
+                            className="w-full px-3 py-2 rounded bg-white border border-gray-300 text-black text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                            style={{ color: 'black', backgroundColor: 'white' }}
+                            placeholder="Wprowadź opis (max 160 znaków)"
+                            maxLength={160}
+                            rows={3}
+                            autoFocus
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setEditingSeo((p) => ({ ...p, description: false }))}
+                              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+                            >
+                              Zapisz
+                            </button>
+                            <button
+                              onClick={() => {
+                                setMetaDraft({ ...metaDraft, seoDescription: editingUser.metadata?.seoDescription || "" });
+                                setEditingSeo((p) => ({ ...p, description: false }));
+                              }}
+                              className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
+                            >
+                              Anuluj
+                            </button>
+                            <span className="text-gray-400 text-xs">
+                              {metaDraft.seoDescription.length}/160
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 mb-2">Słowa kluczowe SEO (opcjonalne)</label>
+                      <input
+                        type="text"
+                        value={metaDraft.seoKeywords}
+                        onChange={(e) => updateMetadataField("seoKeywords", e.target.value)}
+                        className="w-full px-3 py-2 rounded bg-white border border-gray-300 text-black text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        style={{ color: 'black', backgroundColor: 'white' }}
+                        placeholder="np: manicure, pedicure, paznokcie, Warszawa"
+                      />
+                    </div>
+
+                    <div className="pt-2 border-t border-gray-700">
+                      <p className="text-gray-400 text-xs">
+                        URL profilu: naily.pl/zarezerwuj/{editingUser.userSlugUrl || editingUser.uid}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        Jeśli nie ustawisz tytułu lub opisu SEO, zostaną one wygenerowane automatycznie na podstawie danych profilu.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

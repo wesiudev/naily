@@ -1,5 +1,3 @@
-"use client";
-import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -32,8 +30,6 @@ interface UserCardProps {
 }
 
 export default function UserCard({ user, cityParam }: UserCardProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const isIndividualSpecialist = user.seek === true;
   const isSalon = user.seek === false;
 
@@ -49,17 +45,13 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
   };
   const portfolioImages = getPortfolioImages();
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const userSlug = user.userSlugUrl || user.uid;
-    // Update URL without page refresh
-    router.push(`${pathname}?user=${userSlug}`, { scroll: false });
-  };
+  const userSlug = user.userSlugUrl || user.uid;
+  const profileUrl = `/zarezerwuj/${userSlug}`;
 
   return (
-    <div
-      onClick={handleClick}
-      className="group bg-white rounded-xl sm:rounded-2xl border border-neutral-200 p-4 sm:p-5 md:p-6 lg:p-8 hover:shadow-lg transition-all duration-300 text-left cursor-pointer"
+    <Link
+      href={profileUrl}
+      className="group bg-white rounded-xl sm:rounded-2xl border border-neutral-200 p-4 sm:p-5 md:p-6 lg:p-8 hover:shadow-lg transition-all duration-300 text-left cursor-pointer block"
     >
       <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
         {/* Left side - Avatar and basic info */}
@@ -230,7 +222,7 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
             )}
           </div>
         )}
-    </div>
+    </Link>
   );
 }
 

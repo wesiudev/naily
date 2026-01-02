@@ -207,6 +207,19 @@ export default function DashboardContent({
     }
   }
 
+  async function saveTrainingType(trainingType) {
+    if (!user?.uid) return;
+    const nextUser = { ...user, trainingType };
+    dispatch(setUser(nextUser));
+    try {
+      await updateUserDoc(user.uid, { trainingType });
+      toast.success("Ustawienia szkoleń zostały zapisane");
+    } catch (e) {
+      dispatch(setUser(user));
+      toast.error("Nie udało się zapisać ustawień");
+    }
+  }
+
   async function handleBannerUpload(file) {
     if (!user?.uid) return;
     setBannerUploading(true);
@@ -739,6 +752,7 @@ export default function DashboardContent({
               onSaveMetadata={saveMetadata}
               getSafeSettings={getSafeSettings}
               onToggleSetting={toggleSetting}
+              onSaveTrainingType={saveTrainingType}
             />
           </CardContent>
         </Card>

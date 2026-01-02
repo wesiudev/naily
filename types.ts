@@ -44,6 +44,7 @@ export type User = {
   password: string;
 
   portfolioImages: PortfolioImage[];
+  portfolio?: Array<{ id?: string; url?: string; title?: string; description?: string; [key: string]: any }>; // Portfolio images stored in user document
   payments: Payment[];
   services: IService[];
   location: { lng: number; lat: number; address: string };
@@ -75,6 +76,7 @@ export type User = {
   allowedTabs?: string[]; // Array of allowed tab IDs (e.g., ["calendar", "portfolio", "services"])
   priorityLevel?: number; // Higher value = higher position in listings (default: 0)
   customVariables?: Record<string, any>; // Custom key-value pairs for additional data
+  trainingType?: "manicure" | "pedicure" | "both" | "none"; // Type of training courses user offers
 };
 
 export interface ICity {

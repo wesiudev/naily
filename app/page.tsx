@@ -8,23 +8,77 @@ import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
 import RecentPostsWrapper from "@/components/Blog/RecentPostsWrapper";
 
 export default function Home() {
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
+  
+  // Generate JSON-LD structured data for homepage
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${baseUrl}#webpage`,
+        url: baseUrl,
+        name: "Naily: Platforma dla Stylistek Manicure i Pedicure",
+        description: "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce.",
+        inLanguage: "pl-PL",
+        isPartOf: {
+          "@id": `${baseUrl}#website`,
+        },
+        breadcrumb: {
+          "@id": `${baseUrl}#breadcrumb`,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Strona główna",
+            item: baseUrl,
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${baseUrl}#faq`,
+        mainEntity: landingFaq.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      <div id="reserve">
-        <SearchBar />
-      </div>
-      {/* <ImageCollage /> */}
-      <WhatMakesUsUniqueSection />
-      <Hero />
-      <ComparisonSection />
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="min-h-screen bg-white">
+        <div id="reserve">
+          <SearchBar />
+        </div>
+        {/* <ImageCollage /> */}
+        <WhatMakesUsUniqueSection />
+        <Hero />
+        <ComparisonSection />
 
-      <RecentPostsWrapper limit={6} columns={3} />
+        <RecentPostsWrapper limit={6} columns={3} />
 
-      <FinalCta />
-      <div className="py-20">
-        <FAQ className="animate-fade-in-up" items={landingFaq} />
+        <FinalCta />
+        <div className="py-20">
+          <FAQ className="animate-fade-in-up" items={landingFaq} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -99,44 +153,98 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  publisher: "naily.pl",
-  manifest: "/manifest.json",
-  icons: [{ url: "/fav/favicon.ico", sizes: "192x192", type: "image/png" }],
-  title: "Naily: Strona dla stylistek Manicure i Pedicure",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "https://naily.pl"),
+  title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
   description:
-    "Stylistki manicure i pedicure, szkolenia w branży, oferty pracy, cenniki, rezerwacje",
+    "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci w swoim mieście, sprawdź cenniki, zobacz portfolio prac i zarezerwuj wizytę online. Dla stylistek: szkolenia, oferty pracy i narzędzia do zarządzania rezerwacjami.",
+  keywords: [
+    "naily",
+    "naily.pl",
+    "manicure",
+    "pedicure",
+    "stylistki paznokci",
+    "salony paznokci",
+    "rezerwacje online",
+    "cennik manicure",
+    "cennik pedicure",
+    "szkolenia manicure",
+    "szkolenia pedicure",
+    "oferty pracy stylistka",
+    "manicure hybrydowy",
+    "pedicure hybrydowy",
+    "przedłużanie paznokci",
+    "zdobienia paznokci",
+    "stylistka paznokci online",
+    "rezerwacja wizyty manicure",
+    "najlepsze salony paznokci",
+    "stylistka paznokci w mieście",
+  ],
+  authors: [
+    {
+      name: "Naily",
+      url: "https://naily.pl",
+    },
+  ],
+  publisher: "naily.pl",
+  alternates: {
+    canonical: "https://naily.pl",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  manifest: "/manifest.json",
+  icons: [
+    { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+    { url: "/naily-logo.png", sizes: "192x192", type: "image/png" },
+    { url: "/naily-logo-big.png", sizes: "512x512", type: "image/png" },
+  ],
   openGraph: {
     type: "website",
     url: "https://naily.pl",
-    title: "Naily: Strona dla stylistek Manicure i Pedicure",
+    siteName: "Naily",
+    locale: "pl_PL",
+    title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
     description:
-      "Stylistki manicure i pedicure, szkolenia w branży, oferty pracy, cenniki, rezerwacje",
-    siteName: "naily.pl",
+      "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci, sprawdź cenniki i zarezerwuj wizytę online.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1200&h=630&fit=crop&crop=center&auto=format",
         width: 1200,
         height: 630,
-        alt: "Profesjonalny manicure",
+        alt: "Naily - Platforma dla stylistek manicure i pedicure - Rezerwacje online",
+        type: "image/jpeg",
       },
       {
         url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&h=630&fit=crop&crop=center&auto=format",
         width: 1200,
         height: 630,
-        alt: "Manicure w salonie",
+        alt: "Profesjonalny manicure w salonie - Naily",
+        type: "image/jpeg",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Naily: Strona dla stylistek Manicure i Pedicure",
+    site: "@Naily",
+    title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
     description:
-      "Stylistki manicure i pedicure, szkolenia w branży, oferty pracy, cenniki, rezerwacje",
+      "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci i zarezerwuj wizytę online.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1200&h=630&fit=crop&crop=center&auto=format",
-        alt: "Profesjonalny manicure",
+        alt: "Naily - Platforma dla stylistek manicure i pedicure",
       },
     ],
+  },
+  other: {
+    "theme-color": "#2563eb",
   },
 };

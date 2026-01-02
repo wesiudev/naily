@@ -1,4 +1,3 @@
-"use server";
 import { BlogGrid } from "./BlogLayout";
 
 async function fetchRecent(limit = 6) {

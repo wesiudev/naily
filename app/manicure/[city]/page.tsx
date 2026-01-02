@@ -18,6 +18,7 @@ import {
   FaClock,
   FaPhone,
   FaArrowRight,
+  FaTags,
 } from "react-icons/fa";
 import { MdSpa } from "react-icons/md";
 import { FaCheck, FaUserNinja } from "react-icons/fa6";
@@ -28,6 +29,7 @@ import slug3 from "../../../public/slug/slug3.png";
 import Logic from "@/components/SearchBar/Logic";
 import UserSliderWrapper from "@/components/CityPage/UserSliderWrapper";
 import UserCard from "@/components/CityPage/UserCard";
+import PricingTable, { type PricingItem } from "@/components/CityPage/PricingTable";
 import { getUserById, getUsers, db } from "@/firebase";
 import { User } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
@@ -83,7 +85,7 @@ function generateStructuredData(city: ICity, serviceType: "manicure" | "pedicure
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "Jak zarezerwować wizytę w tym mieście?",
+            "name": `Jak zarezerwować wizytę manicure w ${city.name}?`,
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem. Szczególnie w sezonie letnim i przed ważnymi wydarzeniami, gdy zapotrzebowanie na usługi manicure jest większe, warto planować wizyty z kilkutygodniowym wyprzedzeniem."
@@ -145,6 +147,121 @@ async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
     return null;
   }
 }
+
+const manicurePricing: PricingItem[] = [
+  {
+    id: "manicure-classic",
+    name: "Manicure klasyczny z odżywką",
+    minPrice: 110,
+    maxPrice: 110,
+    description: "Podstawowy manicure z lakierem klasycznym, pielęgnacją skórek, kształtowaniem paznokci oraz odżywką wzmacniającą płytkę paznokcia.",
+  },
+  {
+    id: "manicure-hybrid",
+    name: "Manicure hybrydowy (jeden kolor)",
+    minPrice: 80,
+    maxPrice: 80,
+    description: "Trwały manicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 3 tygodni. Idealny dla osób, które chcą długotrwałej ochrony i pięknego wyglądu paznokci.",
+  },
+  {
+    id: "manicure-japanese",
+    name: "Manicure japoński",
+    minPrice: 220,
+    maxPrice: 220,
+    description: "Tradycyjny japoński manicure z użyciem naturalnych składników, delikatnym polerowaniem i specjalnymi odżywkami. Metoda znana z regeneracji i wzmocnienia paznokci.",
+  },
+  {
+    id: "manicure-spa",
+    name: "Manicure SPA (z peelingiem i maską)",
+    minPrice: 180,
+    maxPrice: 180,
+    description: "Luksusowy manicure z pełną pielęgnacją dłoni, peelingiem, maseczką nawilżającą i relaksującym masażem. Kompleksowa regeneracja skóry dłoni i paznokci.",
+  },
+  {
+    id: "manicure-male",
+    name: "Manicure męski",
+    minPrice: 130,
+    maxPrice: 130,
+    description: "Profesjonalna pielęgnacja paznokci i dłoni dla mężczyzn, obejmująca czyszczenie, kształtowanie i polerowanie paznokci oraz pielęgnację skórek.",
+  },
+  {
+    id: "nail-extension-gel",
+    name: "Przedłużanie paznokci żelem na formie",
+    minPrice: 80,
+    maxPrice: 120,
+    description: "Przedłużanie paznokci metodą żelową z użyciem form. Trwała i naturalnie wyglądająca metoda, która pozwala na uzyskanie dowolnej długości i kształtu paznokci.",
+  },
+  {
+    id: "nail-extension-acrylic",
+    name: "Przedłużanie paznokci metodą akrylową",
+    minPrice: 90,
+    maxPrice: 90,
+    description: "Przedłużanie paznokci przy użyciu akrylu - wytrzymała metoda, która zapewnia długotrwały efekt i możliwość tworzenia różnych kształtów i długości.",
+  },
+  {
+    id: "french-manicure",
+    name: "Stylizacja French Manicure",
+    minPrice: 220,
+    maxPrice: 220,
+    description: "Klasyczna stylizacja French Manicure z białymi końcówkami i naturalnym różowym tłem. Elegancki i ponadczasowy wygląd, idealny na każdą okazję.",
+  },
+  {
+    id: "baby-boomer",
+    name: "Stylizacja Baby Boomer",
+    minPrice: 180,
+    maxPrice: 180,
+    description: "Stylizacja Baby Boomer z efektem gradientu od naturalnego różu do białego. Delikatny i naturalny wygląd z subtelnym przejściem kolorów.",
+  },
+  {
+    id: "artistic-decoration",
+    name: "Ręczne zdobienie artystyczne",
+    minPrice: 80,
+    maxPrice: 80,
+    description: "Unikalne ręczne zdobienia paznokci wykonane przez doświadczoną stylistkę. Możliwość stworzenia indywidualnych wzorów, rysunków i dekoracji zgodnie z Twoimi preferencjami.",
+  },
+  {
+    id: "nail-reconstruction",
+    name: "Rekonstrukcja płytki paznokcia",
+    minPrice: 90,
+    maxPrice: 90,
+    description: "Specjalistyczna rekonstrukcja uszkodzonej lub zniszczonej płytki paznokcia. Metoda przywracająca naturalny wygląd i funkcjonalność paznokcia.",
+  },
+  {
+    id: "nail-hardening",
+    name: "Utwardzenie naturalnej płytki żelem lub bazą budującą",
+    minPrice: 140,
+    maxPrice: 140,
+    description: "Wzmocnienie naturalnych paznokci za pomocą żelu lub bazy budującej. Idealne rozwiązanie dla osób z kruchymi i łamliwymi paznokciami, które chcą je wzmocnić bez przedłużania.",
+  },
+  {
+    id: "acrylic-fill",
+    name: "Uzupełnienie paznokci akrylowych",
+    minPrice: 100,
+    maxPrice: 100,
+    description: "Uzupełnienie odrostu paznokci wykonanych metodą akrylową. Regularna korekta pozwala na utrzymanie pięknego wyglądu i przedłużenie trwałości stylizacji.",
+  },
+  {
+    id: "gel-fill",
+    name: "Uzupełnienie paznokci żelowych",
+    minPrice: 170,
+    maxPrice: 170,
+    description: "Uzupełnienie odrostu paznokci wykonanych metodą żelową. Profesjonalna korekta z zachowaniem spójności stylizacji i jakości wykonania.",
+  },
+  {
+    id: "titanium-fill",
+    name: "Uzupełnienie paznokci tytanowych",
+    minPrice: 120,
+    maxPrice: 120,
+    description: "Uzupełnienie odrostu paznokci wykonanych metodą tytanową. Specjalistyczna korekta zapewniająca długotrwałą trwałość i wytrzymałość stylizacji.",
+  },
+  {
+    id: "ibx-treatment",
+    name: "Kuracja regeneracyjna IBX System na paznokcie",
+    minPrice: 50,
+    maxPrice: 50,
+    description: "Profesjonalna kuracja regeneracyjna IBX System wzmacniająca i naprawiająca uszkodzoną płytkę paznokcia. Idealna dla paznokci łamliwych, rozdwajających się lub osłabionych.",
+  },
+];
 
 const preVisitFaq: FaqItem[] = [
   {
@@ -343,7 +460,32 @@ export default async function ServiceCitySlug({
 
   // Generate structured data for SEO
   const structuredData = generateStructuredData(city, "manicure");
-
+  const cityFaq: FaqItem[] = [
+    {
+      id: "booking-city",
+      question: `Jak zarezerwować wizytę manicure w ${city.name}?`,
+      answer:
+        `Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem.`,
+    },
+    {
+      id: "prices-city",
+      question: "Czy ceny różnią się między specjalistkami?",
+      answer:
+        `Tak, ceny usług manicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy manicure klasyczny może kosztować od 60 do 120 złotych, manicure hybrydowy od 90 do 150 złotych, a przedłużanie paznokci od 100 do 200 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia czy przedłużanie paznokci.`,
+    },
+    {
+      id: "location-city",
+      question: "Jak sprawdzić lokalizację salonu?",
+      answer:
+        "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony.",
+    },
+    {
+      id: "change-city",
+      question: "Czy mogę zmienić termin wizyty?",
+      answer:
+        "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu.",
+    },
+  ];
   return (
     <div className="min-h-screen bg-white">
       {/* JSON-LD Structured Data for SEO */}
@@ -367,7 +509,7 @@ export default async function ServiceCitySlug({
             <div className="mt-6">
               <Logic slugCity={city.name} variant="inline" />
             </div>
-            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 06.12.2025</p>
+            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 02.01.2026</p>
           </div>
 
           {/* Results responsive grid cards */}
@@ -477,7 +619,39 @@ export default async function ServiceCitySlug({
           </div>
         </div>
       </section>
+     {/* Ceny Manicure Section */}
+     <section className="relative py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-blue-200/20 blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full bg-purple-200/20 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-blue-100/10 blur-3xl"></div>
+        </div>
 
+        <div className="relative z-10 container mx-auto max-w-4xl">
+          {/* Enhanced Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-200/50 mb-4 sm:mb-6 shadow-sm">
+              <FaTags className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 mb-3 leading-tight">
+              Cennik usług manicure
+            </h2>
+            <p className="text-base sm:text-lg text-neutral-600 font-poppins max-w-2xl mx-auto">
+              Sprawdź szczegółowy cennik wszystkich usług manicure. Ceny mogą się różnić w zależności od stylistki i zakresu usługi.
+            </p>
+          </div>
+
+          {/* Enhanced Pricing Table Container */}
+          <div className="relative">
+            {/* Decorative border accent */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-20 blur-sm"></div>
+            <div className="relative bg-white rounded-xl shadow-xl border border-neutral-200/50 p-6 sm:p-8">
+              <PricingTable items={manicurePricing} />
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Manicure Hybrydowy Section */}
       {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
         <section className="py-20 px-6 bg-white">
@@ -536,59 +710,11 @@ export default async function ServiceCitySlug({
         </section>
       )}
 
-      {/* Ceny Manicure Section */}
-      <section className="py-20 px-6 bg-white">
-        <div className="container">
-          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-            Ceny manicure {city.name} w 2026
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border border-purple-200">
-              <h3 className="text-2xl font-baloo font-bold text-purple-900 mb-4">
-                Manicure klasyczny
-              </h3>
-              <div className="text-4xl font-bold text-purple-700 mb-2">
-                od 70 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Podstawowy manicure z lakierem klasycznym, pielęgnacją skórek i kształtowaniem paznokci.
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border border-blue-200">
-              <h3 className="text-2xl font-baloo font-bold text-blue-900 mb-4">
-                Manicure hybrydowy
-              </h3>
-              <div className="text-4xl font-bold text-blue-700 mb-2">
-                od 80 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Trwały manicure hybrydowy z lakierem UV/LED, utrzymujący się nawet do 3 tygodni.
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-8 border border-pink-200">
-              <h3 className="text-2xl font-baloo font-bold text-pink-900 mb-4">
-                Przedłużanie paznokci
-              </h3>
-              <div className="text-4xl font-bold text-pink-700 mb-2">
-                od 120 zł
-              </div>
-              <p className="text-neutral-600 font-poppins text-sm">
-                Przedłużanie paznokci metodą żelową lub akrylową z możliwością zdobień.
-              </p>
-            </div>
-          </div>
-          <p className="mt-6 text-neutral-600 font-poppins text-sm text-center">
-            * Ceny mogą się różnić w zależności od stylistki, lokalizacji i zakresu usługi. Aktualny cennik znajdziesz na profilu każdej specjalistki.
-          </p>
-        </div>
-      </section>
+ 
 
       {/* Najczęstsze Pytania Section */}
       <section className="py-20 px-6 bg-neutral-50">
         <div className="container">
-          <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-            Najczęstsze pytania przed wizytą
-          </h2>
           <FAQ className="animate-fade-in-up" items={preVisitFaq} />
         </div>
       </section>
@@ -988,29 +1114,4 @@ export async function generateMetadata({
   };
 }
 
-const cityFaq: FaqItem[] = [
-  {
-    id: "booking-city",
-    question: "Jak zarezerwować wizytę w tym mieście?",
-    answer:
-      "Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem.",
-  },
-  {
-    id: "prices-city",
-    question: "Czy ceny różnią się między specjalistkami?",
-    answer:
-      "Tak, ceny usług manicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy manicure klasyczny może kosztować od 40 do 80 złotych, manicure hybrydowy od 60 do 120 złotych, a przedłużanie paznokci od 100 do 200 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia czy przedłużanie paznokci.",
-  },
-  {
-    id: "location-city",
-    question: "Jak sprawdzić lokalizację salonu?",
-    answer:
-      "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony.",
-  },
-  {
-    id: "change-city",
-    question: "Czy mogę zmienić termin wizyty?",
-    answer:
-      "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu.",
-  },
-];
+

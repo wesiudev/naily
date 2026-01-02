@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaEdit, FaCheck, FaTimes, FaBell, FaCog, FaCrown, FaCheckCircle, FaSpinner, FaExclamationCircle } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaEdit, FaCheck, FaTimes, FaBell, FaCog, FaCrown, FaCheckCircle, FaSpinner, FaExclamationCircle, FaGraduationCap } from "react-icons/fa";
 import Image from "next/image";
 import { requestNotificationPermission, hasNotificationPermission, showNotification } from "@/utils/pushNotifications";
 import { toast } from "react-toastify";
@@ -18,6 +18,7 @@ export default function SettingsTab({
   onSaveMetadata,
   getSafeSettings,
   onToggleSetting,
+  onSaveTrainingType,
 }) {
   const [editingSeo, setEditingSeo] = useState({
     title: false,
@@ -873,6 +874,51 @@ export default function SettingsTab({
               ></div>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Training Settings */}
+      <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-purple-100 shadow-sm">
+        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+            <FaGraduationCap className="text-white text-sm md:text-base" />
+          </div>
+          Szkolenia
+        </h3>
+        <div className="space-y-3">
+          <label className="block text-sm md:text-base font-semibold text-gray-700 mb-3">
+            Czy prowadzisz szkolenia manicure lub pedicure?
+          </label>
+          <div className="space-y-2">
+            {[
+              { id: "manicure", label: "Prowadzę szkolenia manicure" },
+              { id: "pedicure", label: "Prowadzę szkolenia pedicure" },
+              { id: "both", label: "Prowadzę szkolenia manicure oraz pedicure" },
+              { id: "none", label: "Nie prowadzę szkoleń" },
+            ].map((option) => (
+              <button
+                key={option.id}
+                onClick={() => onSaveTrainingType(option.id)}
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                  user?.trainingType === option.id
+                    ? "border-purple-500 bg-purple-50 shadow-md"
+                    : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-900 text-sm md:text-base">
+                    {option.label}
+                  </span>
+                  {user?.trainingType === option.id && (
+                    <FaCheckCircle className="text-purple-600 text-lg" />
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs md:text-sm text-gray-500 mt-3">
+            Twój profil będzie widoczny na odpowiednich stronach szkoleń w zależności od wyboru.
+          </p>
         </div>
       </div>
 

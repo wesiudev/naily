@@ -10,8 +10,12 @@ import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
 import { FaCheck, FaMapMarkerAlt, FaClock, FaUser, FaCertificate, FaChartLine, FaDollarSign, FaGraduationCap, FaStar } from "react-icons/fa";
 import Logic from "@/components/SearchBar/Logic";
 import { fetchTrainingOffersByCity } from "@/firebase";
-import { TrainingOffer } from "@/types";
+import { TrainingOffer, User } from "@/types";
 import TestimonialsCarousel from "@/components/Testimonials/Carousel";
+import { getCityUsers } from "@/utils/getCityUsers";
+import { getUsers as getAllUsers } from "@/utils/getUsers";
+import { createLinkFromText } from "@/utils/createLinkFromText";
+import UserCard from "@/components/CityPage/UserCard";
 
 // Enable ISR: Revalidate every hour to keep training offers fresh while maintaining fast static pages
 // Pages are generated on-demand (on first request) and then cached - no need to pre-generate all at build time
@@ -31,6 +35,44 @@ export default async function SzkoleniaCityPage({
 
   // Fetch training offers for this city
   const trainingOffers = await fetchTrainingOffersByCity(city.id) as TrainingOffer[];
+
+  // Fetch users (instructors) who offer manicure courses
+  const cityUsers = await getCityUsers(city.id);
+  const allUsers = await getAllUsers() as User[];
+  
+  // Filter users by trainingType: "manicure" or "both"
+  const instructorUsers = [
+    ...cityUsers.filter((user: User) => {
+      const trainingType = user.trainingType || "none";
+      return (trainingType === "manicure" || trainingType === "both") && 
+             Boolean(user?.configured) && 
+             Boolean(user?.settings?.publicProfile ?? true);
+    }),
+    ...allUsers.filter((user: User) => {
+      const trainingType = user.trainingType || "none";
+      const hasNoCity = !user?.location?.address || user.location.address.trim() === "";
+      return (trainingType === "manicure" || trainingType === "both") &&
+             hasNoCity &&
+             Boolean(user?.configured) && 
+             Boolean(user?.settings?.publicProfile ?? true);
+    }).map((user: User) => ({
+      ...user,
+      location: {
+        ...user.location,
+        address: city.name,
+      },
+    })),
+  ];
+
+  // Sort instructors by priorityLevel
+  const sortedInstructors = instructorUsers.sort((a: User, b: User) => {
+    const priorityA = a.priorityLevel ?? 0;
+    const priorityB = b.priorityLevel ?? 0;
+    if (priorityB !== priorityA) {
+      return priorityB - priorityA;
+    }
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
   // Get nearby cities (excluding villages)
   const allCities: ICity[] = await getCities();
@@ -54,16 +96,30 @@ export default async function SzkoleniaCityPage({
         <div className="container">
           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              Kurs manicure {city.name} 2026 - Szkolenie hybryda {city.name}
-            </h1>
-            <p className="text-gray-500 max-w-2xl font-poppins font-normal text-base sm:text-lg">
-              Profesjonalne szkolenia i kursy z manicure w {city.name}. Ile kosztuje kurs stylizacji paznokci? Sprawdź cennik szkoleń hybrydowych i opinie absolwentek kursów. Rozwijaj swoje umiejętności pod okiem doświadczonych instruktorów.
+              Kursy i szkolenia manicure {city.name} 2026
+            </h1> 
+            <p className="text-gray-500 font-poppins font-normal text-base sm:text-lg">
+              Profesjonalne szkolenia i kursy z manicure w {city.name}. Ile kosztuje kurs stylizacji paznokci? Sprawdź cennik szkoleń i rozwijaj swoje umiejętności pod okiem doświadczonych instruktorek.
             </p>
-            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 06.12.2025</p>
+            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 02.01.2026</p>
             <div className="mt-6">
               <Logic slugCity={city.name} variant="inline" baseRoute="szkolenia-manicure" />
             </div>
           </div>
+
+          {/* Instructors Section */}
+          {sortedInstructors.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-3xl lg:text-4xl font-baloo font-bold text-neutral-900 mb-6">
+                Instruktorki manicure {city.name}
+              </h2>
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+                {sortedInstructors.map((instructor: User) => (
+                  <UserCard key={instructor.uid} user={instructor} cityParam={city.id} />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Training Offers List */}
           {trainingOffers.length > 0 && (
@@ -479,8 +535,8 @@ export async function generateMetadata({
   const cityData: ICity = await getSingleCity(city);
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
   return {
-    title: `Kurs manicure ${cityData.name} 2026 - Szkolenie hybryda ${cityData.name} | Ile kosztuje kurs stylizacji paznokci`,
-    description: `Kurs manicure ${cityData.name} - sprawdź ile kosztuje kurs stylizacji paznokci w 2026. Szkolenie hybryda ${cityData.name}, opinie absolwentek kursów, ile zarobisz po kursie manicure. Profesjonalne kursy z certyfikatami.`,
+    title: `Kursy i szkolenia manicure ${cityData.name} 2026 Zarobki stylistek`,
+    description: `Sprawdź ile kosztuje kurs stylizacji paznokci w 2026. Ile zarobisz po kursie manicure. Profesjonalne kursy z certyfikatami.`,
     keywords: `kurs manicure ${cityData.name}, szkolenie hybryda ${cityData.name}, ile kosztuje kurs stylizacji paznokci, kurs manicure ${cityData.name} 2026, szkolenia manicure ${cityData.name}, opinie absolwentek kursów manicure`,
     openGraph: {
       type: "website",
