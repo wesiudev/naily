@@ -227,7 +227,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
-    siteName: "Naily",
+    siteName: "Naily",  
     locale: "pl_PL",
     title: "Naily: Strona dla stylistek Manicure i Pedicure | Rezerwacje Online",
     description:

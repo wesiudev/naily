@@ -2,7 +2,6 @@ import NotFound from "@/app/not-found";
 import JoinNowButton from "@/components/AdCard/JoinNowButton";
 import Link from "next/link";
 import { getCityUsers } from "@/utils/getCityUsers";
-import { getUsers as getAllUsers } from "@/utils/getUsers";
 import { ICity } from "@/types";
 import { getSingleCity } from "@/utils/getSingleCity";
 import { getCities } from "@/utils/getCities";
@@ -313,29 +312,8 @@ export default async function ServiceCitySlug({
   // Fetch registered users matching city
   const cityUsers = await getCityUsers(city.id);
   
-  // Fetch users without a city (empty location address)
-  const allUsers = await getAllUsers() as User[];
-  const usersWithoutCity = allUsers.filter((user: User) => {
-    const isConfigured = Boolean(user?.configured);
-    const isPublic = Boolean(user?.settings?.publicProfile ?? true);
-    const hasNoCity = !user?.location?.address || user.location.address.trim() === "";
-    return hasNoCity && isConfigured && isPublic;
-  });
-  
-  // Merge city users with users without city, assigning city name to users without city
-  const mergedUsers = [
-    ...cityUsers,
-    ...usersWithoutCity.map((user: User) => ({
-      ...user,
-      location: {
-        ...user.location,
-        address: city.name, // Assign city name from slug
-      },
-    })),
-  ];
-  
-  // Sort merged users by priorityLevel, then by name
-  const sortedMergedUsers = mergedUsers.sort((a: User, b: User) => {
+  // Sort city users by priorityLevel, then by name
+  const sortedMergedUsers = cityUsers.sort((a: User, b: User) => {
     const priorityA = a.priorityLevel ?? 0;
     const priorityB = b.priorityLevel ?? 0;
     if (priorityB !== priorityA) {

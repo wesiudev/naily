@@ -297,13 +297,13 @@ export default async function UserPublicProfile({
       }));
     } else {
       // Fallback: try Firestore subcollection (legacy method)
-      try {
-        const colRef = collection(db, "users", user.uid, "portfolio");
-        const q = query(colRef, orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        portfolio = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-      } catch (_) {
-        portfolio = [];
+    try {
+      const colRef = collection(db, "users", user.uid, "portfolio");
+      const q = query(colRef, orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      portfolio = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    } catch (_) {
+      portfolio = [];
       }
     }
   }

@@ -313,7 +313,7 @@ export default function Header({
         <div className="">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex py-2.5 sm:py-3 lg:py-6 justify-between items-center gap-3 sm:gap-4">
-              <div className="flex flex-row w-full justify-between items-center min-w-0">
+              <div className="flex flex-row w-full lg:w-auto justify-between items-center min-w-0">
                 {/* Mobile Menu Button */}
                 <div className="w-max flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
                   <button
@@ -346,22 +346,7 @@ export default function Header({
               <div className="hidden lg:flex rounded-xl p-2 h-max space-x-6 xl:space-x-8 px-3 items-center w-full justify-between">
                 <nav className="flex items-center space-x-6 xl:space-x-8 flex-1">
                   {/* Primary Navigation Items */}
-                  <Link
-                    href="/szkolenia"
-                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
-                      pathname === "/login" ? "text-white" : "text-zinc-800"
-                    }`}
-                  >
-                    Szkolenia
-                  </Link>
-                  <Link
-                    href="/kariera"
-                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
-                      pathname === "/login" ? "text-white" : "text-zinc-800"
-                    }`}
-                  >
-                    Kariera
-                  </Link>
+                  
 
                   {isFeatureEnabled("affiliate") && (
                   <div className="relative" ref={earnMenuRef}>
@@ -437,6 +422,30 @@ export default function Header({
                   )}
                 </nav>
 
+                {/* Search Bar */}
+                <div className="flex items-center mx-4 flex-shrink-0">
+                  <HeaderSearch 
+                    placeholder="Szukaj miasta..." 
+                    showSearchType={true}
+                    defaultSearchType="manicure"
+                  />
+                </div>
+                <Link
+                    href="/szkolenia"
+                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                      pathname === "/login" ? "text-white" : "text-zinc-800"
+                    }`}
+                  >
+                    Szkolenia
+                  </Link>
+                  <Link
+                    href="/kariera"
+                    className={`text-base transition-colors duration-200 font-semibold whitespace-nowrap hover:opacity-80 ${
+                      pathname === "/login" ? "text-white" : "text-zinc-800"
+                    }`}
+                  >
+                    Kariera
+                  </Link>
                 {/* User Actions - Secondary Navigation */}
                 <div className="flex items-center space-x-4 xl:space-x-6 ml-4 pl-4 xl:pl-6 border-l border-neutral-200">
                   {user?.uid ? (
@@ -605,7 +614,11 @@ export default function Header({
             <div className="flex-1 overflow-y-auto p-6">
               {/* Header Search (mobile) */}
               <div className="mb-6">
-                <HeaderSearch />
+                <HeaderSearch 
+                  placeholder="Szukaj miasta..." 
+                  showSearchType={true}
+                  defaultSearchType="manicure"
+                />
               </div>
               
               {/* Login CTA - Prominent at top when not logged in */}

@@ -239,13 +239,13 @@ export default function TestimonialsCarousel() {
                   </p>
                   <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
                     <div className="relative">
-                      <Image
-                        src={t.image}
-                        alt={t.name}
+                    <Image
+                      src={t.image}
+                      alt={t.name}
                         width={48}
                         height={48}
                         className="rounded-full aspect-square object-cover ring-2 ring-neutral-100"
-                      />
+                    />
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -265,17 +265,17 @@ export default function TestimonialsCarousel() {
         {/* Container with proper padding to show cards fully */}
         <div className="overflow-hidden">
           <div className="px-4 sm:px-6 lg:px-8">
-            <motion.div
+        <motion.div
               className="flex gap-4 sm:gap-6"
               animate={{ x: `-${index * cardWidth}px` }}
-              transition={{ type: "spring", stiffness: 80, damping: 20 }}
+          transition={{ type: "spring", stiffness: 80, damping: 20 }}
               style={{ willChange: 'transform' }}
-            >
-              {items.map((t, idx) => (
-                <article
-                  key={idx}
+        >
+          {items.map((t, idx) => (
+            <article
+              key={idx}
                   className="group flex-shrink-0 w-[280px] sm:w-[340px] lg:w-[420px] p-6 sm:p-8 lg:p-10 rounded-2xl border-2 border-neutral-200/80 bg-white shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-1"
-                >
+            >
               {/* Rating */}
               <div className="flex items-center gap-1.5 mb-4">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -298,13 +298,13 @@ export default function TestimonialsCarousel() {
               {/* Author Info */}
               <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
                 <div className="relative">
-                  <Image
-                    src={t.image}
-                    alt={t.name}
+                <Image
+                  src={t.image}
+                  alt={t.name}
                     width={48}
                     height={48}
                     className="rounded-full aspect-square object-cover ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all"
-                  />
+                />
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -316,7 +316,7 @@ export default function TestimonialsCarousel() {
               </div>
             </article>
           ))}
-          </motion.div>
+        </motion.div>
           </div>
         </div>
 

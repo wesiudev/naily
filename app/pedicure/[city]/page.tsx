@@ -2,7 +2,6 @@ import NotFound from "@/app/not-found";
 import JoinNowButton from "@/components/AdCard/JoinNowButton";
 import Link from "next/link";
 import { getCityUsers } from "@/utils/getCityUsers";
-import { getUsers as getAllUsers } from "@/utils/getUsers";
 import { ICity } from "@/types";
 import { getSingleCity } from "@/utils/getSingleCity";
 import { getCities } from "@/utils/getCities";
@@ -250,29 +249,8 @@ export default async function ServiceCitySlug({
   // Fetch registered users matching city
   const cityUsers = await getCityUsers(city.id);
   
-  // Fetch users without a city (empty location address)
-  const allUsers = await getAllUsers() as User[];
-  const usersWithoutCity = allUsers.filter((user: User) => {
-    const isConfigured = Boolean(user?.configured);
-    const isPublic = Boolean(user?.settings?.publicProfile ?? true);
-    const hasNoCity = !user?.location?.address || user.location.address.trim() === "";
-    return hasNoCity && isConfigured && isPublic;
-  });
-  
-  // Merge city users with users without city, assigning city name to users without city
-  const mergedUsers = [
-    ...cityUsers,
-    ...usersWithoutCity.map((user: User) => ({
-      ...user,
-      location: {
-        ...user.location,
-        address: city.name, // Assign city name from slug
-      },
-    })),
-  ];
-  
-  // Sort merged users by priorityLevel, then by name
-  const sortedMergedUsers = mergedUsers.sort((a: User, b: User) => {
+  // Sort city users by priorityLevel, then by name
+  const sortedMergedUsers = cityUsers.sort((a: User, b: User) => {
     const priorityA = a.priorityLevel ?? 0;
     const priorityB = b.priorityLevel ?? 0;
     if (priorityB !== priorityA) {
@@ -612,12 +590,12 @@ export default async function ServiceCitySlug({
               <FaTags className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 mb-3 leading-tight">
-              Ceny pedicure {city.name} w 2026
-            </h2>
+            Ceny pedicure {city.name} w 2026
+          </h2>
             <p className="text-base sm:text-lg text-neutral-600 font-poppins max-w-2xl mx-auto">
               Sprawdź szczegółowy cennik wszystkich usług pedicure. Ceny mogą się różnić w zależności od stylistki i zakresu usługi.
-            </p>
-          </div>
+              </p>
+            </div>
 
           {/* Enhanced Pricing Table Container */}
           <div className="relative">
@@ -625,8 +603,8 @@ export default async function ServiceCitySlug({
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-20 blur-sm"></div>
             <div className="relative bg-white rounded-xl shadow-xl border border-neutral-200/50 p-6 sm:p-8">
               <PricingTable items={pedicurePricing} />
+              </div>
             </div>
-          </div>
         </div>
       </section>
 

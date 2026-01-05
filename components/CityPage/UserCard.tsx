@@ -45,7 +45,7 @@ export default function UserCard({ user, cityParam }: UserCardProps) {
   };
   const portfolioImages = getPortfolioImages();
 
-  const userSlug = user.userSlugUrl || user.uid;
+    const userSlug = user.userSlugUrl || user.uid;
   const profileUrl = `/zarezerwuj/${userSlug}`;
 
   return (

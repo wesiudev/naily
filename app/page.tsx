@@ -8,8 +8,7 @@ import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
 import RecentPostsWrapper from "@/components/Blog/RecentPostsWrapper";
 
 export default function Home() {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
-  
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";  
   // Generate JSON-LD structured data for homepage
   const structuredData = {
     "@context": "https://schema.org",
@@ -104,7 +103,7 @@ function WhatMakesUsUniqueSection() {
             </svg>
           </div>
           <h2 className="font-baloo text-3xl sm:text-4xl md:text-5xl xl:text-6xl mb-4 text-zinc-800 font-bold leading-tight">
-            Tysiące stylistek manicure i pedicure
+            Tysiące stylistek i kosmetyczek
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-zinc-600 font-poppins leading-relaxed">
             Dołącz do społeczności stylistek, instruktorek i salonów, które już korzystają z Naily
@@ -154,10 +153,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "https://naily.pl"),
-  title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
+  title: "Zarezerwuj Kosmetyczkę | Kosmetyczki blisko Ciebie | Naily",
   description:
-    "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci w swoim mieście, sprawdź cenniki, zobacz portfolio prac i zarezerwuj wizytę online. Dla stylistek: szkolenia, oferty pracy i narzędzia do zarządzania rezerwacjami.",
+    "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
   keywords: [
+    "kosmetyczki blisko Ciebie",
     "naily",
     "naily.pl",
     "manicure",
@@ -213,7 +213,7 @@ export const metadata: Metadata = {
     locale: "pl_PL",
     title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
     description:
-      "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci, sprawdź cenniki i zarezerwuj wizytę online.",
+      "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1200&h=630&fit=crop&crop=center&auto=format",
@@ -234,9 +234,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@Naily",
-    title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
+    title: "Zarezerwuj Kosmetyczkę | Kosmetyczki blisko Ciebie | Naily",
     description:
-      "Naily to największa platforma łącząca klientki ze sprawdzonymi stylistkami manicure i pedicure w całej Polsce. Znajdź najlepsze salony paznokci i zarezerwuj wizytę online.",
+      "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=1200&h=630&fit=crop&crop=center&auto=format",

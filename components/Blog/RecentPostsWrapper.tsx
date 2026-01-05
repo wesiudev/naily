@@ -1,11 +1,4 @@
-"use client";
-import { isFeatureEnabled } from "@/lib/featureFlags";
-import dynamic from "next/dynamic";
-
-const RecentPosts = dynamic(
-  () => import("./RecentPosts"),
-  { ssr: false }
-);
+import RecentPosts from "./RecentPosts";
 
 export default function RecentPostsWrapper({
   limit,
@@ -14,10 +7,8 @@ export default function RecentPostsWrapper({
   limit?: number;
   columns?: 1 | 2 | 3 | 4;
 }) {
-  if (!isFeatureEnabled("blog")) {
-    return null;
-  }
-
+  // Always show blog posts if they exist
+  // The feature flag only controls navigation links, not content display
   return <RecentPosts limit={limit} columns={columns} />;
 }
 

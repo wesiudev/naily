@@ -1,18 +1,32 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { createLinkFromText } from "@/utils/createLinkFromText";
+import { FaChevronDown } from "react-icons/fa";
 
 type City = {
   name: string;
   id: string;
 };
 
+type SearchType = "manicure" | "pedicure" | "szkolenia" | "kariera";
+
+const searchTypeLabels: Record<SearchType, string> = {
+  manicure: "Manicure",
+  pedicure: "Pedicure",
+  szkolenia: "Szkolenia",
+  kariera: "Kariera",
+};
+
 export default function HeaderSearch({
   placeholder = "Miasto",
+  showSearchType = false,
+  defaultSearchType = "manicure",
 }: {
   placeholder?: string;
+  showSearchType?: boolean;
+  defaultSearchType?: SearchType;
 }) {
   const [city, setCity] = useState<City>({ name: "", id: "" });
   const [currentCitiesArray, setCurrentCitiesArray] = useState<City[]>([]);
@@ -21,7 +35,11 @@ export default function HeaderSearch({
   const [debouncedCityName, setDebouncedCityName] = useState<string>("");
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const [searchType, setSearchType] = useState<SearchType>(defaultSearchType);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -77,6 +95,40 @@ export default function HeaderSearch({
     };
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isDropdownOpen]);
+
+  // Reset navigating state when route changes
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [pathname]);
+
+  const getSearchPath = (type: SearchType, citySlug: string): string => {
+    switch (type) {
+      case "manicure":
+        return `/manicure/${citySlug}`;
+      case "pedicure":
+        return `/pedicure/${citySlug}`;
+      case "szkolenia":
+        return `/szkolenia-manicure/${citySlug}`;
+      case "kariera":
+        return `/kariera/${citySlug}`;
+      default:
+        return `/manicure/${citySlug}`;
+    }
+  };
+
   const search = () => {
     if (!city.name.length) {
       toast.error("Proszę wybrać miasto.");
@@ -85,12 +137,48 @@ export default function HeaderSearch({
     setIsNavigating(true);
     // Use city.id if available (from dropdown selection), otherwise create link from name
     const citySlug = city.id || createLinkFromText(city.name);
-    router.push(`/manicure/${citySlug}`);
+    const path = getSearchPath(searchType, citySlug);
+    router.push(path);
   };
 
   return (
-    <div className="relative w-full md:max-w-[320px] h-full flex items-end justify-end">
-      <div className="gap-2 relative flex h-max">
+    <div className="relative w-full md:max-w-[400px] h-full flex items-end justify-end">
+      <div className="gap-2 relative flex h-max w-full">
+        <div className="">
+        {showSearchType && (
+          <div className="cursor-pointer absolute left-1 md:left-2 top-1/2 -translate-y-1/2" ref={dropdownRef}>
+            <div
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`flex items-center rounded-full py-2 px-1.5 md:px-2 md:py-1 text-[10px] md:text-xs transition-colors whitespace-nowrap focus:outline-none
+                ${searchType === "manicure" && "bg-blue-600 text-white"}
+                ${searchType === "pedicure" && "bg-green-600 text-white"}
+                ${searchType === "szkolenia" && "bg-yellow-600 text-white"}
+                ${searchType === "kariera" && "bg-purple-600 text-white"}
+                `}
+            >
+              <span className="font-bold text-white">{searchTypeLabels[searchType]}</span>
+            </div>
+            {isDropdownOpen && (
+              <div className="absolute left-0 top-full mt-1 w-40 bg-white border border-neutral-200 rounded-lg shadow-xl z-50">
+                {(["manicure", "pedicure", "szkolenia", "kariera"] as SearchType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setSearchType(type);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                      searchType === type ? "bg-blue-50 text-blue-700 font-semibold" : "text-zinc-700"
+                    }`}
+                  >
+                    {searchTypeLabels[type]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <input
           type="text"
           value={city.name}
@@ -105,40 +193,29 @@ export default function HeaderSearch({
           }}
           placeholder={placeholder}
           disabled={isNavigating}
-          className="focus:outline-none border border-neutral-200 block w-full bg-white text-sm rounded-lg pl-10 pr-20 shadow-sm disabled:opacity-60"
+          className={`focus:outline-none border border-neutral-200 block w-full bg-white text-xs md:text-sm rounded-full pl-18 md:pl-24  py-1.5 md:py-2 shadow-sm disabled:opacity-60 h-10`}
           autoComplete="off"
         />
-        <div className="w-max">
-          <button
+        <button 
             onClick={search}
-            disabled={!city.name.length || isNavigating}
-            className={`px-3 rounded-lg text-xs ${
+        
+        disabled={!city.name.length || isNavigating}
+        className="w-max absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2">
+          <div
+            className={`cursor-pointer px-2 py-2 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs ${
               city.name.length && !isNavigating
                 ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gray-300 text-gray-500"
             }`}
           >
             {isNavigating ? "Przekierowuję..." : "Szukaj"}
-          </button>
+          </div>
+        </button>
         </div>
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
-          <svg
-            className="w-4 h-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </span>
+        
         {isFetching && !isNavigating && (
           <svg
-            className="absolute right-20 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600 animate-spin"
+            className="absolute right-16 md:right-20 top-1/2 -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-blue-600 animate-spin"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -189,7 +266,8 @@ export default function HeaderSearch({
                     setSuppressFetch(true);
                     setResultSelected(true);
                     setIsNavigating(true);
-                    router.push(`/manicure/${c.id}`);
+                    const path = getSearchPath(searchType, c.id);
+                    router.push(path);
                   }}
                 >
                   {c.name}

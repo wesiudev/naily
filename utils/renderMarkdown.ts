@@ -10,9 +10,9 @@ export const parseMarkdown = (input: any) => {
     if (imageMatch) {
       const altText = imageMatch[1];
       const imageUrl = imageMatch[2];
-      return `<Image loading="lazy" decoding="async" width=${500} height=${500} class="" src=${imageUrl} alt=${polishToEnglish(
+      return `<figure class="my-6 sm:my-8"><img loading="lazy" decoding="async" src="${imageUrl}" alt="${polishToEnglish(
         altText
-      )} />`;
+      )}" class="w-full h-auto rounded-xl shadow-lg object-cover max-h-[500px]" /><figcaption class="mt-2 text-sm text-neutral-500 text-center italic">${altText}</figcaption></figure>`;
     }
     // Parse link syntax [link text](link-url)
     const linkMatches = line.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g);
