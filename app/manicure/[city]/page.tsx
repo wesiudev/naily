@@ -1,136 +1,42 @@
 import NotFound from "@/app/not-found";
 import JoinNowButton from "@/components/AdCard/JoinNowButton";
-import Link from "next/link";
 import { getCityUsers } from "@/utils/getCityUsers";
 import { ICity } from "@/types";
 import { getSingleCity } from "@/utils/getSingleCity";
 import { getCities } from "@/utils/getCities";
 import { Viewport } from "next";
 import Image from "next/image";
-import Script from "next/script";
 import RecentPosts from "@/components/Blog/RecentPosts";
 import FAQ, { type FaqItem } from "@/components/FAQ/FAQ";
-import {
-  FaMapMarkerAlt,
-  FaGem,
-  FaStar,
-  FaClock,
-  FaPhone,
-  FaArrowRight,
-  FaTags,
-} from "react-icons/fa";
-import { MdSpa } from "react-icons/md";
-import { FaCheck, FaUserNinja } from "react-icons/fa6";
 import { IService } from "@/types";
-import slug1 from "../../../public/slug/slug1.png";
-import slug2 from "../../../public/slug/slug2.png";
-import slug3 from "../../../public/slug/slug3.png";
-import Logic from "@/components/SearchBar/Logic";
 import UserSliderWrapper from "@/components/CityPage/UserSliderWrapper";
 import UserCard from "@/components/CityPage/UserCard";
-import PricingTable, { type PricingItem } from "@/components/CityPage/PricingTable";
 import { getUserById, getUsers, db } from "@/firebase";
 import { User } from "@/types";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { Metadata } from "next";
+import { type PricingItem } from "@/components/CityPage/PricingTable";
+
+// SEO Components
+import SchemaGenerator from "@/components/CityPage/SEO/SchemaGenerator";
+import KeywordRichContent from "@/components/CityPage/SEO/KeywordRichContent";
+import LocalBusinessList from "@/components/CityPage/SEO/LocalBusinessList";
+import ServiceAreaMap from "@/components/CityPage/SEO/ServiceAreaMap";
+import ReviewRichSnippets from "@/components/CityPage/SEO/ReviewRichSnippets";
+import PriceComparisonTable from "@/components/CityPage/SEO/PriceComparisonTable";
+
+// Page Sections
+import CityHero from "@/components/CityPage/Sections/CityHero";
+import PricingSection from "@/components/CityPage/Sections/PricingSection";
+import WhyChooseSection from "@/components/CityPage/Sections/WhyChooseSection";
+import NearbyCitiesSection from "@/components/CityPage/Sections/NearbyCitiesSection";
+import CityOverviewSection from "@/components/CityPage/Sections/CityOverviewSection";
+import ServicesGridSection from "@/components/CityPage/Sections/ServicesGridSection";
+import CareerTrainingSection from "@/components/CityPage/Sections/CareerTrainingSection";
 
 // Enable ISR: Revalidate every hour to keep salon listings fresh while maintaining fast static pages
 // Pages are generated on-demand (on first request) and then cached - no need to pre-generate all at build time
 export const revalidate = 3600; // 1 hour
-
-// Generate JSON-LD structured data for SEO
-function generateStructuredData(city: ICity, serviceType: "manicure" | "pedicure") {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
-  const serviceName = serviceType === "manicure" ? "Manicure" : "Pedicure";
-  
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "CollectionPage",
-        "@id": `${baseUrl}/${serviceType}/${city.id}#webpage`,
-        "url": `${baseUrl}/${serviceType}/${city.id}`,
-        "name": `TOP 10 MANICURE ${city.name} - Cennik Katalog`,
-        "description": `TOP 10 najlepszych stylistek i salonów ${serviceType} ${city.name}. Pełny cennik, katalog usług i opinie.`,
-        "inLanguage": "pl-PL",
-        "isPartOf": {
-          "@id": `${baseUrl}#website`
-        },
-        "breadcrumb": {
-          "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`
-        }
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${baseUrl}/${serviceType}/${city.id}#breadcrumb`,
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Strona główna",
-            "item": baseUrl
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": `${serviceName} ${city.name}`,
-            "item": `${baseUrl}/${serviceType}/${city.id}`
-          }
-        ]
-      },
-      {
-        "@type": "FAQPage",
-        "@id": `${baseUrl}/${serviceType}/${city.id}#faq`,
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": `Jak zarezerwować wizytę manicure w ${city.name}?`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Rezerwacja wizyty na manicure w naszym mieście jest bardzo prosta. Najpierw przejrzyj listę dostępnych specjalistek i salonów na tej stronie. Każdy profil zawiera szczegółowe informacje o stylistce, jej doświadczeniu, portfolio prac oraz dostępnych terminach. Możesz zarezerwować wizytę bezpośrednio przez platformę online, wybierając dogodny dla Ciebie termin z kalendarza dostępności. Po wyborze terminu otrzymasz potwierdzenie rezerwacji na podany adres email lub numer telefonu. Większość specjalistek oferuje również możliwość rezerwacji telefonicznej lub przez wiadomość prywatną. Pamiętaj, że niektóre popularne stylistki mogą mieć dłuższe terminy oczekiwania, dlatego warto rezerwować z wyprzedzeniem. Szczególnie w sezonie letnim i przed ważnymi wydarzeniami, gdy zapotrzebowanie na usługi manicure jest większe, warto planować wizyty z kilkutygodniowym wyprzedzeniem."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Czy ceny różnią się między specjalistkami?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Tak, ceny usług manicure różnią się między specjalistkami i zależą od wielu czynników. Każda stylistka ustala własny cennik, który może być uzależniony od jej doświadczenia, lokalizacji salonu, używanego sprzętu i produktów, a także zakresu oferowanych usług. Podstawowy manicure klasyczny może kosztować od 40 do 80 złotych, manicure hybrydowy od 60 do 120 złotych, a przedłużanie paznokci od 100 do 200 złotych. Ceny mogą również różnić się w zależności od tego, czy wybierasz usługę w salonie czy wizyta odbywa się w domu klientki. Aktualny, szczegółowy cennik znajdziesz na profilu każdej specjalistki, gdzie często dostępne są również informacje o pakietach promocyjnych, zniżkach dla stałych klientek oraz cenach dodatkowych usług takich jak zdobienia czy przedłużanie paznokci."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Jak sprawdzić lokalizację salonu?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Lokalizacja każdego salonu i stylistki jest szczegółowo opisana na jej profilu. Znajdziesz tam pełny adres wraz z kodem pocztowym, a także interaktywną mapę Google Maps, która ułatwi Ci dotarcie na miejsce. Większość profili zawiera również informacje o dostępności komunikacji miejskiej, możliwości parkowania w pobliżu salonu oraz wskazówki dojazdu dla klientek przyjeżdżających samochodem. Niektóre stylistki oferują również usługi mobilne, przyjeżdżając do klientek do domu, co jest szczególnie wygodne w przypadku zabiegów manicure. Jeśli masz pytania dotyczące lokalizacji lub potrzebujesz dodatkowych wskazówek dojazdu, możesz skontaktować się bezpośrednio ze stylistką przez telefon lub wiadomość prywatną. Warto sprawdzić lokalizację przed rezerwacją, aby upewnić się, że salon jest dla Ciebie dogodnie położony i łatwo dostępny."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Czy mogę zmienić termin wizyty?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu. Pamiętaj, że wczesne poinformowanie o potrzebie zmiany terminu zwiększa szanse na znalezienie dogodnego rozwiązania."
-            }
-          }
-        ]
-      },
-      {
-        "@type": "ItemList",
-        "@id": `${baseUrl}/${serviceType}/${city.id}#itemlist`,
-        "name": `TOP 10 MANICURE ${city.name} - Cennik Katalog`,
-        "description": `Lista najlepszych stylistek i salonów ${serviceType} w ${city.name}`,
-        "numberOfItems": 10,
-        "itemListElement": {
-          "@type": "ListItem",
-          "position": 1,
-          "name": `Najlepsze salony ${serviceName} w ${city.name}`
-        }
-      }
-    ]
-  };
-}
 
 async function fetchUserBySlugOrUid(slug: string): Promise<User | null> {
   try {
@@ -436,8 +342,6 @@ export default async function ServiceCitySlug({
         .map((x) => x.city)
     : [];
 
-  // Generate structured data for SEO
-  const structuredData = generateStructuredData(city, "manicure");
   const cityFaq: FaqItem[] = [
     {
       id: "booking-city",
@@ -464,83 +368,38 @@ export default async function ServiceCitySlug({
         "Tak, w większości przypadków możesz zmienić termin wizyty, jednak zasady dotyczące zmian i odwołań różnią się w zależności od polityki danej specjalistki. Szczegółowe informacje o możliwości zmiany terminu, wymaganym czasie wyprzedzenia oraz ewentualnych opłatach za odwołanie znajdziesz w potwierdzeniu rezerwacji oraz na profilu stylistki. Zazwyczaj zmiana terminu jest możliwa bez dodatkowych opłat, jeśli poinformujesz stylistkę z odpowiednim wyprzedzeniem (zwykle minimum 24-48 godzin przed wizytą). Odwołanie wizyty w ostatniej chwili może wiązać się z koniecznością uiszczenia częściowej opłaty lub pełnej kwoty za usługę, zgodnie z polityką salonu. W przypadku nagłych sytuacji losowych, większość stylistek jest elastyczna i stara się znaleźć rozwiązanie korzystne dla obu stron. Najlepiej skontaktować się bezpośrednio ze stylistką, aby omówić możliwość zmiany terminu.",
     },
   ];
+
+  const allFaqItems = [...preVisitFaq, ...cityFaq];
+
   return (
     <div className="min-h-screen bg-white">
-      {/* JSON-LD Structured Data for SEO */}
-      <Script
-        id="structured-data"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      {/* Comprehensive Schema Generator with LocalBusiness and BeautySalon */}
+      <SchemaGenerator
+        city={city}
+        serviceType="manicure"
+        users={sortedMergedUsers}
+        faqItems={allFaqItems.map((faq) => ({
+          question: faq.question,
+          answer: faq.answer,
+        }))}
       />
+      {/* Hero Section */}
+      <CityHero city={city} serviceType="manicure" />
       
-      {/* Featured Salons Section - Modern Design */}
+      {/* Featured Salons Section */}
+      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
       <section className="pb-20 px-6 bg-purple-50">
         <div className="container">
-          <div className="mb-12">
-            <h1 className="text-4xl lg:text-5xl font-baloo font-bold text-black mb-4">
-              TOP 10 MANICURE {city.name} - Cennik Katalog na 2026 rok
-            </h1>
-            <p className="text-gray-500 max-w-2xl font-poppins font-normal">
-              Sprawdzone miejsca z najwyższymi ocenami klientek i profesjonalnym manicure. Sprawdź przewidywane ceny i katalog stylistek manicure w swoim mieście.
-            </p>
-            {/* Inline search bar matching screenshot */}
-            <div className="mt-6">
-              <Logic slugCity={city.name} variant="inline" />
-            </div>
-            <p className="text-gray-500 font-poppins text-sm mt-3">Ostatnia aktualizacja: 02.01.2026</p>
-          </div>
-
-          {/* Results responsive grid cards */}
-          {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 mb-10">
-              {sortedMergedUsers.map(
-                (u: {
-                  uid: string;
-                  name: string;
-                  logo?: string;
-                  userSlugUrl?: string;
-                  services?: IService[];
-                  portfolioImages?: unknown[];
-                  portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
-                  premiumActive?: boolean;
-                  seek?: boolean;
-                  location?: { address?: string };
-                  phoneNumber?: string;
-                  description?: string;
-                }) => {
-                  const isIndividualSpecialist = u.seek === true;
-                  const isSalon = u.seek === false;
-                  // Get portfolio images from either portfolioImages or portfolio field
-                  // portfolioImages uses {src: string}, portfolio uses {url: string}
-                  const getPortfolioImages = () => {
-                    if (u.portfolioImages && Array.isArray(u.portfolioImages) && u.portfolioImages.length > 0) {
-                      return u.portfolioImages.map((img: any) => ({ src: img.src || img.url }));
-                    }
-                    if (u.portfolio && Array.isArray(u.portfolio) && u.portfolio.length > 0) {
-                      return u.portfolio.map((item: any) => ({ src: item.url || item.src }));
-                    }
-                    return [];
-                  };
-                  return (
+              {sortedMergedUsers.map((u: User) => (
                     <UserCard key={u.uid} user={u} cityParam={cityParam} />
-                  );
-                }
-              )}
+              ))}
             </div>
-          )}
 
+            {/* AD Card */}
           <div className="grid grid-cols-1 gap-8">
-            {salonsWithAd.map((salon, index) => {
-              // Special rendering for AD card
-              if (salon.isAd) {
-                return (
-                  <div
-                    key={salon.id}
-                    className="group bg-white h-max rounded-2xl transition-all duration-300 overflow-hidden animate-fade-in-up border border-primary-200 hover:shadow-lg"
-                    style={{ animationDelay: `${index * 150}ms` }}
-                  >
+              <div className="group bg-white h-max rounded-2xl transition-all duration-300 overflow-hidden animate-fade-in-up border border-primary-200 hover:shadow-lg">
                     <div className="md:grid md:grid-cols-12 gap-8 p-6 md:p-8 lg:p-10">
-                      {/* AD Image */}
                       <div className="relative md:col-span-4 rounded-xl overflow-hidden bg-primary-50 flex items-center justify-center min-h-[220px] md:min-h-[260px] lg:min-h-[300px]">
                         <Image
                           src="/naily-logo2.png"
@@ -550,28 +409,24 @@ export default async function ServiceCitySlug({
                           className="object-contain p-10 md:p-4 lg:p-12"
                         />
                       </div>
-
-                      {/* AD Content */}
                       <div className="md:col-span-8 flex flex-col justify-between h-full">
                         <div className="flex flex-col gap-4">
                           <div className="mt-4 md:mt-0 mb-2 md:mb-4 flex flex-row items-start justify-between gap-3">
                             <h3 className="text-3xl font-baloo font-bold text-zinc-800 transition-colors">
-                              {salon.title}
+                          Zarejestruj się
                             </h3>
                             <span className="inline-flex items-center rounded-full bg-primary-50 text-blue-700 px-3.5 py-1.5 text-xs md:text-sm font-inter font-medium">
-                              {salon.subtitle}
+                          Miesiąc za darmo
                             </span>
                           </div>
-
-                          {/* AD Features */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                            {salon.features?.map(
+                        {["Rezerwacje online", "Profesjonalny cennik", "Większa widoczność", "Nowe klientki", "Prowadzenie szkoleń", "0% prowizji"].map(
                               (feature: string, featureIndex: number) => (
                                 <div
                                   key={featureIndex}
                                   className="flex items-center gap-2 text-sm text-neutral-700 font-inter font-normal leading-relaxed"
                                 >
-                                  <FaCheck className="text-green-500" />
+                              <span className="text-green-500">✓</span>
                                   <span>{feature}</span>
                                 </div>
                               )
@@ -580,10 +435,8 @@ export default async function ServiceCitySlug({
                         </div>
                         <div className="mt-8 md:mt-10 lg:mt-0 flex flex-col gap-3">
                           <span className="text-xs md:text-sm text-neutral-500 font-inter font-normal pr-0 md:pr-12">
-                            Promocja tylko dla pierwszych 10 specjalistek w
-                            Twoim mieście — zajmij miejsce zanim zniknie.
+                        Promocja tylko dla pierwszych 10 specjalistek w Twoim mieście — zajmij miejsce zanim zniknie.
                           </span>
-                          {/* CTA Button */}
                           <div>
                             <JoinNowButton />
                           </div>
@@ -591,407 +444,105 @@ export default async function ServiceCitySlug({
                       </div>
                     </div>
                   </div>
-                );
-              }
-            })}
           </div>
         </div>
       </section>
-     {/* Ceny Manicure Section */}
-     <section className="relative py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-blue-200/20 blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full bg-purple-200/20 blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-blue-100/10 blur-3xl"></div>
-        </div>
-
-        <div className="relative z-10 container mx-auto max-w-4xl">
-          {/* Enhanced Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-200/50 mb-4 sm:mb-6 shadow-sm">
-              <FaTags className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 mb-3 leading-tight">
-              Cennik usług manicure
-            </h2>
-            <p className="text-base sm:text-lg text-neutral-600 font-poppins max-w-2xl mx-auto">
-              Sprawdź szczegółowy cennik wszystkich usług manicure. Ceny mogą się różnić w zależności od stylistki i zakresu usługi.
-            </p>
-          </div>
-
-          {/* Enhanced Pricing Table Container */}
-          <div className="relative">
-            {/* Decorative border accent */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-20 blur-sm"></div>
-            <div className="relative bg-white rounded-xl shadow-xl border border-neutral-200/50 p-6 sm:p-8">
-              <PricingTable items={manicurePricing} />
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Manicure Hybrydowy Section */}
-      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 0 && (
-        <section className="py-20 px-6 bg-white">
-          <div className="container">
-            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-              Manicure hybrydowy {city.name} – sprawdzone stylistki w 2026 roku
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-              {sortedMergedUsers.slice(0, 3).map((u: {
-                uid: string;
-                name: string;
-                logo?: string;
-                userSlugUrl?: string;
-                services?: IService[];
-                portfolioImages?: unknown[];
-                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
-                premiumActive?: boolean;
-                seek?: boolean;
-                location?: { address?: string };
-                phoneNumber?: string;
-                description?: string;
-              }) => (
-                <UserCard key={u.uid} user={u} cityParam={cityParam} />
-              ))}
-            </div>
-          </div>
-        </section>
       )}
 
-      {/* Najlepsze Stylistki Section */}
-      {Array.isArray(sortedMergedUsers) && sortedMergedUsers.length > 3 && (
-        <section className="py-20 px-6 bg-neutral-50">
-          <div className="container">
-            <h2 className="mb-12 text-3xl lg:text-4xl font-baloo font-bold text-neutral-900">
-              Paznokcie hybrydowe {city.name}
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-              {sortedMergedUsers.slice(3, 6).map((u: {
-                uid: string;
-                name: string;
-                logo?: string;
-                userSlugUrl?: string;
-                services?: IService[];
-                portfolioImages?: unknown[];
-                portfolio?: Array<{ url?: string; id?: string; [key: string]: unknown }>;
-                premiumActive?: boolean;
-                seek?: boolean;
-                location?: { address?: string };
-                phoneNumber?: string;
-                description?: string;
-              }) => (
-                <UserCard key={u.uid} user={u} cityParam={cityParam} />
-              ))}
-            </div>
-          </div>
-        </section>
+      {/* Aggressive SEO Component 1: Keyword-Rich Content */}
+      <KeywordRichContent
+        city={city}
+        serviceType="manicure"
+        userCount={sortedMergedUsers.length}
+      />
+
+      {/* Aggressive SEO Component 2: Local Business List */}
+      {sortedMergedUsers.length > 0 && (
+        <LocalBusinessList
+          city={city}
+          serviceType="manicure"
+          users={sortedMergedUsers}
+        />
       )}
 
- 
+      {/* Aggressive SEO Component 3: Service Area Map */}
+      <ServiceAreaMap
+        city={city}
+        serviceType="manicure"
+        nearbyCities={nearbyCities}
+      />
 
-      {/* Najczęstsze Pytania Section */}
+      {/* Aggressive SEO Component 4: Review Rich Snippets */}
+      {sortedMergedUsers.length > 0 && (
+        <ReviewRichSnippets
+          city={city}
+          serviceType="manicure"
+          users={sortedMergedUsers}
+        />
+      )}
+
+      {/* Aggressive SEO Component 5: Price Comparison Table */}
+      {sortedMergedUsers.length > 0 && (
+        <PriceComparisonTable
+          city={city}
+          serviceType="manicure"
+          users={sortedMergedUsers}
+        />
+      )}
+
+      {/* Pricing Section */}
+      <PricingSection pricingItems={manicurePricing} serviceType="manicure" />
+
+      {/* Services Grid Sections */}
+      {sortedMergedUsers.length > 0 && (
+        <>
+          <ServicesGridSection
+            users={sortedMergedUsers}
+            cityParam={cityParam}
+            title={`Manicure hybrydowy ${city.name} – sprawdzone stylistki w 2026 roku`}
+            sliceStart={0}
+            sliceEnd={3}
+          />
+          {sortedMergedUsers.length > 3 && (
+            <ServicesGridSection
+              users={sortedMergedUsers}
+              cityParam={cityParam}
+              title={`Paznokcie hybrydowe ${city.name}`}
+              sliceStart={3}
+              sliceEnd={6}
+            />
+          )}
+        </>
+      )}
+
+      {/* Pre-Visit FAQ Section */}
       <section className="py-20 px-6 bg-neutral-50">
         <div className="container">
           <FAQ className="animate-fade-in-up" items={preVisitFaq} />
         </div>
       </section>
 
-      {/* City Overview Section - Enhanced */}
-      <section className="py-20 px-6">
-        <div className="container">
-          <h2 className="mb-16 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900 leading-tight">
-            Manicure {city.name} - Przegląd cen w 2026
-          </h2>
+      {/* City Overview Section */}
+      <CityOverviewSection city={city} serviceType="manicure" />
 
-          {/* Enhanced Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-8">
-            <div className="">
-              <Image
-                src={slug1}
-                alt={`Najlepsza jakość manicure ${city.name} - Profesjonalne usługi paznokci`}
-                width={500}
-                height={500}
-                className="w-[350px]"
-                loading="lazy"
-                fetchPriority="low"
-              />
-              <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Stylistki paznokci w Twojej lokalizacji
-              </h3>
-              <p className="text-neutral-600 font-poppins font-normal">
-                Twoja stylistka paznokci {city.name} - wypróbuj manicure,
-                który podkreśli Twój charakter.
-              </p>
-            </div>
+      {/* Career & Training Section */}
+      <CareerTrainingSection city={city} />
 
-            <div className="">
-              <Image
-                src={slug2}
-                alt={`Najlepsze opinie manicure ${city.name} - Zadowolone klientki na 2026 rok`}
-                width={500}
-                height={500}
-                className="w-[350px]"
-                loading="lazy"
-                fetchPriority="low"
-              />
+      {/* Nearby Cities Section */}
+      <NearbyCitiesSection nearbyCities={nearbyCities} serviceType="manicure" />
 
-              <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Perfekcyjne stylizacje paznokci
-              </h3>
-              <p className="text-neutral-600 font-poppins font-normal">
-                Setki pozytywnych opinii i tysiące zachwyconych dłoni. Sprawdź,
-                dlaczego kobiety wybierają Naily.
-              </p>
-            </div>
-
-            <div className="">
-              <Image
-                src={slug3}
-                alt={`Rezerwuj manicure ${city.name} - Umów wizytę online`}
-                width={500}
-                height={500}
-                className="w-[350px]"
-                loading="lazy"
-                fetchPriority="low"
-              />
-
-              <h3 className="text-3xl font-baloo mt-8 lg:mt-12 mb-6 font-bold text-zinc-800">
-                Rezerwuj manicure, kiedy chcesz
-              </h3>
-              <p className="text-neutral-600 font-poppins font-normal">
-                Zarezerwuj termin lub przyjmuj klientki wtedy, gdy to dla Ciebie
-                najwygodniejsze.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Szkolenia & Kariera Section */}
-      <section className="py-12 px-6 bg-white">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Szkolenia Card */}
-            <Link
-              href={`/szkolenia-manicure/${city.id}`}
-              className="group bg-white rounded-xl p-8 lg:p-10 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
-            >
-              <div className="flex flex-col h-full">
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                    <FaGem className="text-2xl text-purple-700" />
-                  </div>
-                  <h3 className="text-2xl lg:text-3xl font-baloo font-bold text-zinc-800 mb-3 group-hover:text-blue-600 transition-colors">
-                    Szkolenia Manicure {city.name}
-                  </h3>
-                  <p className="text-neutral-600 text-base font-poppins leading-relaxed">
-                    Znajdź najlepsze szkolenia z manicure w {city.name}. Profesjonalne kursy, certyfikaty i rozwój umiejętności.
-                  </p>
-                </div>
-                <div className="mt-auto pt-4">
-                  <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
-                    Instruktorki manicure {city.name}
-                    <FaArrowRight className="text-sm" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Kariera Card */}
-            <Link
-              href={`/kariera/${city.id}`}
-              className="group bg-white rounded-xl p-8 lg:p-10 hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
-            >
-              <div className="flex flex-col h-full">
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                    <FaStar className="text-2xl text-blue-700" />
-                  </div>
-                  <h3 className="text-2xl lg:text-3xl font-baloo font-bold text-zinc-800 mb-3 group-hover:text-blue-600 transition-colors">
-                    Pracuj w Salonie Manicure {city.name}
-                  </h3>
-                  <p className="text-neutral-600 text-base font-poppins leading-relaxed">
-                    Znajdź najlepsze oferty pracy w {city.name}. Profesjonalne kariery i rozwój umiejętności w branży beauty.
-                  </p>
-                </div>
-                <div className="mt-auto pt-4">
-                  <span className="inline-flex items-center gap-2 text-blue-600 font-semibold font-poppins group-hover:gap-3 transition-all">
-                    Zobacz oferty pracy
-                    <FaArrowRight className="text-sm" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-      {/* Nearby Cities Section - distance based */}
-      <section className="py-20 px-6 bg-white">
-        <div className="container">
-          <h3 className="mb-20 text-4xl lg:text-5xl font-baloo font-bold text-neutral-900">
-            Szukaj też w innych miastach
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-2xl lg:text-3xl font-baloo font-bold text-neutral-900 mb-4">
-                Manicure
-              </h2>
-              <div className="flex flex-wrap gap-6">
-                {nearbyCities.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/manicure/${c.id}`}
-                    className="group py-3 relative w-max text-xl text-black hover:border-blue-800 hover:text-blue-800"
-                  >
-                    {`${c.name}`}
-                    <div className="absolute bottom-0 left-0 w-full h-[4px] bg-blue-800 group-hover:h-[6px] duration-100 rounded-full"></div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h2 className="text-2xl lg:text-3xl font-baloo font-bold text-neutral-900 mb-4">
-                Pedicure
-              </h2>
-              <div className="flex flex-wrap gap-6">
-                {nearbyCities.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/pedicure/${c.id}`}
-                    className="group py-3 relative w-max text-xl text-black hover:border-blue-800 hover:text-blue-800"
-                  >
-                    {`${c.name}`}
-                    <div className="absolute bottom-0 left-0 w-full h-[4px] bg-blue-800 group-hover:h-[6px] duration-100 rounded-full"></div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Professional Salons */}
-      <section className="py-12 px-6 bg-neutral-50">
-        <div className="container">
-          <div className="mb-12">
-            <h2 className="text-4xl lg:text-5xl font-baloo font-bold text-zinc-800 mb-4">
-              Dlaczego warto?
-            </h2>
-            <p className="text-neutral-600 max-w-2xl font-poppins font-normal">
-              Profesjonalne salony oferują najwyższą jakość usług i
-              bezpieczeństwo
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-16">
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FaGem className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Certyfikowane produkty
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Używanie tylko sprawdzonych i bezpiecznych kosmetyków
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FaStar className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Doświadczone stylistki
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Wykwalifikowany personel z wieloletnim doświadczeniem
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FaClock className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Dogodne terminy
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Elastyczne godziny otwarcia dostosowane do Twoich potrzeb
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FaPhone className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Łatwa rezerwacja
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Szybkie i wygodne umawianie wizyt online lub telefonicznie
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FaMapMarkerAlt className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Dogodne lokalizacje
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Salony w centrum miasta z łatwym dojazdem komunikacją
-                    miejską
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MdSpa className="text-4xl text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold font-baloo text-2xl text-zinc-800 mb-2">
-                    Sterylne narzędzia
-                  </h3>
-                  <p className="text-neutral-600 text-sm font-poppins font-normal">
-                    Dezynfekcja i sterylizacja wszystkich narzędzi po każdym
-                    kliencie
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Why Choose Section */}
+      <WhyChooseSection />
 
       {/* Recent blog posts */}
       <RecentPosts limit={3} columns={3} className="bg-white" />
 
       {/* City FAQ */}
-      <div className="py-20">
+      <section className="py-20 px-6 bg-white">
+        <div className="container">
         <FAQ className="animate-fade-in-up" items={cityFaq} />
       </div>
+      </section>
 
       {/* User Slider Wrapper */}
       <UserSliderWrapper
@@ -1021,8 +572,8 @@ export async function generateMetadata({
   const cityData: ICity = await getSingleCity(city);
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
   const canonicalUrl = `${baseUrl}/manicure/${cityData.id}`;
-  const title = `TOP 10 MANICURE ${cityData.name} 2026 - Cennik Katalog Opinie`;
-  const description = `TOP 10 najlepszych stylistek i salonów manicure ${cityData.name} na 2026 rok. Pełny cennik, katalog usług i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
+  const title = `Manicure ${cityData.name} 2026`;
+  const description = `Najlepsze stylistki i salony manicure ${cityData.name}. Cenniki, usługi i opinie. Sprawdzone miejsca z najwyższymi ocenami. Rezerwuj online.`;
   const keywords = `manicure ${cityData.name}, cennik manicure ${cityData.name}, najlepsze salony paznokci ${cityData.name}, stylistki paznokci ${cityData.name}, manicure hybrydowy ${cityData.name}, pedicure ${cityData.name}`;
   
   return {
@@ -1069,7 +620,7 @@ export async function generateMetadata({
           url: `${baseUrl}/pricing.png`,
           width: 1200,
           height: 630,
-          alt: `TOP 10 MANICURE ${cityData.name} - Cennik Katalog`,
+          alt: `Manicure ${cityData.name}`,
           type: "image/png",
         },
       ],
@@ -1082,7 +633,7 @@ export async function generateMetadata({
       images: [
         {
           url: `${baseUrl}/pricing.png`,
-          alt: `TOP 10 MANICURE ${cityData.name} - Cennik Katalog`,
+          alt: `Manicure ${cityData.name}`,
         },
       ],
     },

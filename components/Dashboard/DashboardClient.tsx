@@ -15,7 +15,7 @@ import DashboardContent from "@/components/Dashboard/DashboardContent/index";
 import { setPremiumGiftPopupOpen } from "@/redux/slices/cta";
 
 interface DashboardClientProps {
-  user: User;
+  user: User | null;
   dashboardData: {
     stats: {
       totalReservations: number;
@@ -29,7 +29,7 @@ interface DashboardClientProps {
     };
     recentReservations: any[];
     topServices: any[];
-  };
+  } | null;
 }
 
 export default function DashboardClient({ user, dashboardData }: DashboardClientProps) {
@@ -44,11 +44,13 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [topNavHeight, setTopNavHeight] = useState<number>(0);
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
 
   useEffect(() => {
     // Listen to Firebase auth state changes    
     const unsubscribe = onAuthStateChanged(auth, (authUser: any | null) => {
       setFirebaseUser(authUser);
+      setAuthChecked(true);
 
       if (!authUser) {
         // No user authenticated, redirect to home
@@ -56,21 +58,42 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
         return;
       }
 
-      // User is authenticated, check if Redux user data is loaded
-      if (reduxUser?.uid) {
+      // User is authenticated via Firebase
+      // Use Redux user if available, otherwise fall back to server-provided user
+      const currentUser = reduxUser?.uid ? reduxUser : (user || null);
+      
+      if (currentUser) {
         setIsLoading(false);
 
-        // Check if user needs fast configuration
-        if (!reduxUser?.configured) {
+        // Check if user needs fast configuration (only if we have Redux user)
+        if (reduxUser?.uid && !reduxUser?.configured) {
           setShowFastConfig(true);
         }
       }
-      // If authUser exists but reduxUser is not loaded yet,
-      // the InitUser component will handle loading it and this effect will re-run
+      // If authUser exists but neither reduxUser nor server user is available yet,
+      // wait a bit for InitUser to load Redux state, then use server user as fallback
     });
 
     return () => unsubscribe();
-  }, [router, reduxUser]);
+  }, [router, reduxUser, user]);
+
+  // Fallback: If Firebase auth exists but Redux user hasn't loaded after a timeout,
+  // use server-provided user and stop loading, or stop loading if we have any user
+  useEffect(() => {
+    if (authChecked && firebaseUser && isLoading) {
+      const timeoutId = setTimeout(() => {
+        // If we have Firebase auth, stop loading if we have either Redux user or server user
+        // If we have neither after timeout, something went wrong but we should still stop loading
+        // to avoid infinite loading state
+        const currentUser = reduxUser?.uid ? reduxUser : (user || null);
+        if (currentUser || !reduxUser?.uid) {
+          setIsLoading(false);
+        }
+      }, 2000); // Wait 2 seconds for Redux to load
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [authChecked, firebaseUser, isLoading, user, reduxUser]);
 
   // Live unread notifications badge
   useEffect(() => {
@@ -170,7 +193,11 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
     }
   };
 
-  if (isLoading) {
+  // Determine the current user to use (Redux > Server > null)
+  const currentUser = reduxUser?.uid ? reduxUser : (user || null);
+  
+  // If still loading and we don't have any user data yet, show loading
+  if (isLoading && !currentUser) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -180,6 +207,28 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
       </div>
     );
   }
+
+  // Safety check: If we're not loading but still don't have a user, something went wrong
+  // This shouldn't happen if auth is working correctly, but handle it gracefully
+  if (!currentUser && authChecked) {
+    // If Firebase auth exists but no user data, wait a bit more or redirect
+    if (firebaseUser) {
+      // Firebase auth exists but user data not loaded - wait a bit more
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mx-auto mb-3"></div>
+            <p className="text-neutral-600 text-sm">Ładowanie danych użytkownika...</p>
+          </div>
+        </div>
+      );
+    }
+    // No Firebase auth - should have been redirected, but handle it anyway
+    return null;
+  }
+
+  // If we have a user but no dashboard data, we can still render (dashboardData might be null)
+  // The DashboardContent component should handle null dashboardData gracefully
 
   return (
     <div className="relative w-full min-h-screen">
@@ -209,7 +258,7 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 notificationCount={notificationCount}
-                user={reduxUser || user}
+                user={currentUser}
               />
             </div>
             
@@ -224,7 +273,7 @@ export default function DashboardClient({ user, dashboardData }: DashboardClient
               <DashboardContent
                 setActiveTab={setActiveTab}
                 activeTab={activeTab}
-                user={reduxUser || user}
+                user={currentUser}
                 firebaseUser={firebaseUser}
                 dashboardData={dashboardData}
                 getStatusColor={getStatusColor}

@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Metadata } from "next";
 import ConditionalNav from "@/components/ConditionalNav";
+import Breadcrumb from "@/components/Breadcrumb";
 import Footer from "@/components/Footer";
 import { Providers } from "@/redux/Provider";
 import "react-toastify/dist/ReactToastify.css";
@@ -136,6 +137,7 @@ export default async function RootLayout({
           <FontManager />
           <InitUser />
           <ConditionalNav />
+          <Breadcrumb />
           <main className="min-h-screen">{children}</main>
           <Footer />
           <ModalManager />

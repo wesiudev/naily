@@ -153,9 +153,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "https://naily.pl"),
-  title: "Zarezerwuj Kosmetyczkę | Kosmetyczki blisko Ciebie | Naily",
+  title: "Rezerwacje Manicure - Naily",
   description:
-    "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
+    "Dołącz jako Stylistka manicure lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
   keywords: [
     "kosmetyczki blisko Ciebie",
     "naily",
@@ -211,7 +211,7 @@ export const metadata: Metadata = {
     url: "https://naily.pl",
     siteName: "Naily",
     locale: "pl_PL",
-    title: "Naily: Platforma dla Stylistek Manicure i Pedicure | Rezerwacje Online 2026",
+    title: "Rezerwacje Manicure - Naily",
     description:
       "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
     images: [
@@ -234,7 +234,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@Naily",
-    title: "Zarezerwuj Kosmetyczkę | Kosmetyczki blisko Ciebie | Naily",
+    title: "Rezerwacje Manicure - Naily",
     description:
       "Dołącz jako Kosmetyczka lub Salon Kosmetyczny i otrzymuj rezerwacje od swoich klientek.",
     images: [

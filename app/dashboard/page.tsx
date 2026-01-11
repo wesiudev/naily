@@ -3,8 +3,6 @@ import { getCurrentUser } from "@/utils/serverAuth";
 import { fetchDashboardData } from "@/utils/dashboardData";
 import DashboardClient from "@/components/Dashboard/DashboardClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function DashboardPage() {
   // Get the current user server-side
   const user = await getCurrentUser();

@@ -34,6 +34,18 @@ function normalizePost(post: any, index: number) {
 }
 
 function getStaticPosts(limit: number) {
+  // Only show static posts on localhost/development
+  // Check if we're in development mode or if NEXT_PUBLIC_URL indicates localhost
+  const isLocalhost =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_URL?.includes("localhost") ||
+    process.env.NEXT_PUBLIC_URL?.includes("127.0.0.1") ||
+    !process.env.NEXT_PUBLIC_URL; // If URL is not set, assume localhost
+
+  if (!isLocalhost) {
+    return [];
+  }
+
   return staticBlogPosts
     .filter((post) => post.published)
     .slice(0, limit)
@@ -83,10 +95,10 @@ async function fetchRecent(limit = 6) {
       return normalized.slice(0, limit);
     }
 
-    // Fallback to static blog posts
+    // Fallback to static blog posts (only on localhost)
     return getStaticPosts(limit);
   } catch (e) {
-    // If all else fails, use static posts
+    // If all else fails, use static posts (only on localhost)
     console.error("Error fetching blog posts:", e);
     return getStaticPosts(limit);
   }

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { updateDocument } from "@/firebase";
+import { updateDocument, updateBlogPost } from "@/firebase";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import Image from "next/image";
@@ -91,6 +91,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Update the individual document in the blog collection
       await updateDocument(
         [
           "title",
@@ -123,6 +124,11 @@ export default function EditPostForm({ post }: EditPostFormProps) {
         "blog",
         post.postId
       );
+      
+      // Also update the legacy array structure in blog/blog document
+      // This ensures backward compatibility with the old storage format
+      await updateBlogPost(post.postId, formData);
+      
       toast.success("Post został zaktualizowany");
     } catch (error) {
       console.error("Error updating post:", error);

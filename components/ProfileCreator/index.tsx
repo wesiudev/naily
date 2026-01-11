@@ -9,6 +9,7 @@ import { errorCatcher } from "@/utils/errorCatcher";
 import type { SimpleLocation } from "@/components/User/ProfileConfig/AccountLocation/MapInput";
 import { createLinkFromText } from "@/utils/createLinkFromText";
 import type { IService } from "@/types";
+import { FaCheck } from "react-icons/fa6";
 // Image upload helpers removed for now; reintroduce when needed
 
 type StepId = 0 | 1 | 2 | 3 | 4 | 5;
@@ -29,11 +30,13 @@ export default function ProfileCreator() {
   );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<SimpleLocation | null>(null);
+  const [locationCity, setLocationCity] = useState<string>("");
+  const [locationType, setLocationType] = useState<"haveAddress" | "mobileStylist" | "noAddress">("haveAddress");
+  const [mobileStylistCities, setMobileStylistCities] = useState<string[]>([]);
   const [profileImageUrl, _setProfileImageUrl] = useState<string | null>(null);
   const [serviceDrafts, setServiceDrafts] = useState<ServiceDraft[]>([]);
   const [trainingType, setTrainingType] = useState<"manicure" | "pedicure" | "both" | "none" | undefined>(undefined);
@@ -43,7 +46,6 @@ export default function ProfileCreator() {
   const [basicsErrors, setBasicsErrors] = useState<{
     name?: string;
     email?: string;
-    phone?: string;
     password?: string;
     repeatPassword?: string;
     acceptRules?: string;
@@ -59,11 +61,6 @@ export default function ProfileCreator() {
         description: "Wybierz czy zakładasz profil jako salon czy stylistka.",
       },
       {
-        title: "Podstawowe dane",
-        next: "Szkolenia",
-        description: "Imię i nazwisko / nazwa salonu, kontakt.",
-      },
-      {
         title: "Szkolenia",
         next: "Lokalizacja",
         description: "Czy prowadzisz szkolenia manicure lub pedicure?",
@@ -72,6 +69,11 @@ export default function ProfileCreator() {
         title: "Lokalizacja",
         next: "Prezentacja profilu",
         description: "Wybierz miasto.",
+      },
+      {
+        title: "Podstawowe dane",
+        next: "Szkolenia",
+        description: "Przedstaw swoją markę",
       },
       {
         title: "Prezentacja profilu",
@@ -87,6 +89,15 @@ export default function ProfileCreator() {
     ],
     []
   );
+
+  // Scroll to top when step changes
+  const prevStepRef = useRef<StepId | null>(null);
+  useEffect(() => {
+    if (prevStepRef.current !== null && prevStepRef.current !== step) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    prevStepRef.current = step;
+  }, [step]);
 
   const progress = ((step + 1) / steps.length) * 100;
 
@@ -138,14 +149,20 @@ export default function ProfileCreator() {
                       onNext={() => setStep(1)}
                     />
                   )}
-                  {step === 1 && (
+                   {step === 1 && (
+                    <StepTraining
+                      value={trainingType}
+                      onChange={setTrainingType}
+                      onBack={() => setStep(0)}
+                      onNext={() => setStep(2)}
+                    />
+                  )}
+                  {step === 3 && (
                     <StepBasics
                       name={name}
                       setName={setName}
                       email={email}
                       setEmail={setEmail}
-                      phone={phone}
-                      setPhone={setPhone}
                       password={password}
                       setPassword={setPassword}
                       repeatPassword={repeatPassword}
@@ -154,28 +171,27 @@ export default function ProfileCreator() {
                       setAttempted={setAttemptedBasics}
                       errors={basicsErrors}
                       setErrors={setBasicsErrors}
-                      onBack={() => setStep(0)}
-                      onNext={() => setStep(2)}
+                      onBack={() => setStep(2)}
+                      onNext={() => setStep(4)}
                     />
                   )}
+                 
                   {step === 2 && (
-                    <StepTraining
-                      value={trainingType}
-                      onChange={setTrainingType}
-                      onBack={() => setStep(1)}
-                      onNext={() => setStep(3)}
-                    />
-                  )}
-                  {step === 3 && (
                     <StepLocation
                       value={location}
                       onChange={setLocation}
+                      city={locationCity}
+                      setCity={setLocationCity}
+                      locationType={locationType}
+                      setLocationType={setLocationType}
+                      mobileStylistCities={mobileStylistCities}
+                      setMobileStylistCities={setMobileStylistCities}
                       attempted={attemptedLocation}
                       setAttempted={setAttemptedLocation}
                       error={locationError}
                       setError={setLocationError}
-                      onBack={() => setStep(2)}
-                      onNext={() => setStep(4)}
+                      onBack={() => setStep(1)}
+                      onNext={() => setStep(3)}
                     />
                   )}
                   {step === 4 && (
@@ -205,12 +221,6 @@ export default function ProfileCreator() {
                         else if (!emailOk)
                           nextBasicsErrors.email =
                             "Podaj poprawny adres email.";
-                        const phoneDigits = (phone || "").replace(/\D/g, "");
-                        if (
-                          !(phoneDigits.length >= 9 && phoneDigits.length <= 15)
-                        )
-                          nextBasicsErrors.phone =
-                            "Podaj poprawny numer telefonu.";
                         if ((password || "").length < 8)
                           nextBasicsErrors.password =
                             "Hasło powinno mieć minimum 8 znaków";
@@ -218,9 +228,12 @@ export default function ProfileCreator() {
                           nextBasicsErrors.repeatPassword =
                             "Hasła nie są takie same.";
 
-                        const nextLocationError = location?.address
-                          ? ""
-                          : "Wybierz miasto.";
+                        let nextLocationError = "";
+                        if (locationType === "haveAddress" && !location?.address) {
+                          nextLocationError = "Wybierz adres lub wybierz inną opcję.";
+                        } else if (locationType === "mobileStylist" && mobileStylistCities.length === 0) {
+                          nextLocationError = "Wybierz przynajmniej jedno miasto, w którym oferujesz usługi.";
+                        }
 
                         // If any errors, persist and jump to first invalid step
                         if (
@@ -254,7 +267,6 @@ export default function ProfileCreator() {
                             email,
                             description,
                             photoURL: profileImageUrl || "",
-                            phoneNumber: phone,
                             seek: accountType === "individual",
                             emailVerified: false,
                             configured: false,
@@ -268,6 +280,9 @@ export default function ProfileCreator() {
                             },
                             password: "",
                             trainingType: trainingType || "none",
+                            isMobileStylist: locationType === "mobileStylist",
+                            mobileStylistCities: locationType === "mobileStylist" ? mobileStylistCities : [],
+                            city: locationType === "haveAddress" ? locationCity : "",
                           });
 
                           // Grant 30-day free premium for new users
@@ -391,8 +406,6 @@ function StepBasics({
   setName,
   email,
   setEmail,
-  phone,
-  setPhone,
   password,
   setPassword,
   repeatPassword,
@@ -408,8 +421,6 @@ function StepBasics({
   setName: (_v: string) => void;
   email: string;
   setEmail: (_v: string) => void;
-  phone: string;
-  setPhone: (_v: string) => void;
   password: string;
   setPassword: (_v: string) => void;
   repeatPassword: string;
@@ -419,7 +430,6 @@ function StepBasics({
   errors: {
     name?: string;
     email?: string;
-    phone?: string;
     password?: string;
     repeatPassword?: string;
     acceptRules?: string;
@@ -427,7 +437,6 @@ function StepBasics({
   setErrors: (_v: {
     name?: string;
     email?: string;
-    phone?: string;
     password?: string;
     repeatPassword?: string;
     acceptRules?: string;
@@ -444,16 +453,14 @@ function StepBasics({
       );
     if (!email?.trim()) newErrors.email = "To pole jest wymagane.";
     else if (!emailOk) newErrors.email = "Podaj poprawny adres email.";
-    const phoneDigits = (phone || "").replace(/\D/g, "");
-    if (!(phoneDigits.length >= 9 && phoneDigits.length <= 15))
-      newErrors.phone = "Podaj poprawny numer telefonu.";
     if ((password || "").length < 8)
       newErrors.password = "Hasło powinno mieć minimum 8 znaków";
     if ((password || "") !== (repeatPassword || ""))
       newErrors.repeatPassword = "Hasła nie są takie same.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, email, phone, password, repeatPassword, setErrors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, email, password, repeatPassword]);
 
   const handleNext = () => {
     setAttempted(true);
@@ -467,7 +474,7 @@ function StepBasics({
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
-            Imię i nazwisko / Nazwa salonu
+            Nazwa marki
           </label>
           <input
             type="text"
@@ -478,7 +485,7 @@ function StepBasics({
                 ? "border-red-500"
                 : "border-gray-300 focus:border-blue-500"
             }`}
-            placeholder="Wprowadź imię i nazwisko lub nazwę salonu"
+            placeholder="Nazwa salonu lub imię i nazwisko"
           />
           {attempted && errors.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -505,25 +512,6 @@ function StepBasics({
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
-            Numer telefonu
-          </label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className={`w-full rounded-lg border-2 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-              attempted && errors.phone
-                ? "border-red-500"
-                : "border-gray-300 focus:border-blue-500"
-            }`}
-            placeholder="+48 123 456 789"
-          />
-          {attempted && errors.phone && (
-            <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-          )}
-        </div>
 
         <div>
           <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
@@ -602,9 +590,7 @@ function StepTraining({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold font-poppins mb-3 text-gray-700">
-        Czy prowadzisz szkolenia manicure lub pedicure?
-      </label>
+  
       <div className="space-y-3">
         {[
           { id: "manicure", label: "Prowadzę szkolenia manicure." },
@@ -628,11 +614,9 @@ function StepTraining({
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-3 right-3 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"
+                className="absolute top-4 right-3 w-5 h-5 bg-green-400 rounded-full flex items-center justify-center"
               >
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
+                <FaCheck className="text-white" />
               </motion.div>
             )}
           </motion.button>
@@ -664,6 +648,12 @@ function StepTraining({
 function StepLocation({
   value,
   onChange,
+  city,
+  setCity,
+  locationType,
+  setLocationType,
+  mobileStylistCities,
+  setMobileStylistCities,
   attempted,
   setAttempted,
   error,
@@ -673,6 +663,12 @@ function StepLocation({
 }: {
   value: SimpleLocation | null;
   onChange: (_v: SimpleLocation | null) => void;
+  city: string;
+  setCity: (_v: string) => void;
+  locationType: "haveAddress" | "mobileStylist" | "noAddress";
+  setLocationType: (_v: "haveAddress" | "mobileStylist" | "noAddress") => void;
+  mobileStylistCities: string[];
+  setMobileStylistCities: (_v: string[]) => void;
   attempted: boolean;
   setAttempted: (_v: boolean) => void;
   error: string;
@@ -680,29 +676,183 @@ function StepLocation({
   onBack: () => void;
   onNext: () => void;
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<
-    Array<{ address: string; lat: number; lng: number }>
+  const [address, setAddress] = useState("");
+  const [citySearchQuery, setCitySearchQuery] = useState("");
+  const [addressSearchQuery, setAddressSearchQuery] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    Array<{ address: string; lat: number; lng: number; city?: string }>
   >([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [debouncedCityQuery, setDebouncedCityQuery] = useState("");
+  const [debouncedAddressQuery, setDebouncedAddressQuery] = useState("");
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const citySuggestionsRef = useRef<HTMLDivElement>(null);
+  const addressInputRef = useRef<HTMLInputElement>(null);
+  const addressSuggestionsRef = useRef<HTMLDivElement>(null);
+  const citySearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const addressSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Debounce city search for address form
+  useEffect(() => {
+    if (citySearchTimeoutRef.current) {
+      clearTimeout(citySearchTimeoutRef.current);
+    }
+    citySearchTimeoutRef.current = setTimeout(() => {
+      setDebouncedCityQuery(citySearchQuery);
+    }, 500);
+    return () => {
+      if (citySearchTimeoutRef.current) {
+        clearTimeout(citySearchTimeoutRef.current);
+      }
+    };
+  }, [citySearchQuery]);
+
+  // Debounce address search
+  useEffect(() => {
+    if (addressSearchTimeoutRef.current) {
+      clearTimeout(addressSearchTimeoutRef.current);
+    }
+    addressSearchTimeoutRef.current = setTimeout(() => {
+      setDebouncedAddressQuery(addressSearchQuery);
+    }, 500);
+    return () => {
+      if (addressSearchTimeoutRef.current) {
+        clearTimeout(addressSearchTimeoutRef.current);
+      }
+    };
+  }, [addressSearchQuery]);
+
+  // Fetch city suggestions for address form
+  useEffect(() => {
+    if (locationType !== "haveAddress" || debouncedCityQuery.length < 2) {
+      setCitySuggestions([]);
+      setShowCitySuggestions(false);
+      return;
+    }
+
+    const fetchCities = async () => {
+      try {
+        const cityLink = createLinkFromText(debouncedCityQuery);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL || ""}/api/cities/${cityLink}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        const cityNames = data.slice(0, 10).map((city: any) => city.name);
+        setCitySuggestions(cityNames);
+        setShowCitySuggestions(true);
+      } catch (err) {
+        console.error("City search error:", err);
+        setCitySuggestions([]);
+      }
+    };
+
+    fetchCities();
+  }, [debouncedCityQuery, locationType]);
+
+  // Fetch address suggestions with debouncing and abort controller
+  useEffect(() => {
+    if (locationType !== "haveAddress" || !city || debouncedAddressQuery.length < 3) {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+      return;
+    }
+
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const fetchAddresses = async () => {
+      try {
+        const query = `${debouncedAddressQuery}, ${city}, Polska`;
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}&limit=5&addressdetails=1`,
+          { signal: controller.signal }
+        );
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        const formatted = data.map((item: any) => ({
+          address: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+        }));
+        setAddressSuggestions(formatted);
+        setShowAddressSuggestions(true);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Search error:", err);
+          setAddressSuggestions([]);
+        }
+      }
+    };
+
+    fetchAddresses();
+
+    return () => {
+      controller.abort();
+    };
+  }, [debouncedAddressQuery, city, locationType]);
+
+  // Fetch city suggestions for mobile stylist
+  useEffect(() => {
+    if (locationType !== "mobileStylist" || citySearchQuery.length < 2) {
+      setCitySuggestions([]);
+      setShowCitySuggestions(false);
+      return;
+    }
+
+    const fetchCities = async () => {
+      try {
+        const cityLink = createLinkFromText(citySearchQuery);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL || ""}/api/cities/${cityLink}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        const cityNames = data.slice(0, 10).map((city: any) => city.name);
+        setCitySuggestions(cityNames);
+        setShowCitySuggestions(true);
+      } catch (err) {
+        console.error("City search error:", err);
+        setCitySuggestions([]);
+      }
+    };
+
+    fetchCities();
+  }, [citySearchQuery, locationType]);
 
   useEffect(() => {
-    if (value?.address) {
-      setSearchQuery(value.address);
+    if (value?.address && locationType === "haveAddress") {
+      setAddress(value.address);
+      setAddressSearchQuery(value.address);
+    } else if (!value?.address && locationType === "haveAddress") {
+      setAddressSearchQuery("");
     }
-  }, [value]);
+  }, [value, locationType]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        addressSuggestionsRef.current &&
+        !addressSuggestionsRef.current.contains(event.target as Node) &&
+        addressInputRef.current &&
+        !addressInputRef.current.contains(event.target as Node) &&
+        citySuggestionsRef.current &&
+        !citySuggestionsRef.current.contains(event.target as Node) &&
+        cityInputRef.current &&
+        !cityInputRef.current.contains(event.target as Node)
       ) {
-        setShowSuggestions(false);
+        setShowAddressSuggestions(false);
+        setShowCitySuggestions(false);
       }
     };
 
@@ -712,35 +862,13 @@ function StepLocation({
     };
   }, []);
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query + ", Polska"
-        )}&limit=5&addressdetails=1`
-      );
-      const data = await response.json();
-      const formatted = data.map((item: any) => ({
-        address: item.display_name,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
-      }));
-      setSuggestions(formatted);
-      setShowSuggestions(true);
-    } catch (err) {
-      console.error("Search error:", err);
-      setSuggestions([]);
-    }
+  const handleCitySelectForAddress = (selectedCity: string) => {
+    setCity(selectedCity);
+    setCitySearchQuery("");
+    setShowCitySuggestions(false);
   };
 
-  const handleSelect = (suggestion: {
+  const handleAddressSelect = (suggestion: {
     address: string;
     lat: number;
     lng: number;
@@ -750,14 +878,95 @@ function StepLocation({
       lat: suggestion.lat,
       lng: suggestion.lng,
     });
-    setSearchQuery(suggestion.address);
-    setShowSuggestions(false);
+    setAddress(suggestion.address);
+    setAddressSearchQuery("");
+    setShowAddressSuggestions(false);
     setError("");
   };
 
+
+  const handleCityInputKeyDownForAddress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && citySuggestions.length > 0) {
+      e.preventDefault();
+      handleCitySelectForAddress(citySuggestions[0]);
+    }
+  };
+
+  const handleCitySelect = (city: string) => {
+    if (!mobileStylistCities.includes(city)) {
+      setMobileStylistCities([...mobileStylistCities, city]);
+    }
+    setCitySearchQuery("");
+    setShowCitySuggestions(false);
+    setError("");
+  };
+
+  const handleAddCity = () => {
+    const trimmedQuery = citySearchQuery.trim();
+    if (!trimmedQuery) return;
+
+    // First, try to find exact match in suggestions
+    const exactMatch = citySuggestions.find(
+      (city) => city.toLowerCase() === trimmedQuery.toLowerCase()
+    );
+
+    if (exactMatch && !mobileStylistCities.includes(exactMatch)) {
+      handleCitySelect(exactMatch);
+      return;
+    }
+
+    // If no exact match but there are suggestions, add the first one
+    if (citySuggestions.length > 0) {
+      const firstSuggestion = citySuggestions.find(
+        (city) => !mobileStylistCities.includes(city)
+      );
+      if (firstSuggestion) {
+        handleCitySelect(firstSuggestion);
+        return;
+      }
+    }
+
+    // If no suggestions match, add the typed text as-is (user might have typed a valid city name)
+    if (!mobileStylistCities.includes(trimmedQuery)) {
+      setMobileStylistCities([...mobileStylistCities, trimmedQuery]);
+      setCitySearchQuery("");
+      setShowCitySuggestions(false);
+      setError("");
+    }
+  };
+
+  const handleCityInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddCity();
+    }
+  };
+
+  const removeCity = (cityToRemove: string) => {
+    setMobileStylistCities(
+      mobileStylistCities.filter((city) => city !== cityToRemove)
+    );
+  };
+
   const validate = () => {
-    if (!value?.address) {
-      setError("Wybierz miasto.");
+    if (locationType === "haveAddress") {
+      if (!city.trim()) {
+        setError("Wybierz miasto.");
+        setAttempted(true);
+        return false;
+      }
+      // Address is optional - save whatever is typed if there's something
+      if (addressSearchQuery.trim() && !value?.address) {
+        onChange({
+          address: addressSearchQuery.trim(),
+          lat: 52.2296756, // Default Warsaw coordinates
+          lng: 21.0122287,
+        });
+      }
+      // If city is selected, validation passes (address is optional)
+    }
+    if (locationType === "mobileStylist" && mobileStylistCities.length === 0) {
+      setError("Wybierz przynajmniej jedno miasto, w którym oferujesz usługi.");
       setAttempted(true);
       return false;
     }
@@ -773,46 +982,295 @@ function StepLocation({
 
   return (
     <div>
-      <div className="relative">
-        <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
-          Lokalizacja
-        </label>
-        <input
-          ref={inputRef}
-          type="text"
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          onFocus={() => {
-            if (suggestions.length > 0) setShowSuggestions(true);
-          }}
-          className={`w-full rounded-lg border-2 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-            attempted && error
-              ? "border-red-500"
-              : "border-gray-300 focus:border-blue-500"
-          }`}
-          placeholder="Wpisz miasto..."
-        />
-        {attempted && error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
-        )}
+      <div className="space-y-6">
+        {/* Location Type Selection */}
+        <div className="space-y-3">
+          <label className="block text-sm font-semibold font-poppins mb-3 text-gray-700">
+            Wybierz opcję lokalizacji:
+          </label>
 
-        {showSuggestions && suggestions.length > 0 && (
-          <div
-            ref={suggestionsRef}
-            className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          {/* Option 1: Have Address */}
+          <motion.button
+            type="button"
+            onClick={() => {
+              setLocationType("haveAddress");
+              setError("");
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full border-2 rounded-lg p-4 text-left transition-all ${
+              locationType === "haveAddress"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
           >
-            {suggestions.map((suggestion, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSelect(suggestion)}
-                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-800"
-              >
-                {suggestion.address}
-              </button>
-            ))}
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-800">
+                Mam adres salonu/pracowni
+              </span>
+              {locationType === "haveAddress" && (
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </motion.button>
+
+          {/* Option 2: Mobile Stylist */}
+          <motion.button
+            type="button"
+            onClick={() => {
+              setLocationType("mobileStylist");
+              setError("");
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full border-2 rounded-lg p-4 text-left transition-all ${
+              locationType === "mobileStylist"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-800">
+                Mobilna stylistka
+              </span>
+              {locationType === "mobileStylist" && (
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </motion.button>
+
+          {/* Option 3: No Address */}
+          <motion.button
+            type="button"
+            onClick={() => {
+              setLocationType("noAddress");
+              setError("");
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full border-2 rounded-lg p-4 text-left transition-all ${
+              locationType === "noAddress"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-800">
+                Nie mam adresu
+              </span>
+              {locationType === "noAddress" && (
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </motion.button>
+        </div>
+
+        {/* Address Input (shown when haveAddress is selected) */}
+        {locationType === "haveAddress" && (
+          <div className="space-y-4">
+            {/* City Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
+                Miasto
+              </label>
+              <div className="relative">
+                <input
+                  ref={cityInputRef}
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={(e) => setCitySearchQuery(e.target.value)}
+                  onKeyDown={handleCityInputKeyDownForAddress}
+                  onFocus={() => {
+                    if (citySuggestions.length > 0) setShowCitySuggestions(true);
+                  }}
+                  className={`w-full rounded-lg border-2 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                    attempted && error && !city
+                      ? "border-red-500"
+                      : "border-gray-300 focus:border-blue-500"
+                  }`}
+                  placeholder="Wpisz miasto..."
+                />
+                {showCitySuggestions && citySuggestions.length > 0 && (
+                  <div
+                    ref={citySuggestionsRef}
+                    className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                  >
+                    {citySuggestions.map((suggestionCity, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleCitySelectForAddress(suggestionCity)}
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-800 border-b border-gray-100 last:border-b-0"
+                      >
+                        {suggestionCity}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {city && (
+                <p className="text-sm text-blue-600 font-medium">Wybrane miasto: {city}</p>
+              )}
+            </div>
+
+            {/* Address Input */}
+            {city && (
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
+                  Dokładny adres <span className="text-gray-400 font-normal text-xs">(opcjonalnie)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    ref={addressInputRef}
+                    type="text"
+                    value={addressSearchQuery}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setAddressSearchQuery(newValue);
+                      // Update location immediately as user types
+                      if (newValue.trim()) {
+                        onChange({
+                          address: newValue,
+                          lat: 52.2296756, // Default Warsaw coordinates
+                          lng: 21.0122287,
+                        });
+                      } else {
+                        onChange(null);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (addressSuggestions.length > 0) setShowAddressSuggestions(true);
+                    }}
+                    className={`w-full rounded-lg border-2 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                      attempted && error && !city
+                        ? "border-red-500"
+                        : "border-gray-300 focus:border-blue-500"
+                    }`}
+                    placeholder="Wpisz adres lub wybierz z listy (opcjonalnie)"
+                  />
+                  {showAddressSuggestions && addressSuggestions.length > 0 && (
+                    <div
+                      ref={addressSuggestionsRef}
+                      className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                    >
+                      {addressSuggestions.map((suggestion, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleAddressSelect(suggestion)}
+                          className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-800 border-b border-gray-100 last:border-b-0"
+                        >
+                          {suggestion.address}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 font-poppins">
+                  💡 Wybierz adres z listy lub wpisz własny adres (opcjonalnie)
+                </p>
+              </div>
+            )}
+            {attempted && error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
           </div>
         )}
+
+        {/* Mobile Stylist Cities Selection */}
+        {locationType === "mobileStylist" && (
+          <div className="space-y-4">
+            <label className="block text-sm font-semibold font-poppins mb-2 text-gray-700">
+              W których miastach oferujesz usługi?
+            </label>
+            <div className="space-y-2">
+              <div className="relative flex gap-2">
+                <input
+                  ref={cityInputRef}
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={(e) => setCitySearchQuery(e.target.value)}
+                  onKeyDown={handleCityInputKeyDown}
+                  onFocus={() => {
+                    if (citySuggestions.length > 0) setShowCitySuggestions(true);
+                  }}
+                  className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Wpisz miasto i naciśnij Enter lub kliknij Dodaj"
+                />
+                <motion.button
+                  type="button"
+                  onClick={handleAddCity}
+                  disabled={!citySearchQuery.trim()}
+                  whileHover={{ scale: citySearchQuery.trim() ? 1.02 : 1 }}
+                  whileTap={{ scale: citySearchQuery.trim() ? 0.98 : 1 }}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                    citySearchQuery.trim()
+                      ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  Dodaj
+                </motion.button>
+              </div>
+              <p className="text-xs text-gray-500 font-poppins">
+                💡 Wpisz nazwę miasta i naciśnij Enter lub kliknij &quot;Dodaj&quot;, aby dodać miasto do listy
+              </p>
+              {showCitySuggestions && citySuggestions.length > 0 && (
+                <div
+                  ref={citySuggestionsRef}
+                  className="bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                >
+                  {citySuggestions
+                    .filter((city) => !mobileStylistCities.includes(city))
+                    .map((city, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleCitySelect(city)}
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors text-gray-800 border-b border-gray-100 last:border-b-0"
+                      >
+                        {city}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+            {mobileStylistCities.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {mobileStylistCities.map((city) => (
+                  <span
+                    key={city}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                  >
+                    {city}
+                    <button
+                      onClick={() => removeCity(city)}
+                      className="hover:text-blue-900 font-bold"
+                      type="button"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {attempted && error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
       </div>
+
       <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
         <motion.button
           onClick={onBack}

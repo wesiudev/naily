@@ -91,7 +91,18 @@ export default async function BlogPostPage({
     <BlogLayout>
       <div className="max-w-4xl mx-auto">
         {/* Hero Image */}
-        {post.mainImage && (
+        
+
+        {/* Blog Header */}
+        <BlogHeader
+          title={post.title}
+          subtitle={post.intro}
+          author="Mentor Manicure"
+          date={date}
+          readTime={readingTime}
+          tags={post.tags}
+        />
+{post.mainImage && (
           <div className="mb-6 sm:mb-8 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
             <Image
               src={post.mainImage}
@@ -103,28 +114,9 @@ export default async function BlogPostPage({
             />
           </div>
         )}
-
-        {/* Blog Header */}
-        <BlogHeader
-          title={post.title}
-          subtitle={post.intro}
-          author="Mentor Manicure"
-          date={date}
-          readTime={readingTime}
-          tags={post.tags}
-        />
-
         {/* Blog Content */}
         <BlogContent>
-          {/* Intro */}
-          {post.intro && (
-            <div className="mb-8">
-              <p className="text-lg sm:text-xl text-neutral-700 leading-relaxed font-poppins">
-                {post.intro}
-              </p>
-            </div>
-          )}
-
+          
           {/* Sections */}
           {post.sections && post.sections.length > 0 && (
             <div className="space-y-8 sm:space-y-10">

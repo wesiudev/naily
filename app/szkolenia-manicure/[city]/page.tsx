@@ -535,7 +535,7 @@ export async function generateMetadata({
   const cityData: ICity = await getSingleCity(city);
   const baseUrl = process.env.NEXT_PUBLIC_URL || "https://naily.pl";
   return {
-    title: `Kursy i szkolenia manicure ${cityData.name} 2026 Zarobki stylistek`,
+    title: `Kursy i szkolenia manicure ${cityData.name} 2026`,
     description: `Sprawdź ile kosztuje kurs stylizacji paznokci w 2026. Ile zarobisz po kursie manicure. Profesjonalne kursy z certyfikatami.`,
     keywords: `kurs manicure ${cityData.name}, szkolenie hybryda ${cityData.name}, ile kosztuje kurs stylizacji paznokci, kurs manicure ${cityData.name} 2026, szkolenia manicure ${cityData.name}, opinie absolwentek kursów manicure`,
     openGraph: {
