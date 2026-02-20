@@ -449,13 +449,6 @@ export default async function ServiceCitySlug({
       </section>
       )}
 
-      {/* Aggressive SEO Component 1: Keyword-Rich Content */}
-      <KeywordRichContent
-        city={city}
-        serviceType="manicure"
-        userCount={sortedMergedUsers.length}
-      />
-
       {/* Aggressive SEO Component 2: Local Business List */}
       {sortedMergedUsers.length > 0 && (
         <LocalBusinessList
@@ -537,6 +530,12 @@ export default async function ServiceCitySlug({
       {/* Recent blog posts */}
       <RecentPosts limit={3} columns={3} className="bg-white" />
 
+{/* Aggressive SEO Component 1: Keyword-Rich Content */}
+<KeywordRichContent
+        city={city}
+        serviceType="manicure"
+        userCount={sortedMergedUsers.length}
+      />
       {/* City FAQ */}
       <section className="py-20 px-6 bg-white">
         <div className="container">

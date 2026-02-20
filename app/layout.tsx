@@ -137,7 +137,7 @@ export default async function RootLayout({
           <FontManager />
           <InitUser />
           <ConditionalNav />
-          <Breadcrumb />
+          {/* <Breadcrumb /> */}
           <main className="min-h-screen">{children}</main>
           <Footer />
           <ModalManager />

@@ -37,7 +37,7 @@ export default function KeywordRichContent({
       <div className="container mx-auto max-w-7xl">
         <article className="prose prose-lg max-w-none">
           <h2 className="text-3xl sm:text-4xl font-baloo font-bold text-neutral-900 mb-4">
-            {serviceNameCapitalized} {city.name} - Kompleksowy Przewodnik 2026
+            Stylistki {serviceNameCapitalized} {city.name}
           </h2>
 
           <div className="space-y-4 text-neutral-700 font-poppins leading-relaxed">
