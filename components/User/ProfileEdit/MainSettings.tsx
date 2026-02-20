@@ -275,7 +275,7 @@ export default function MainSettings({ user }: { user: User }) {
           value={user?.userSlugUrl || ""}
           onChange={(val) => handleState("userSlugUrl", val)}
           currentUid={user?.uid || ""}
-          baseUrlPrefix="naily.pl/u/"
+          baseUrlPrefix="naily.pl/zarezerwuj/"
         />
       </div>
       <input

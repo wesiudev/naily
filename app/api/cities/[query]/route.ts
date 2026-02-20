@@ -1,18 +1,15 @@
-import data from "polskie-miejscowosci";
-import { createLinkFromText } from "@/utils/createLinkFromText";
 import { NextResponse } from "next/server";
+import { getCityTypeCitiesData } from "@/utils/buildCities";
 
 // Cache the processed cities data
 let cachedCities: { id: string; name: string }[] | null = null;
 
 function getCities() {
   if (!cachedCities) {
-    cachedCities = Array.from(new Set(data.map((city) => city.Name))).map(
-      (name) => ({
-        id: createLinkFromText(name),
-        name,
-      })
-    );
+    cachedCities = getCityTypeCitiesData().map((city) => ({
+      id: city.id,
+      name: city.name,
+    }));
   }
   return cachedCities;
 }

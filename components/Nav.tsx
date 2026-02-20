@@ -250,9 +250,9 @@ export default function Header({
   const handleViewPublicProfile = () => {
     try {
       if (user?.userSlugUrl) {
-        window.open(`/u/${user.userSlugUrl}`, "_blank");
+        window.open(`/zarezerwuj/${user.userSlugUrl}`, "_blank");
       } else if (user?.uid) {
-        window.open(`/u/${user.uid}`, "_blank");
+        window.open(`/zarezerwuj/${user.uid}`, "_blank");
       }
     } catch (_e) {}
   };

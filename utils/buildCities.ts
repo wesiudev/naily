@@ -99,6 +99,10 @@ export function getCitiesData(): ICity[] {
   return cachedCities;
 }
 
+export function getCityTypeCitiesData(): ICity[] {
+  return getCitiesData().filter((city) => city.type === "city");
+}
+
 
 
 

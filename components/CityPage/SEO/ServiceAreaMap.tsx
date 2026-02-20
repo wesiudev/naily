@@ -97,26 +97,6 @@ export default function ServiceAreaMap({
                 </div>
               )}
             </div>
-
-            {city.latitude && city.longitude && (
-              <div className="mt-4 p-3 sm:p-4 bg-white rounded-lg border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-2 font-poppins">
-                  Lokalizacja na mapie:
-                </p>
-                <div className="aspect-video bg-neutral-100 rounded-lg flex items-center justify-center">
-                  <iframe
-                    src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${city.latitude},${city.longitude}&zoom=12`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="rounded-lg"
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>

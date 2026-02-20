@@ -5,7 +5,7 @@ import Nav from "@/components/Nav";
 export default function ConditionalNav() {
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith("/dashboard");
-  const isUserProfile = pathname?.includes("/u/");
+  const isUserProfile = pathname?.includes("/zarezerwuj/");
 
   if (isDashboard) return null;
   if (isUserProfile) return <Nav isUserProfile={true} />;

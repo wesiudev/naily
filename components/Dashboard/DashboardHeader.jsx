@@ -46,10 +46,10 @@ export default function DashboardHeader({
   const handleViewPublicProfile = () => {
     if (user?.userSlugUrl) {
       // Open public profile in new tab
-      window.open(`/u/${user.userSlugUrl}`, "_blank");
+      window.open(`/zarezerwuj/${user.userSlugUrl}`, "_blank");
     } else if (user?.uid) {
       // Fallback to uid if no slug is set
-      window.open(`/u/${user.uid}`, "_blank");
+      window.open(`/zarezerwuj/${user.uid}`, "_blank");
     } else {
       toast.error("Brak informacji o profilu użytkownika");
     }

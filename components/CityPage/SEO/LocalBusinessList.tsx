@@ -83,7 +83,7 @@ export default function LocalBusinessList({
 
                 {user.userSlugUrl && (
                   <Link
-                    href={`/u/${user.userSlugUrl}`}
+                    href={`/zarezerwuj/${user.userSlugUrl}`}
                     className="inline-block mt-4 text-blue-600 hover:text-blue-700 font-semibold text-sm"
                     itemProp="url"
                   >

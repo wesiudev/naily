@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getCitiesData } from "@/utils/buildCities";
+import { getCityTypeCitiesData } from "@/utils/buildCities";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const cities = getCitiesData();
+  const cities = getCityTypeCitiesData();
   return NextResponse.json(cities);
 }

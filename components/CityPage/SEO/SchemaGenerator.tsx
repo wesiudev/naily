@@ -79,8 +79,8 @@ export function generateComprehensiveSchema({
         position: index + 1,
         name: user.name || `Stylistka ${serviceType}`,
         item: user.userSlugUrl
-          ? `${baseUrl}/u/${user.userSlugUrl}`
-          : `${baseUrl}/u/${user.uid}`,
+          ? `${baseUrl}/zarezerwuj/${user.userSlugUrl}`
+          : `${baseUrl}/zarezerwuj/${user.uid}`,
       })),
     },
   ];
@@ -90,12 +90,12 @@ export function generateComprehensiveSchema({
     if (user.location?.address && user.phoneNumber) {
       const businessSchema: any = {
         "@type": "BeautySalon",
-        "@id": `${baseUrl}/u/${user.userSlugUrl || user.uid}#business`,
+        "@id": `${baseUrl}/zarezerwuj/${user.userSlugUrl || user.uid}#business`,
         name: user.name || `Salon ${serviceType} ${city.name}`,
         description: user.description || `Profesjonalny salon ${serviceType} w ${city.name}`,
         url: user.userSlugUrl
-          ? `${baseUrl}/u/${user.userSlugUrl}`
-          : `${baseUrl}/u/${user.uid}`,
+          ? `${baseUrl}/zarezerwuj/${user.userSlugUrl}`
+          : `${baseUrl}/zarezerwuj/${user.uid}`,
         telephone: user.phoneNumber,
         address: {
           "@type": "PostalAddress",
@@ -131,7 +131,7 @@ export function generateComprehensiveSchema({
             name: service.real_name || service.name,
             description: service.description,
             provider: {
-              "@id": `${baseUrl}/u/${user.userSlugUrl || user.uid}#business`,
+              "@id": `${baseUrl}/zarezerwuj/${user.userSlugUrl || user.uid}#business`,
             },
           },
           price: service.price || "0",

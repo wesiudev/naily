@@ -98,8 +98,8 @@ export default function Results({ results }: { results: User[] }) {
                       className="px-4 py-2 bg-gray-100 text-gray-800 rounded shadow hover:bg-gray-200 transition"
                       href={
                         selectedUser.userSlugUrl
-                          ? `/u/${encodeURIComponent(selectedUser.userSlugUrl)}`
-                          : `/u/${encodeURIComponent(selectedUser.uid)}`
+                          ? `/zarezerwuj/${encodeURIComponent(selectedUser.userSlugUrl)}`
+                          : `/zarezerwuj/${encodeURIComponent(selectedUser.uid)}`
                       }
                     >
                       Zobacz profil

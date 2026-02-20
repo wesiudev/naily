@@ -14,7 +14,7 @@ import "./dashboardTheme.css";
 // reduxUser?.subscription?.status === "active"
 {
   /* <Link
-                      href={`/u/${reduxUser?.userSlugUrl || reduxUser?.uid}`}
+                      href={`/zarezerwuj/${reduxUser?.userSlugUrl || reduxUser?.uid}`}
                       className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors"
                     >
                       <FaEye className="w-4 h-4" /> Zobacz profil publiczny
